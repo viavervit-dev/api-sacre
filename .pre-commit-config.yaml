@@ -16,6 +16,8 @@ repos:
     rev: v1.19.1
     hooks:
       - id: mypy
-        additional_dependencies: []
+        args: ["--config-file=pyproject.toml"]
+        additional_dependencies: [pydantic, pydantic-settings]
         stages: [pre-commit]
+        files: ^src/
 

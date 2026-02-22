@@ -67,7 +67,7 @@ def get_settings() -> Settings:
     variables de entorno en cada acceso a la configuración.
     """
 
-    return Settings()  # pyright: ignore[reportCallIssue]
+    return Settings()  # type: ignore[call-arg]  # pyright: ignore[reportCallIssue]
 
 
 settings = get_settings()
