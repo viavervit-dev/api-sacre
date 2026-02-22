@@ -24,6 +24,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24.13.0"
+      - name: Verificar que exista al menos un tag
+        run: |
+          if ! git tag | grep -q .; then
+            echo "No existen tags en el repositorio."
+            echo "Se requiere crear manualmente el tag inicial antes de usar este flujo."
+            echo "Ejecuta: git tag v0.1.0 && git push origin v0.1.0"
+            exit 1
+          fi
       - name: Instalar dependencias del flujo
         run: npm install --no-save semantic-release @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/changelog @semantic-release/git @semantic-release/github conventional-changelog-conventionalcommits
       - name: Instalar dependencia toml para Python
