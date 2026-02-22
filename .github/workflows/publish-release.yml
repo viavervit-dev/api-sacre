@@ -41,9 +41,15 @@ jobs:
           npx semantic-release --dry-run > sr.log
           VERSION=$(grep -oP 'next release version is \K[0-9]+\.[0-9]+\.[0-9]+' sr.log || echo "")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Omitir publicación si no hay nueva versión
+        if: env.VERSION == ''
+        run: echo "No se detectaron cambios que generen una nueva versión. Omitiendo publicación."
       - name: Actualizar pyproject.toml con la nueva versión
+        if: env.VERSION != ''
         run: python update_version.py ${{ env.VERSION }}
       - name: Verificar configuración de semantic-release
+        if: env.VERSION != ''
         run: npx semantic-release --dry-run
       - name: Ejecutar semantic-release
+        if: env.VERSION != ''
         run: npx semantic-release
