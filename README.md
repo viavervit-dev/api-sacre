@@ -15,13 +15,20 @@ Este proyecto está organizado siguiendo una arquitectura modular y escalable, f
 ### 📁 Estructura de Carpetas
 
 ```txt
-src/
-├── config/                    # Configuración central de la aplicación
-│   ├── database.py            # Conexión y sesión de base de datos
-│   ├── exception_handlers.py  # Manejadores globales de excepciones
-│   ├── parameters.py          # Variables de entorno y parámetros
-│   └── serialization.py       # Configuración de serialización
-└── main.py                    # Punto de entrada de la aplicación
+api-sacre/
+├── src/                            # Código fuente de la aplicación
+│   ├── common/                     # Utilidades y contratos compartidos
+│   │   └── response.py             # Modelo genérico de respuesta estándar `Response[T]`
+│   ├── config/                     # Configuración central de la aplicación
+│   │   ├── database.py             # Pool de conexiones asíncrono a la base de datos
+│   │   ├── exception_handlers.py   # Manejadores globales de excepciones HTTP y de validación
+│   │   ├── parameters.py           # Variables de entorno y parámetros de la aplicación
+│   │   └── serialization.py        # Respuesta JSON de alto rendimiento con orjson
+│   └── main.py                     # Punto de entrada: instancia FastAPI, lifespan y rutas base
+├── workflow/                       # Guías y convenciones del equipo
+│   ├── branching_strategy.md       # Estrategia de ramas Git
+│   ├── create_branch.md            # Proceso para crear nuevas ramas
+│   └── create_commit.md            # Convenciones de mensajes de commit
 ```
 
 ## 🔹 3. Tecnologías
