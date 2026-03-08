@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -51,10 +52,26 @@ async def close_db_pool() -> None:
         _engine = None
 
 
+async def check_db_connection() -> bool:
+    """Verifica que la base de datos esté disponible ejecutando una consulta simple."""
+
+    if _engine is None:
+        return False
+
+    try:
+        async with _engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+
+        return True
+    except Exception:
+        return False
+
+
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependencia para obtener una sesión de base de datos.
 
+    ### Ejemplo de uso:
     ```python
     @app.get("/users/{user_id}")
     async def get_user(
@@ -63,10 +80,6 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     ):
         ...
     ```
-
-    Yields:
-        AsyncSession: Sesión de base de datos que hace `commit` automático en caso de éxito y
-        `rollback` en caso de excepción.
     """
 
     if _async_session_factory is None:

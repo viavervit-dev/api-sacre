@@ -49,7 +49,7 @@ Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 ```txt
 # === Aplicación ===
 APP_NAME="API Sacre"
-DEBUG=false
+DEBUG=true
 
 # === Base de Datos ===
 DATABASE_URL="postgresql+asyncpg://user:password@localhost:5432/api_sacre"
@@ -94,10 +94,10 @@ poetry install
 
 ### Paso 5: Iniciar servidor de desarrollo
 
-Este comando iniciará el servidor en modo desarrollo con recarga automática al detectar cambios en el código.
+Este comando iniciará el servidor utilizando el `HOST` y `PORT` definidos en el archivo `.env`. Si `DEBUG=true`, la recarga automática estará habilitada.
 
 ```txt
-uvicorn src.main:app --reload
+python -m src.main
 ```
 
 ## 🔹 5. Contribución
@@ -110,4 +110,4 @@ A continuación se presentan a las personas que están aportando al desarrollo d
 
 | Nombre | Enlaces | Roles |
 |--------|:-------:|:-----:|
-| Carlos Andres Aguirre Ariza | [GitHub](https://github.com/The-Asintota) - [LinkedIn](https://www.linkedin.com/in/carlosaguirredev/) | DevOps |
+| Carlos Andres Aguirre Ariza | [GitHub](https://github.com/The-Asintota) - [LinkedIn](https://www.linkedin.com/in/carlosaguirredev/) | Backend, Documentación, DevOps |

@@ -1,9 +1,13 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+import uvicorn
+from fastapi import APIRouter, FastAPI
+from fastapi import Response as FastAPIResponse
+from pydantic import BaseModel, Field
 
-from src.config.database import close_db_pool, create_db_pool
+from src.common.response import Response
+from src.config.database import check_db_connection, close_db_pool, create_db_pool
 from src.config.exception_handlers import register_exception_handlers
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
@@ -12,15 +16,14 @@ from src.config.serialization import JSONResponse
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
-    Gestor del ciclo de vida de la aplicación.
-
-    Maneja los eventos de inicio y cierre:
-    - Inicio: Inicializa la piscina de conexiones a la base de datos.
-    - Cierre: Cierra las conexiones de forma segura.
+    Gestor del ciclo de vida de la aplicación, maneja los eventos de inicio y cierre:
+    - **Inicio:** Inicializa la piscina de conexiones a la base de datos.
+    - **Cierre:** Cierra las conexiones de forma segura.
     """
 
     # Inicio
     await create_db_pool()
+
     yield
     # Cierre
     await close_db_pool()
@@ -34,11 +37,78 @@ app = FastAPI(
     default_response_class=JSONResponse,
 )
 
-register_exception_handlers(app)
+
+# Registra los manejadores de excepciones personalizados
+register_exception_handlers(app=app)
 
 
-@app.get("/health")
-async def health_check() -> dict[str, str]:
+# Configura el router principal para la API, con un prefijo para todas las rutas v1
+v1_router = APIRouter(prefix="/api/v1")
+app.include_router(router=v1_router)
+
+
+class HealthCheck(BaseModel):
+    """Modelo de respuesta para el endpoint de verificación de salud."""
+
+    database: str = Field(description="Estado de la conexión a la base de datos.")
+
+
+@app.get(
+    path="/health/",
+    responses={
+        200: {
+            "description": "Todos los componentes de la API están disponibles.",
+            "model": Response[HealthCheck],
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "message": "Todos los componentes de la API están disponibles.",
+                        "data": {"database": "healthy"},
+                    },
+                }
+            },
+        },
+        503: {
+            "description": "Algún componente de la API no está disponible.",
+            "model": Response[HealthCheck],
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "message": "Algún componente de la API no está disponible.",
+                        "data": {"database": "unhealthy"},
+                    },
+                }
+            },
+        },
+    },
+)
+async def health_check(response: FastAPIResponse) -> Response[HealthCheck]:
     """Endpoint de verificación de salud para balanceadores de carga y monitoreo."""
 
-    return {"status": "healthy"}
+    response.status_code = 200
+    checks = {"database": "healthy"}
+    healthy = True
+
+    if not await check_db_connection():
+        checks["database"] = "unhealthy"
+        healthy = False
+
+    if not healthy:
+        response.status_code = 503
+
+    return Response(
+        success=healthy,
+        message="Estado de salud de la API.",
+        data=HealthCheck(**checks),
+    )
+
+
+if __name__ == "__main__":
+    uvicorn.run(
+        app="src.main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.debug,
+    )

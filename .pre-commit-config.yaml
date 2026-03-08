@@ -20,4 +20,3 @@ repos:
         additional_dependencies: [pydantic, pydantic-settings]
         stages: [pre-commit]
         files: ^src/
-
