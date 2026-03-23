@@ -17,6 +17,10 @@
         "reportUnknownMemberType": "none",
         "reportMissingTypeStubs": "none"
     },
+    "python.analysis.ignore": [
+        "src/config/models.py",
+        "alembic/env.py"
+    ],
     "errorLens.gutterIconsEnabled": true,
     "errorLens.enabled": true,
     "editor.formatOnSave": true,

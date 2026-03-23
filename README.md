@@ -16,14 +16,20 @@ Este proyecto está organizado siguiendo una arquitectura modular y escalable, f
 
 ```txt
 api-sacre/
+├── alembic/                        # Configuración y scripts de migraciones (Alembic)
+│   ├── versions/                   # Archivos de migración generados automáticamente
+│   └── env.py                      # Entorno de ejecución de migraciones (async)
 ├── src/                            # Código fuente de la aplicación
 │   ├── common/                     # Utilidades y contratos compartidos
 │   │   └── response.py             # Modelo genérico de respuesta estándar `Response[T]`
 │   ├── config/                     # Configuración central de la aplicación
-│   │   ├── database.py             # Pool de conexiones asíncrono a la base de datos
+│   │   ├── database.py             # Pool de conexiones asíncrono (Base declarativa incluida)
 │   │   ├── exception_handlers.py   # Manejadores globales de excepciones HTTP y de validación
 │   │   ├── parameters.py           # Variables de entorno y parámetros de la aplicación
 │   │   └── serialization.py        # Respuesta JSON de alto rendimiento con orjson
+│   ├── modules/                    # Módulos de negocio (uno por entidad/dominio)
+│   │   └── customers/              # Módulo de clientes
+│   │       └── models/             # Modelos ORM (también actúan como entidades de dominio)
 │   └── main.py                     # Punto de entrada: instancia FastAPI, lifespan y rutas base
 ├── workflow/                       # Guías y convenciones del equipo
 │   ├── branching_strategy.md       # Estrategia de ramas Git
@@ -59,7 +65,11 @@ APP_NAME="API Sacre"
 DEBUG=true
 
 # === Base de Datos ===
-DATABASE_URL="postgresql+asyncpg://user:password@localhost:5432/api_sacre"
+# Desarrollo local (SQLite, no requiere servidor)
+DATABASE_URL="sqlite+aiosqlite:///./sacre.db"
+
+# Producción (PostgreSQL)
+# DATABASE_URL="postgresql+asyncpg://user:password@localhost:5432/api_sacre"
 DB_POOL_MAX_OVERFLOW=10
 DB_POOL_SIZE=10
 
@@ -107,11 +117,58 @@ Este comando iniciará el servidor utilizando el `HOST` y `PORT` definidos en el
 python -m src.main
 ```
 
-## 🔹 5. Contribución
+## 🔹 5. Base de Datos y Migraciones
+
+Este proyecto usa **Alembic** para gestionar las migraciones del esquema de base de datos. Los modelos ORM se definen en la carpeta `models/` de cada módulo y deben registrarse en `src/config/models.py` para que Alembic los detecte.
+
+### Flujo de trabajo
+
+Cada vez que crees o modifiques un modelo ORM, sigue estos pasos:
+
+**1. Crear o modificar el modelo** en `src/modules/<modulo>/models/<modelo>.py`
+
+**2. Registrar el modelo** en `src/config/models.py` (solo si es un modelo nuevo):
+
+```python
+# src/config/models.py
+from src.modules.customers.models.customer import Customer
+from src.modules.products.models.product import Product
+```
+
+> [!NOTE]
+> Alembic no descubre los modelos automáticamente. `src/config/models.py` es el registro central que le indica a Alembic qué tablas existen. `alembic/env.py` importa este archivo y nunca necesita modificarse al agregar nuevos modelos.
+
+**3. Generar la migración** (Alembic compara el modelo con el estado actual de la BD):
+
+```bash
+alembic revision --autogenerate -m "descripcion_del_cambio"
+```
+
+> [!IMPORTANT]
+> Revisa siempre el archivo generado en `alembic/versions/` antes de aplicarlo. El `autogenerate` detecta la mayoría de cambios, pero no todos (p. ej. cambios en `CHECK` constraints, lógica de columnas calculadas).
+
+**4. Aplicar la migración** a la base de datos:
+
+```bash
+alembic upgrade head
+```
+
+### Otros comandos útiles
+
+| Comando | Descripción |
+|---------|-------------|
+| `alembic upgrade head` | Aplica todas las migraciones pendientes |
+| `alembic downgrade -1` | Revierte la última migración aplicada |
+| `alembic downgrade base` | Revierte todas las migraciones (esquema vacío) |
+| `alembic current` | Muestra la revisión actualmente aplicada en la BD |
+| `alembic history` | Lista todas las migraciones en orden cronológico |
+
+
+## 🔹 6. Contribución
 
 Consulta nuestra guía [CONTRIBUTING](CONTRIBUTING.md) para conocer las reglas y buenas prácticas que debes seguir antes de contribuir al proyecto. Este documento proporciona instrucciones detalladas sobre cómo configurar tu entorno de desarrollo, trabajar correctamente en el repositorio, proponer cambios de manera efectiva y seguir el estilo de código adoptado por el equipo.
 
-## 🔹 6. Colaboradores
+## 🔹 7. Colaboradores
 
 A continuación se presentan a las personas que están aportando al desarrollo de este proyecto.
 

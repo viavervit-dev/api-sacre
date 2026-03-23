@@ -2,7 +2,7 @@ import tomllib
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field, PostgresDsn
+from pydantic import AnyUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     debug: bool
 
     # === Base de Datos ===
-    database_url: PostgresDsn
+    database_url: AnyUrl
     db_pool_size: int = Field(ge=1, le=100)
     db_pool_max_overflow: int = Field(ge=0, le=100)
 
