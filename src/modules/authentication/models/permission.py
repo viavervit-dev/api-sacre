@@ -14,7 +14,8 @@ class Permission(MappedAsDataclass, Base):
     de dominio y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
     """
 
-    __tablename__ = "auth.permissions"
+    __tablename__ = "permissions"
+    __table_args__ = {"schema": "auth"}
 
     name: Mapped[str] = mapped_column(
         String(length=PermissionEntity.NAME_MAX_LENGTH.value),
@@ -46,7 +47,8 @@ class Group(MappedAsDataclass, Base):
     dominio y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
     """
 
-    __tablename__ = "auth.groups"
+    __tablename__ = "groups"
+    __table_args__ = {"schema": "auth"}
 
     name: Mapped[str] = mapped_column(
         String(length=GroupEntity.NAME_MAX_LENGTH.value),
@@ -85,7 +87,8 @@ class PermissionGroup(MappedAsDataclass, Base):
     con **Alembic**.
     """
 
-    __tablename__ = "auth.permission_groups"
+    __tablename__ = "permission_groups"
+    __table_args__ = {"schema": "auth"}
 
     permission_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.permissions.id", ondelete="CASCADE"),

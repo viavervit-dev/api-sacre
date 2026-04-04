@@ -12,6 +12,7 @@ class CustomerEntity(Enum):
     DOCUMENT_NUMBER_DESCRIPTION = "Número del documento del cliente."
     PHONE_DESCRIPTION = "Número de teléfono del cliente."
     DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
+    ID_USER_DESCRIPTION = "ID del usuario/auth de la persona."
 
     # Propiedades para los campos de la entidad
     FIRST_NAMES_MAX_LENGTH = 40

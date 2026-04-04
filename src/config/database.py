@@ -32,24 +32,13 @@ async def create_db_pool() -> None:
     global _engine, _async_session_factory
 
     db_url = str(settings.database_url)
-    is_sqlite = db_url.startswith("sqlite")
-
-    if is_sqlite:
-        # SQLite no soporta pool_size ni max_overflow
-        _engine = create_async_engine(
-            db_url,
-            connect_args={"check_same_thread": False},
-            echo=settings.debug,
-        )
-    else:
-        _engine = create_async_engine(
-            db_url,
-            pool_size=settings.db_pool_size,
-            max_overflow=settings.db_pool_max_overflow,
-            pool_pre_ping=True,
-            echo=settings.debug,
-        )
-
+    _engine = create_async_engine(
+        db_url,
+        pool_size=settings.db_pool_size,
+        max_overflow=settings.db_pool_max_overflow,
+        pool_pre_ping=True,
+        echo=settings.debug,
+    )
     _async_session_factory = async_sessionmaker(
         bind=_engine,
         class_=AsyncSession,

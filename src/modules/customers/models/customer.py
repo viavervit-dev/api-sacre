@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Enum, String
+from sqlalchemy import DateTime, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
 
 from src.config.database import Base
@@ -14,8 +14,15 @@ class Customer(MappedAsDataclass, Base):
     dominio y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
     """
 
-    __tablename__ = "customer.customers"
+    __tablename__ = "customers"
+    __table_args__ = {"schema": "customer"}
 
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey(column="auth.users.id"),
+        doc=CustomerEntity.ID_USER_DESCRIPTION.value,
+        nullable=False,
+        unique=True,
+    )
     first_names: Mapped[str] = mapped_column(
         String(length=CustomerEntity.FIRST_NAMES_MAX_LENGTH.value),
         doc=CustomerEntity.FIRST_NAMES_DESCRIPTION.value,

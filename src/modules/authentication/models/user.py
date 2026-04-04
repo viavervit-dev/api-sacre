@@ -8,42 +8,10 @@ from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationshi
 from src.config.database import Base
 from src.modules.authentication.constants import UserEntity
 from src.modules.authentication.models.permission import Group
+from src.modules.customers.models.customer import Customer
 
 # Configuración de PassLib para hashing de contraseñas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-class UserGroup(MappedAsDataclass, Base):
-    """
-    Entidad `UserGroup` y modelo ORM de la tabla `user_groups`. Actúa simultáneamente como entidad
-    de dominio y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
-    """
-
-    __tablename__ = "auth.user_groups"
-
-    user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("auth.users.id", ondelete="CASCADE"),
-        doc="ID del usuario referenciado",
-        nullable=False,
-    )
-    group_id: Mapped[UUID] = mapped_column(
-        ForeignKey("auth.groups.id", ondelete="CASCADE"),
-        doc="ID del grupo referenciado",
-        nullable=False,
-    )
-    id: Mapped[UUID] = mapped_column(
-        doc="Identificador único (UUID v4).",
-        default_factory=uuid4,
-        primary_key=True,
-        nullable=False,
-    )
-    user: Mapped["User"] = relationship("User", backref="user_groups", default=None)
-    group: Mapped[Group] = relationship("Group", backref="user_groups", default=None)
-    date_joined: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        doc="Fecha y hora de la creación del registro.",
-        default_factory=lambda: datetime.now(tz=UTC),
-    )
 
 
 class User(MappedAsDataclass, Base):
@@ -52,8 +20,15 @@ class User(MappedAsDataclass, Base):
     y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
     """
 
-    __tablename__ = "auth.users"
+    __tablename__ = "users"
+    __table_args__ = {"schema": "auth"}
 
+    customer: Mapped[Customer] = relationship(
+        "Customer",
+        uselist=False,
+        back_populates=None,
+        cascade="all, delete-orphan",
+    )
     email: Mapped[str] = mapped_column(
         String(length=UserEntity.EMAIL_MAX_LENGTH.value),
         doc=UserEntity.EMAIL_DESCRIPTION.value,
@@ -62,11 +37,6 @@ class User(MappedAsDataclass, Base):
     password_hash: Mapped[str] = mapped_column(
         String(length=UserEntity.PASSWORD_HASH_MAX_LENGTH.value),
         doc=UserEntity.PASSWORD_HASH_DESCRIPTION.value,
-        nullable=False,
-    )
-    permission_groups_id: Mapped[UUID] = mapped_column(
-        ForeignKey(column="auth.groups.id", ondelete="CASCADE"),
-        doc="ID de la permission referenciada",
         nullable=False,
     )
     id: Mapped[UUID] = mapped_column(
@@ -96,3 +66,37 @@ class User(MappedAsDataclass, Base):
         """Verifica si la contraseña proporcionada coincide con el hash almacenado."""
 
         return pwd_context.verify(secret=password, hash=self.password_hash)
+
+
+class UserGroup(MappedAsDataclass, Base):
+    """
+    Entidad `UserGroup` y modelo ORM de la tabla `user_groups`. Actúa simultáneamente como entidad
+    de dominio y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
+    """
+
+    __tablename__ = "user_groups"
+    __table_args__ = {"schema": "auth"}
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey(column="auth.users.id", ondelete="CASCADE"),
+        doc="ID del usuario referenciado",
+        nullable=False,
+    )
+    group_id: Mapped[UUID] = mapped_column(
+        ForeignKey(column="auth.groups.id", ondelete="CASCADE"),
+        doc="ID del grupo referenciado",
+        nullable=False,
+    )
+    id: Mapped[UUID] = mapped_column(
+        doc="Identificador único (UUID v4).",
+        default_factory=uuid4,
+        primary_key=True,
+        nullable=False,
+    )
+    user: Mapped[User] = relationship("User", backref="user_groups", default=None)
+    group: Mapped[Group] = relationship("Group", backref="user_groups", default=None)
+    date_joined: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        doc="Fecha y hora de la creación del registro.",
+        default_factory=lambda: datetime.now(tz=UTC),
+    )

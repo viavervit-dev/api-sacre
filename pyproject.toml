@@ -20,6 +20,8 @@ asyncpg = "^0.31.0"
 alembic = "^1.18.3"
 orjson = "^3.11.7"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+psycopg2-binary = "^2.9.11"
+python-dotenv = "^1.2.2"
 
 [dependency-groups]
 development = [
@@ -27,7 +29,6 @@ development = [
     "mypy (>=1.19.1,<2.0.0)",
     "commitizen (>=4.13.8,<5.0.0)",
     "pre-commit (>=4.5.1,<5.0.0)",
-    "aiosqlite (>=0.22.1,<0.23.0)"
 ]
 testing = [
     "pytest (>=9.0.2,<10.0.0)",
