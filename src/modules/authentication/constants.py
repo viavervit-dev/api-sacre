@@ -37,3 +37,5 @@ class UserEntity(Enum):
     # Propiedades para los campos de la entidad
     EMAIL_MAX_LENGTH = 60
     PASSWORD_HASH_MAX_LENGTH = 128
+    PASSWORD_MAX_LENGTH = 30
+    PASSWORD_MIN_LENGTH = 8

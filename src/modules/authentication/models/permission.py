@@ -32,7 +32,7 @@ class Permission(MappedAsDataclass, Base):
     permission_groups: Mapped[list["PermissionGroup"]] = relationship(
         "PermissionGroup",
         back_populates="permission",
-        default=None,
+        init=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -65,7 +65,7 @@ class Group(MappedAsDataclass, Base):
     permission_groups: Mapped[list["PermissionGroup"]] = relationship(
         "PermissionGroup",
         back_populates="group",
-        default=None,
+        init=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -106,11 +106,11 @@ class PermissionGroup(MappedAsDataclass, Base):
         primary_key=True,
         nullable=False,
     )
-    group: Mapped[Group] = relationship("Group", back_populates="permission_groups", default=None)
+    group: Mapped[Group] = relationship("Group", back_populates="permission_groups", init=False)
     permission: Mapped[Permission] = relationship(
         "Permission",
         back_populates="permission_groups",
-        default=None,
+        init=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

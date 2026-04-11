@@ -1,11 +1,11 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
 
 from src.config.database import Base
-from src.modules.customers.constants import CustomerEntity, DocumentTypesCustomer
+from src.modules.customers.constants import CustomerEntity
 
 
 class Customer(MappedAsDataclass, Base):
@@ -33,8 +33,8 @@ class Customer(MappedAsDataclass, Base):
         doc=CustomerEntity.LAST_NAMES_DESCRIPTION.value,
         nullable=True,
     )
-    document_type: Mapped[DocumentTypesCustomer] = mapped_column(
-        Enum(enums=DocumentTypesCustomer, name="document_type_enum"),
+    document_type: Mapped[str] = mapped_column(
+        String(length=CustomerEntity.DOCUMENT_TYPE_MAX_LENGTH.value),
         doc=CustomerEntity.DOCUMENT_TYPE_DESCRIPTION.value,
         nullable=True,
     )

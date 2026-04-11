@@ -1,16 +1,19 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Annotated
 
 import uvicorn
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi import Response as FastAPIResponse
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.response import Response
-from src.config.database import check_db_connection, close_db_pool, create_db_pool
+from src.config.database import check_db_connection, close_db_pool, create_db_pool, get_db_session
 from src.config.exception_handlers import register_exception_handlers
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
+from src.modules.customers.repositories.customer import CustomerCreateDTO, CustomerRepository
 
 
 @asynccontextmanager
@@ -84,8 +87,24 @@ class HealthCheck(BaseModel):
         },
     },
 )
-async def health_check(response: FastAPIResponse) -> Response[HealthCheck]:
+async def health_check(
+    response: FastAPIResponse,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> Response[HealthCheck]:
     """Endpoint de verificación de salud para balanceadores de carga y monitoreo."""
+
+    data = CustomerCreateDTO(
+        email="prueba_manual@foo.com",
+        password="ClaveFuerte1",
+        first_names="Lionel",
+        last_names="Messi",
+        document_type="RUT",
+        document_number="12312312",
+        phone="+549112223344",
+    )
+
+    customer = await CustomerRepository.create_customer(data=data, session=session)
+    print(customer)
 
     response.status_code = 200
     checks = {"database": "healthy"}

@@ -1,5 +1,7 @@
 from enum import Enum
 
+ROLE = "customer"
+
 
 class CustomerEntity(Enum):
     """Enumeración que define constantes relacionadas con la entidad `Customer`."""
@@ -14,10 +16,14 @@ class CustomerEntity(Enum):
     DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
     ID_USER_DESCRIPTION = "ID del usuario/auth de la persona."
 
+    # Mensajes de error
+    DOCUMENT_TYPE_INVALID = "El valor seleccionado no es válido."
+
     # Propiedades para los campos de la entidad
     FIRST_NAMES_MAX_LENGTH = 40
     LAST_NAMES_MAX_LENGTH = 40
     DOCUMENT_NUMBER_MAX_LENGTH = 13
+    DOCUMENT_TYPE_MAX_LENGTH = 9
     PHONE_MAX_LENGTH = 25
 
 
@@ -27,3 +33,9 @@ class DocumentTypesCustomer(Enum):
     RUT = "RUT"
     PASSPORT = "Pasaporte"
     IDENTIFICATION_NUMBER = "Cédula"
+
+    @classmethod
+    def values(cls) -> set[str]:
+        """Devuelve un `set` de los valores de la enumeración."""
+
+        return {item.value for item in cls}

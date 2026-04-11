@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
@@ -9,9 +9,6 @@ from src.config.database import Base
 from src.modules.authentication.constants import UserEntity
 from src.modules.authentication.models.permission import Group
 from src.modules.customers.models.customer import Customer
-
-# Configuración de PassLib para hashing de contraseñas
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class User(MappedAsDataclass, Base):
@@ -28,6 +25,7 @@ class User(MappedAsDataclass, Base):
         uselist=False,
         back_populates=None,
         cascade="all, delete-orphan",
+        init=False,
     )
     email: Mapped[str] = mapped_column(
         String(length=UserEntity.EMAIL_MAX_LENGTH.value),
@@ -38,6 +36,7 @@ class User(MappedAsDataclass, Base):
         String(length=UserEntity.PASSWORD_HASH_MAX_LENGTH.value),
         doc=UserEntity.PASSWORD_HASH_DESCRIPTION.value,
         nullable=False,
+        init=False,
     )
     id: Mapped[UUID] = mapped_column(
         doc=UserEntity.ID_DESCRIPTION.value,
@@ -49,7 +48,7 @@ class User(MappedAsDataclass, Base):
         "Group",
         secondary="auth.user_groups",
         backref="users",
-        default=None,
+        init=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -60,12 +59,16 @@ class User(MappedAsDataclass, Base):
     def set_password(self, password: str) -> None:
         """Guarda el hash encriptado de la contraseña."""
 
-        self.password_hash = pwd_context.hash(secret=password)
+        salt = bcrypt.gensalt()
+        self.password_hash = bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
     def verify_password(self, password: str) -> bool:
         """Verifica si la contraseña proporcionada coincide con el hash almacenado."""
 
-        return pwd_context.verify(secret=password, hash=self.password_hash)
+        try:
+            return bcrypt.checkpw(password.encode("utf-8"), self.password_hash.encode("utf-8"))
+        except ValueError:
+            return False
 
 
 class UserGroup(MappedAsDataclass, Base):
@@ -93,8 +96,12 @@ class UserGroup(MappedAsDataclass, Base):
         primary_key=True,
         nullable=False,
     )
-    user: Mapped[User] = relationship("User", backref="user_groups", default=None)
-    group: Mapped[Group] = relationship("Group", backref="user_groups", default=None)
+    user: Mapped[User] = relationship(
+        "User", backref="user_groups", init=False, overlaps="groups,users"
+    )
+    group: Mapped[Group] = relationship(
+        "Group", backref="user_groups", init=False, overlaps="groups,users"
+    )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         doc="Fecha y hora de la creación del registro.",
