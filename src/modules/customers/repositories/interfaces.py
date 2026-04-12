@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.customers.dto import CustomerCreateDTO, CustomerReadDTO
+from src.modules.customers.dto import CreateCustomerDTO, ReadCustomerDTO
 
 
 class ICustomerRepository(ABC):
@@ -16,9 +17,17 @@ class ICustomerRepository(ABC):
     @abstractmethod
     async def create_customer(
         cls,
-        data: CustomerCreateDTO,
+        data: CreateCustomerDTO,
         session: AsyncSession,
-    ) -> CustomerReadDTO:
-        """Crea un nuevo cliente en la base de datos a partir de un diccionario de datos."""
+    ) -> ReadCustomerDTO:
+        """Crea un nuevo cliente en la base de datos a partir de un diccionario de datos y se le
+        asigna el rol **customer**."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
+    async def exists(cls, session: AsyncSession, **kwargs: Any) -> bool:
+        """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
 
         pass

@@ -1,10 +1,12 @@
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.authentication.models.permission import Group
 from src.modules.authentication.models.user import User, UserGroup
 from src.modules.customers.constants import ROLE
-from src.modules.customers.dto import CustomerCreateDTO, CustomerReadDTO
+from src.modules.customers.dto import CreateCustomerDTO, ReadCustomerDTO
 from src.modules.customers.models.customer import Customer
 from src.modules.customers.repositories.interfaces import ICustomerRepository
 
@@ -19,9 +21,9 @@ class CustomerRepository(ICustomerRepository):
     @classmethod
     async def create_customer(
         cls,
-        data: CustomerCreateDTO,
+        data: CreateCustomerDTO,
         session: AsyncSession,
-    ) -> CustomerReadDTO:
+    ) -> ReadCustomerDTO:
 
         user = User(email=data.email)  # pyright: ignore[reportCallIssue]
         user.set_password(data.password)
@@ -50,12 +52,12 @@ class CustomerRepository(ICustomerRepository):
         )
         session.add(customer)
 
-        await session.flush()  # Para obtener el customer.id
+        await session.flush()
 
         await session.commit()
         await session.refresh(customer)
 
-        return CustomerReadDTO(
+        return ReadCustomerDTO(
             id=customer.user_id,
             first_names=customer.first_names,
             last_names=customer.last_names,
@@ -63,3 +65,34 @@ class CustomerRepository(ICustomerRepository):
             document_number=customer.document_number,
             phone=customer.phone,
         )
+
+    @classmethod
+    async def exists(cls, session: AsyncSession, **kwargs: Any) -> bool:
+
+        user_filters = []
+        customer_filters = []
+
+        # Clasificar los filtros según si pertenecen al modelo Customer o User
+        for key, value in kwargs.items():
+            if hasattr(Customer, key):
+                customer_filters.append(getattr(Customer, key) == value)
+            elif hasattr(User, key):
+                user_filters.append(getattr(User, key) == value)
+            else:
+                raise ValueError(f"No existe la columna '{key}' en los modelos Customer y User.")
+
+        # Construir la consulta dinámica según los filtros proporcionados
+        if user_filters and not customer_filters:
+            stmt = select(select(User.id).where(*user_filters).exists())
+        else:
+            stmt = select(Customer.user_id)
+            if user_filters:
+                stmt = stmt.join(User).where(*user_filters)
+            if customer_filters:
+                stmt = stmt.where(*customer_filters)
+
+            stmt = select(stmt.exists())
+
+        result = await session.execute(stmt)
+
+        return result.scalar_one()

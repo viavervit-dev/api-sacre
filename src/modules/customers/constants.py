@@ -18,6 +18,9 @@ class CustomerEntity(Enum):
 
     # Mensajes de error
     DOCUMENT_TYPE_INVALID = "El valor seleccionado no es válido."
+    DOCUMENT_NUMBER_IN_USE = "Este número de documento ya está registrado."
+    PHONE_IN_USE = "Este número de teléfono ya está registrado."
+    EMAIL_IN_USE = "Este correo ya está registrado."
 
     # Propiedades para los campos de la entidad
     FIRST_NAMES_MAX_LENGTH = 40
