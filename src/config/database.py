@@ -84,7 +84,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     @app.get("/users/{user_id}")
     async def get_user(
         user_id: int,
-        session: AsyncSession = Depends(get_db_session), # Aquí se inyecta la sesión
+        session: Annotated[AsyncSession, Depends(get_db_session)], # Aquí se inyecta la sesión
     ):
         ...
     ```

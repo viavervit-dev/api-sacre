@@ -7,7 +7,7 @@ from src.modules.customers.repositories.interfaces import ICustomerRepository
 class CreateCustomerService:
     """Servicio para la creación de clientes en la base de datos."""
 
-    def __init__(self, customer_repo: ICustomerRepository, session: AsyncSession) -> None:
+    def __init__(self, customer_repo: type[ICustomerRepository], session: AsyncSession) -> None:
         self.customer_repo = customer_repo
         self.session = session
 

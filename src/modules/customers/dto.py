@@ -1,60 +1,159 @@
+from typing import TYPE_CHECKING
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from fastapi.exceptions import RequestValidationError
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.common.constants import ValidationErrorMessages
 from src.modules.authentication.constants import UserEntity
 from src.modules.customers.constants import CustomerEntity, DocumentTypesCustomer
-from src.modules.customers.repositories.interfaces import ICustomerRepository
+
+if TYPE_CHECKING:
+    from src.modules.customers.repositories.interfaces import ICustomerRepository
 
 
 class CreateCustomerDTO(BaseModel):
     """DTO para la creación de un cliente"""
 
-    email: EmailStr = Field(max_length=UserEntity.EMAIL_MAX_LENGTH.value)
+    model_config = ConfigDict(use_enum_values=True)
+
+    email: EmailStr = Field(
+        max_length=UserEntity.EMAIL_MAX_LENGTH.value,
+        description=UserEntity.EMAIL_DESCRIPTION.value,
+        examples=["user@email.com"],
+        json_schema_extra={
+            "x-validation-errors": [
+                ValidationErrorMessages.STRING_TOO_LONG.value,
+                ValidationErrorMessages.MISSING.value,
+                ValidationErrorMessages.VALUE_ERROR_EMAIL.value,
+                UserEntity.EMAIL_IN_USE.value,
+            ]
+        },
+    )
     password: str = Field(
         max_length=UserEntity.PASSWORD_MAX_LENGTH.value,
         min_length=UserEntity.PASSWORD_MIN_LENGTH.value,
+        description=UserEntity.PASSWORD_DESCRIPTION.value,
+        examples=["6UjSV0QWmYfrFCG8"],
+        json_schema_extra={
+            "x-validation-errors": [
+                ValidationErrorMessages.STRING_TOO_LONG.value,
+                ValidationErrorMessages.STRING_TOO_SHORT.value,
+                ValidationErrorMessages.MISSING.value,
+                ValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
     )
-    first_names: str = Field(max_length=CustomerEntity.FIRST_NAMES_MAX_LENGTH.value)
-    last_names: str = Field(max_length=CustomerEntity.LAST_NAMES_MAX_LENGTH.value)
-    document_number: str = Field(max_length=CustomerEntity.DOCUMENT_NUMBER_MAX_LENGTH.value)
-    phone: str = Field(max_length=CustomerEntity.PHONE_MAX_LENGTH.value)
-    document_type: str
+    first_names: str = Field(
+        max_length=CustomerEntity.FIRST_NAMES_MAX_LENGTH.value,
+        description=CustomerEntity.FIRST_NAMES_DESCRIPTION.value,
+        examples=["Juan Pablo"],
+        json_schema_extra={
+            "x-validation-errors": [
+                ValidationErrorMessages.STRING_TOO_LONG.value,
+                ValidationErrorMessages.MISSING.value,
+                ValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+    )
+    last_names: str = Field(
+        max_length=CustomerEntity.LAST_NAMES_MAX_LENGTH.value,
+        description=CustomerEntity.LAST_NAMES_DESCRIPTION.value,
+        examples=["Pérez Gómez"],
+        json_schema_extra={
+            "x-validation-errors": [
+                ValidationErrorMessages.STRING_TOO_LONG.value,
+                ValidationErrorMessages.MISSING.value,
+                ValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+    )
+    document_type: DocumentTypesCustomer = Field(
+        description=CustomerEntity.DOCUMENT_TYPE_DESCRIPTION.value,
+        examples=DocumentTypesCustomer.values(),
+        json_schema_extra={
+            "x-validation-errors": [
+                ValidationErrorMessages.STRING_TOO_LONG.value,
+                ValidationErrorMessages.MISSING.value,
+                ValidationErrorMessages.VALUE_ERROR.value,
+                ValidationErrorMessages.ENUM.value,
+            ]
+        },
+    )
+    document_number: str = Field(
+        max_length=CustomerEntity.DOCUMENT_NUMBER_MAX_LENGTH.value,
+        description=CustomerEntity.DOCUMENT_NUMBER_DESCRIPTION.value,
+        examples=["12345678-9"],
+        json_schema_extra={
+            "x-validation-errors": [
+                ValidationErrorMessages.STRING_TOO_LONG.value,
+                ValidationErrorMessages.MISSING.value,
+                ValidationErrorMessages.VALUE_ERROR.value,
+                CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
+            ]
+        },
+    )
+    phone: str = Field(
+        max_length=CustomerEntity.PHONE_MAX_LENGTH.value,
+        description=CustomerEntity.PHONE_DESCRIPTION.value,
+        examples=["+593 123456789"],
+        json_schema_extra={
+            "x-validation-errors": [
+                ValidationErrorMessages.STRING_TOO_LONG.value,
+                ValidationErrorMessages.MISSING.value,
+                ValidationErrorMessages.VALUE_ERROR.value,
+                CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
+            ]
+        },
+    )
 
-    @field_validator("document_type")
-    def document_type_must_be_allowed(self, v: str) -> str:
-        """Valida que el tipo de documento sea uno de los permitidos."""
-
-        allowed = DocumentTypesCustomer.values()
-
-        if v not in allowed:
-            raise ValueError(CustomerEntity.DOCUMENT_TYPE_INVALID.value)
-
-        return v
-
-    async def check_email(self, session: AsyncSession, repository: ICustomerRepository) -> None:
+    async def check_email(
+        self,
+        session: AsyncSession,
+        repository: type["ICustomerRepository"],
+    ) -> None:
         """Ejecuta validaciones para el correo electrónico del cliente."""
 
         # Validar que el correo electrónico no esté registrado en la base de datos
         email_exists = await repository.exists(session, email=self.email)
 
         if email_exists:
-            raise ValueError(CustomerEntity.EMAIL_IN_USE.value)
+            raise RequestValidationError(
+                errors=[
+                    {
+                        "loc": ("body", "email"),
+                        "msg": UserEntity.EMAIL_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                ]
+            )
 
-    async def check_phone(self, session: AsyncSession, repository: ICustomerRepository) -> None:
+    async def check_phone(
+        self,
+        session: AsyncSession,
+        repository: type["ICustomerRepository"],
+    ) -> None:
         """Ejecuta validaciones para el número de teléfono del cliente."""
 
         # Validar que el número de teléfono no esté registrado en la base de datos
         phone_exists = await repository.exists(session, phone=self.phone)
 
         if phone_exists:
-            raise ValueError(CustomerEntity.PHONE_IN_USE.value)
+            raise RequestValidationError(
+                errors=[
+                    {
+                        "loc": ("body", "phone"),
+                        "msg": CustomerEntity.PHONE_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                ]
+            )
 
     async def check_document_number(
         self,
-        repository: ICustomerRepository,
         session: AsyncSession,
+        repository: type["ICustomerRepository"],
     ) -> None:
         """Ejecuta validaciones para el número de documento del cliente."""
 
@@ -62,15 +161,41 @@ class CreateCustomerDTO(BaseModel):
         document_exists = await repository.exists(session, document_number=self.document_number)
 
         if document_exists:
-            raise ValueError(CustomerEntity.DOCUMENT_NUMBER_IN_USE.value)
+            raise RequestValidationError(
+                errors=[
+                    {
+                        "loc": ("body", "document_number"),
+                        "msg": CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                ]
+            )
 
 
 class ReadCustomerDTO(BaseModel):
-    """DTO para la lectura de un cliente"""
+    """DTO para la lectura de datos de un cliente"""
 
-    id: UUID
-    first_names: str
-    last_names: str
-    document_type: str
-    document_number: str
-    phone: str
+    id: UUID = Field(
+        description=CustomerEntity.ID_DESCRIPTION.value,
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    )
+    first_names: str = Field(
+        description=CustomerEntity.FIRST_NAMES_DESCRIPTION.value,
+        examples=["Juan Pablo"],
+    )
+    last_names: str = Field(
+        description=CustomerEntity.LAST_NAMES_DESCRIPTION.value,
+        examples=["Pérez Gómez"],
+    )
+    document_type: str = Field(
+        description=CustomerEntity.DOCUMENT_TYPE_DESCRIPTION.value,
+        examples=DocumentTypesCustomer.values(),
+    )
+    document_number: str = Field(
+        description=CustomerEntity.DOCUMENT_NUMBER_DESCRIPTION.value,
+        examples=["12345678-9"],
+    )
+    phone: str = Field(
+        description=CustomerEntity.PHONE_DESCRIPTION.value,
+        examples=["+593 123456789"],
+    )

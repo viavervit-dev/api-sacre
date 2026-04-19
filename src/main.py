@@ -1,19 +1,19 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Annotated
+from typing import Any
 
 import uvicorn
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi import Response as FastAPIResponse
+from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.response import Response
-from src.config.database import check_db_connection, close_db_pool, create_db_pool, get_db_session
+from src.config.database import check_db_connection, close_db_pool, create_db_pool
 from src.config.exception_handlers import register_exception_handlers
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
-from src.modules.customers.repositories.customer import CustomerCreateDTO, CustomerRepository
+from src.modules.customers.routers.create import router as create_customer_router
 
 
 @asynccontextmanager
@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await create_db_pool()
 
     yield
+
     # Cierre
     await close_db_pool()
 
@@ -41,12 +42,41 @@ app = FastAPI(
 )
 
 
+def openapi() -> dict[str, Any]:
+    """
+    Genera el esquema OpenAPI personalizado para la aplicación, eliminando el código de
+    estado 422 de las respuestas.
+    """
+
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        routes=app.routes,
+    )
+
+    # Eliminar el 422 de todos los endpoints
+    for path in schema.get("paths", {}).values():
+        for operation in path.values():
+            operation.get("responses", {}).pop("422", None)
+
+    app.openapi_schema = schema
+
+    return app.openapi_schema
+
+
+app.openapi = openapi
+
+
 # Registra los manejadores de excepciones personalizados
 register_exception_handlers(app=app)
 
 
 # Configura el router principal para la API, con un prefijo para todas las rutas v1
 v1_router = APIRouter(prefix="/api/v1")
+v1_router.include_router(router=create_customer_router)
 app.include_router(router=v1_router)
 
 
@@ -58,53 +88,38 @@ class HealthCheck(BaseModel):
 
 @app.get(
     path="/health/",
+    tags=["Utilidades"],
     responses={
         200: {
-            "description": "Todos los componentes de la API están disponibles.",
+            "description": "Estado de salud de los componentes de la API.",
             "model": Response[HealthCheck],
             "content": {
                 "application/json": {
-                    "example": {
-                        "success": True,
-                        "message": "Todos los componentes de la API están disponibles.",
-                        "data": {"database": "healthy"},
-                    },
-                }
-            },
-        },
-        503: {
-            "description": "Algún componente de la API no está disponible.",
-            "model": Response[HealthCheck],
-            "content": {
-                "application/json": {
-                    "example": {
-                        "success": False,
-                        "message": "Algún componente de la API no está disponible.",
-                        "data": {"database": "unhealthy"},
+                    "examples": {
+                        "available": {
+                            "summary": "Disponibles",
+                            "value": {
+                                "success": True,
+                                "message": "Todos los componentes de la API están disponibles.",
+                                "data": {"database": "healthy"},
+                            },
+                        },
+                        "unavailable": {
+                            "summary": "No disponibles",
+                            "value": {
+                                "success": True,
+                                "message": "Algunos componentes de la API no están disponibles.",
+                                "data": {"database": "unhealthy"},
+                            },
+                        },
                     },
                 }
             },
         },
     },
 )
-async def health_check(
-    response: FastAPIResponse,
-    session: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Response[HealthCheck]:
+async def health_check(response: FastAPIResponse) -> Response[HealthCheck]:
     """Endpoint de verificación de salud para balanceadores de carga y monitoreo."""
-
-    data = CustomerCreateDTO(
-        email="prueba_manual@foo.com",
-        password="ClaveFuerte1",
-        first_names="Lionel",
-        last_names="Messi",
-        document_type="RUT",
-        document_number="12312312",
-        phone="+549112223344",
-    )
-
-    customer = await CustomerRepository.create_customer(data=data, session=session)
-    print(customer)
 
     response.status_code = 200
     checks = {"database": "healthy"}

@@ -57,7 +57,7 @@ class CustomerRepository(ICustomerRepository):
         await session.commit()
         await session.refresh(customer)
 
-        return ReadCustomerDTO(
+        return ReadCustomerDTO.model_construct(
             id=customer.user_id,
             first_names=customer.first_names,
             last_names=customer.last_names,

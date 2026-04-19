@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 ROLE = "customer"
 
@@ -14,13 +14,12 @@ class CustomerEntity(Enum):
     DOCUMENT_NUMBER_DESCRIPTION = "Número del documento del cliente."
     PHONE_DESCRIPTION = "Número de teléfono del cliente."
     DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
-    ID_USER_DESCRIPTION = "ID del usuario/auth de la persona."
+    ID_USER_DESCRIPTION = "ID asignado al cliente por el sistema."
 
     # Mensajes de error
     DOCUMENT_TYPE_INVALID = "El valor seleccionado no es válido."
     DOCUMENT_NUMBER_IN_USE = "Este número de documento ya está registrado."
     PHONE_IN_USE = "Este número de teléfono ya está registrado."
-    EMAIL_IN_USE = "Este correo ya está registrado."
 
     # Propiedades para los campos de la entidad
     FIRST_NAMES_MAX_LENGTH = 40
@@ -30,7 +29,7 @@ class CustomerEntity(Enum):
     PHONE_MAX_LENGTH = 25
 
 
-class DocumentTypesCustomer(Enum):
+class DocumentTypesCustomer(StrEnum):
     """Enumeración que define los tipos de documentos para la entidad de un cliente."""
 
     RUT = "RUT"
@@ -38,7 +37,7 @@ class DocumentTypesCustomer(Enum):
     IDENTIFICATION_NUMBER = "Cédula"
 
     @classmethod
-    def values(cls) -> set[str]:
-        """Devuelve un `set` de los valores de la enumeración."""
+    def values(cls) -> list[str]:
+        """Devuelve una lista de los valores de la enumeración."""
 
-        return {item.value for item in cls}
+        return [item.value for item in cls]

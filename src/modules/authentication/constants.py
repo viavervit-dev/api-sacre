@@ -32,7 +32,11 @@ class UserEntity(Enum):
     ID_DESCRIPTION = "Identificador único (UUID v4)."
     EMAIL_DESCRIPTION = "Correo electrónico del usuario."
     PASSWORD_HASH_DESCRIPTION = "Hash encriptado de la contraseña del usuario."
+    PASSWORD_DESCRIPTION = "Contraseña del usuario"
     DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
+
+    # Mensajes de error
+    EMAIL_IN_USE = "Este correo electrónico ya está registrado."
 
     # Propiedades para los campos de la entidad
     EMAIL_MAX_LENGTH = 60
