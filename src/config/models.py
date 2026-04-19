@@ -7,4 +7,9 @@ Importa aquí TODOS los modelos SQLAlchemy del proyecto para que Alembic los det
 migraciones con autogenerate. Cada vez que crees un nuevo modelo, agrégalo a este archivo.
 """
 
-from src.modules.customers.models.customer import CustomerModel
+# Modelos del módulo de autenticación
+from src.modules.authentication.models.permission import Group, Permission, PermissionGroup
+from src.modules.authentication.models.user import User, UserGroup
+
+# Modelos del módulo de clientes
+from src.modules.customers.models.customer import Customer

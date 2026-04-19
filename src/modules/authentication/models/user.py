@@ -1,0 +1,109 @@
+from datetime import UTC, datetime
+from uuid import UUID, uuid4
+
+import bcrypt
+from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
+
+from src.config.database import Base
+from src.modules.authentication.constants import UserEntity
+from src.modules.authentication.models.permission import Group
+from src.modules.customers.models.customer import Customer
+
+
+class User(MappedAsDataclass, Base):
+    """
+    Entidad `User` y modelo ORM de la tabla `users`. Actúa simultáneamente como entidad de dominio
+    y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
+    """
+
+    __tablename__ = "users"
+    __table_args__ = {"schema": "auth"}
+
+    customer: Mapped[Customer] = relationship(
+        "Customer",
+        uselist=False,
+        back_populates=None,
+        cascade="all, delete-orphan",
+        init=False,
+    )
+    email: Mapped[str] = mapped_column(
+        String(length=UserEntity.EMAIL_MAX_LENGTH.value),
+        doc=UserEntity.EMAIL_DESCRIPTION.value,
+        unique=True,
+    )
+    password_hash: Mapped[str] = mapped_column(
+        String(length=UserEntity.PASSWORD_HASH_MAX_LENGTH.value),
+        doc=UserEntity.PASSWORD_HASH_DESCRIPTION.value,
+        nullable=False,
+        init=False,
+    )
+    id: Mapped[UUID] = mapped_column(
+        doc=UserEntity.ID_DESCRIPTION.value,
+        default_factory=uuid4,
+        primary_key=True,
+        nullable=False,
+    )
+    groups: Mapped[list[Group]] = relationship(
+        "Group",
+        secondary="auth.user_groups",
+        backref="users",
+        init=False,
+    )
+    date_joined: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        doc=UserEntity.DATE_JOINED_DESCRIPTION.value,
+        default_factory=lambda: datetime.now(tz=UTC),
+    )
+
+    def set_password(self, password: str) -> None:
+        """Guarda el hash encriptado de la contraseña."""
+
+        salt = bcrypt.gensalt()
+        self.password_hash = bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+
+    def verify_password(self, password: str) -> bool:
+        """Verifica si la contraseña proporcionada coincide con el hash almacenado."""
+
+        try:
+            return bcrypt.checkpw(password.encode("utf-8"), self.password_hash.encode("utf-8"))
+        except ValueError:
+            return False
+
+
+class UserGroup(MappedAsDataclass, Base):
+    """
+    Entidad `UserGroup` y modelo ORM de la tabla `user_groups`. Actúa simultáneamente como entidad
+    de dominio y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
+    """
+
+    __tablename__ = "user_groups"
+    __table_args__ = {"schema": "auth"}
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey(column="auth.users.id", ondelete="CASCADE"),
+        doc="ID del usuario referenciado",
+        nullable=False,
+    )
+    group_id: Mapped[UUID] = mapped_column(
+        ForeignKey(column="auth.groups.id", ondelete="CASCADE"),
+        doc="ID del grupo referenciado",
+        nullable=False,
+    )
+    id: Mapped[UUID] = mapped_column(
+        doc="Identificador único (UUID v4).",
+        default_factory=uuid4,
+        primary_key=True,
+        nullable=False,
+    )
+    user: Mapped[User] = relationship(
+        "User", backref="user_groups", init=False, overlaps="groups,users"
+    )
+    group: Mapped[Group] = relationship(
+        "Group", backref="user_groups", init=False, overlaps="groups,users"
+    )
+    date_joined: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        doc="Fecha y hora de la creación del registro.",
+        default_factory=lambda: datetime.now(tz=UTC),
+    )

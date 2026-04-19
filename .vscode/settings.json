@@ -19,7 +19,7 @@
     },
     "python.analysis.ignore": [
         "src/config/models.py",
-        "alembic/env.py"
+        "alembic/"
     ],
     "errorLens.gutterIconsEnabled": true,
     "errorLens.enabled": true,
