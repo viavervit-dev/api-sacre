@@ -18,18 +18,27 @@ Este proyecto está organizado siguiendo una arquitectura modular y escalable, f
 api-sacre/
 ├── alembic/                        # Configuración y scripts de migraciones (Alembic)
 │   ├── versions/                   # Archivos de migración generados automáticamente
-│   └── env.py                      # Entorno de ejecución de migraciones (async)
+│   └── env.py                      # Entorno de ejecución de migraciones
 ├── src/                            # Código fuente de la aplicación
 │   ├── common/                     # Utilidades y contratos compartidos
-│   │   └── response.py             # Modelo genérico de respuesta estándar `Response[T]`
+│   │   ├── constants.py            # Constantes globales
+│   │   ├── response.py             # Modelo genérico de respuesta estándar
+│   │   └── schema.py               # Esquemas base de Pydantic
 │   ├── config/                     # Configuración central de la aplicación
-│   │   ├── database.py             # Pool de conexiones asíncrono (Base declarativa incluida)
-│   │   ├── exception_handlers.py   # Manejadores globales de excepciones HTTP y de validación
-│   │   ├── parameters.py           # Variables de entorno y parámetros de la aplicación
-│   │   └── serialization.py        # Respuesta JSON de alto rendimiento con orjson
-│   ├── modules/                    # Módulos de negocio (uno por entidad/dominio)
-│   │   └── customers/              # Módulo de clientes
-│   │       └── models/             # Modelos ORM (también actúan como entidades de dominio)
+│   │   ├── database.py             # Conexión a base de datos y pool
+│   │   ├── exception_handlers.py   # Manejadores de excepciones globales
+│   │   ├── models.py               # Registro de modelos para Alembic
+│   │   ├── parameters.py           # Variables de entorno
+│   │   └── serialization.py        # Configuración de serialización JSON
+│   ├── modules/                    # Módulos de negocio (separados por dominio)
+│   │   └── <nombre_del_modulo>/    # Estructura genérica de un módulo
+│   │       ├── dto.py              # Esquemas de transferencia de datos (Pydantic)
+│   │       ├── models/             # Entidades ORM del dominio
+│   │       ├── repositories/       # Acceso a base de datos (Patrón Repository)
+│   │       ├── routers/            # Endpoints y rutas de FastAPI
+│   │       └── services/           # Lógica de negocio (Casos de uso)
+│   ├── scripts/                    # Scripts de configuración y mantenimiento
+│   │   └── configure_roles.py      # Inicialización de roles y permisos
 │   └── main.py                     # Punto de entrada: instancia FastAPI, lifespan y rutas base
 ├── workflow/                       # Guías y convenciones del equipo
 │   ├── branching_strategy.md       # Estrategia de ramas Git
@@ -164,11 +173,31 @@ alembic upgrade head
 | `alembic history` | Lista todas las migraciones en orden cronológico |
 
 
-## 🔹 6. Contribución
+## 🔹 6. Scripts Disponibles
+
+El proyecto incluye scripts de mantenimiento y configuración inicial dentro del directorio `src/scripts/`. Estos scripts interactúan directamente con la base de datos.
+
+### Configuración de Roles y Permisos
+
+Para inicializar o actualizar los permisos y roles de los usuarios en la base de datos, ejecuta el siguiente comando en la raíz del proyecto:
+
+```bash
+python -m src.scripts.configure_roles
+```
+
+**¿Qué hace este script?**
+- Crea los permisos basados en los modelos existentes.
+- Crea los grupos o roles predeterminados.
+- Asocia automáticamente los permisos correctos a cada grupo.
+- Limpia los permisos obsoletos de los grupos si estos fueron removidos de la configuración.
+
+*(Si necesitas agregar nuevos roles o ajustar los permisos de un grupo existente, debes modificar los diccionarios `GROUPS` y `PERMISSIONS` dentro de `src/scripts/configure_roles.py` antes de correr el comando).*
+
+## 🔹 7. Contribución
 
 Consulta nuestra guía [CONTRIBUTING](CONTRIBUTING.md) para conocer las reglas y buenas prácticas que debes seguir antes de contribuir al proyecto. Este documento proporciona instrucciones detalladas sobre cómo configurar tu entorno de desarrollo, trabajar correctamente en el repositorio, proponer cambios de manera efectiva y seguir el estilo de código adoptado por el equipo.
 
-## 🔹 7. Colaboradores
+## 🔹 8. Colaboradores
 
 A continuación se presentan a las personas que están aportando al desarrollo de este proyecto.
 
