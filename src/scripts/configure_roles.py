@@ -4,7 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import close_db_pool, create_db_pool, get_db_session
+from src.modules.admins.models.admin import Admin
 from src.modules.authentication.models.permission import Group, Permission, PermissionGroup
+from src.modules.authentication.models.user import User
 from src.modules.customers.models.customer import Customer
 
 GROUPS = [
@@ -12,18 +14,34 @@ GROUPS = [
         "name": "customer",
         "models": [Customer.__tablename__],
         "permissions": [
+            f"{User.__tablename__}.read",
+            f"{User.__tablename__}.update_password",
+            f"{User.__tablename__}.delete",  # Si tiene el permiso, puede elimina los datos del rol
             f"{Customer.__tablename__}.read",
             f"{Customer.__tablename__}.update",
-            f"{Customer.__tablename__}.delete",
+        ],
+    },
+    {
+        "name": "admin",
+        "models": [Admin.__tablename__],
+        "permissions": [
+            f"{User.__tablename__}.read",
+            f"{Admin.__tablename__}.read",
         ],
     },
 ]
 
 PERMISSIONS = [
+    # Permisos para el modelo User
+    f"{User.__tablename__}.read",
+    f"{User.__tablename__}.delete",
+    f"{User.__tablename__}.update_password",
     # Permisos para el modelo Customer
     f"{Customer.__tablename__}.read",
     f"{Customer.__tablename__}.update",
     f"{Customer.__tablename__}.delete",
+    # Permisos para el modelo Admin
+    f"{Admin.__tablename__}.read",
 ]
 
 
@@ -97,6 +115,7 @@ async def run(session: AsyncSession) -> None:
 
 
 async def main() -> None:
+
     # 1. Inicializar la conexión a la base de datos
     await create_db_pool()
 

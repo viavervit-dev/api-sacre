@@ -6,6 +6,7 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
 from src.config.database import Base
+from src.modules.admins.models.admin import Admin
 from src.modules.authentication.constants import UserEntity
 from src.modules.authentication.models.permission import Group
 from src.modules.customers.models.customer import Customer
@@ -22,6 +23,13 @@ class User(MappedAsDataclass, Base):
 
     customer: Mapped[Customer] = relationship(
         "Customer",
+        uselist=False,
+        back_populates=None,
+        cascade="all, delete-orphan",
+        init=False,
+    )
+    admin: Mapped[Admin] = relationship(
+        "Admin",
         uselist=False,
         back_populates=None,
         cascade="all, delete-orphan",
@@ -60,13 +68,19 @@ class User(MappedAsDataclass, Base):
         """Guarda el hash encriptado de la contraseña."""
 
         salt = bcrypt.gensalt()
-        self.password_hash = bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+        self.password_hash = bcrypt.hashpw(
+            password=password.encode("utf-8"),
+            salt=salt,
+        ).decode(encoding="utf-8")
 
     def verify_password(self, password: str) -> bool:
         """Verifica si la contraseña proporcionada coincide con el hash almacenado."""
 
         try:
-            return bcrypt.checkpw(password.encode("utf-8"), self.password_hash.encode("utf-8"))
+            return bcrypt.checkpw(
+                password=password.encode("utf-8"),
+                hashed_password=self.password_hash.encode(encoding="utf-8"),
+            )
         except ValueError:
             return False
 
