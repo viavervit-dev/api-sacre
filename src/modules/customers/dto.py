@@ -1,11 +1,10 @@
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.constants import ValidationErrorMessages
+from src.common.constants import DTOValidationErrorMessages
 from src.modules.authentication.constants import UserEntity
 from src.modules.customers.constants import CustomerEntity, DocumentTypesCustomer
 
@@ -24,9 +23,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["user@email.com"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR_EMAIL.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR_EMAIL.value,
                 UserEntity.EMAIL_IN_USE.value,
             ]
         },
@@ -38,10 +37,10 @@ class CreateCustomerDTO(BaseModel):
         examples=["6UjSV0QWmYfrFCG8"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.STRING_TOO_SHORT.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.STRING_TOO_SHORT.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
     )
@@ -51,9 +50,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["Juan Pablo"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
     )
@@ -63,9 +62,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["Pérez Gómez"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
     )
@@ -74,10 +73,10 @@ class CreateCustomerDTO(BaseModel):
         examples=DocumentTypesCustomer.values(),
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
-                ValidationErrorMessages.ENUM.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.ENUM.value,
             ]
         },
     )
@@ -87,9 +86,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["12345678-9"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
                 CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
             ]
         },
@@ -100,9 +99,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["+593 123456789"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
                 CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
             ]
         },
@@ -175,10 +174,6 @@ class CreateCustomerDTO(BaseModel):
 class ReadCustomerDTO(BaseModel):
     """DTO para la lectura de datos de un cliente"""
 
-    id: UUID = Field(
-        description=CustomerEntity.ID_DESCRIPTION.value,
-        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
-    )
     first_names: str = Field(
         description=CustomerEntity.FIRST_NAMES_DESCRIPTION.value,
         examples=["Juan Pablo"],

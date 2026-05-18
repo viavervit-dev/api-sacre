@@ -86,6 +86,7 @@ class CustomerRepository(ICustomerRepository):
             stmt = select(select(User.id).where(*user_filters).exists())
         else:
             stmt = select(Customer.user_id)
+
             if user_filters:
                 stmt = stmt.join(User).where(*user_filters)
             if customer_filters:

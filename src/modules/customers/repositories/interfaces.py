@@ -31,3 +31,10 @@ class ICustomerRepository(ABC):
         """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
 
         pass
+
+    @classmethod
+    @abstractmethod
+    async def get_customer(cls, session: AsyncSession, **kwargs: Any) -> list[ReadCustomerDTO]:
+        """Obtiene una lista de clientes que coincidan con los filtros proporcionados."""
+
+        pass

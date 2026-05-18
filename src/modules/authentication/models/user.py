@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 
 import bcrypt
 from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
+from sqlalchemy.orm import Mapped, MappedAsDataclass, backref, mapped_column, relationship
 
 from src.config.database import Base
 from src.modules.admins.models.admin import Admin
@@ -46,6 +46,10 @@ class User(MappedAsDataclass, Base):
         nullable=False,
         init=False,
     )
+    role: Mapped[str] = mapped_column(
+        String(length=UserEntity.ROLE_MAX_LENGTH.value),
+        doc=UserEntity.ROLE_NAME_DESCRIPTION.value,
+    )
     id: Mapped[UUID] = mapped_column(
         doc=UserEntity.ID_DESCRIPTION.value,
         default_factory=uuid4,
@@ -55,8 +59,9 @@ class User(MappedAsDataclass, Base):
     groups: Mapped[list[Group]] = relationship(
         "Group",
         secondary="auth.user_groups",
-        backref="users",
+        backref=backref("users", overlaps="groups,user_groups"),
         init=False,
+        overlaps="user_groups",
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -69,7 +74,7 @@ class User(MappedAsDataclass, Base):
 
         salt = bcrypt.gensalt()
         self.password_hash = bcrypt.hashpw(
-            password=password.encode("utf-8"),
+            password=password.encode(encoding="utf-8"),
             salt=salt,
         ).decode(encoding="utf-8")
 
@@ -78,11 +83,21 @@ class User(MappedAsDataclass, Base):
 
         try:
             return bcrypt.checkpw(
-                password=password.encode("utf-8"),
+                password=password.encode(encoding="utf-8"),
                 hashed_password=self.password_hash.encode(encoding="utf-8"),
             )
         except ValueError:
             return False
+
+    def has_permission(self, permission_name: str) -> bool:
+        """Verifica si el usuario tiene un permiso específico."""
+
+        for group in self.groups:
+            for permission in group.permissions:
+                if permission.name == permission_name:
+                    return True
+
+        return False
 
 
 class UserGroup(MappedAsDataclass, Base):
@@ -111,10 +126,16 @@ class UserGroup(MappedAsDataclass, Base):
         nullable=False,
     )
     user: Mapped[User] = relationship(
-        "User", backref="user_groups", init=False, overlaps="groups,users"
+        "User",
+        backref=backref("user_groups", overlaps="groups,users"),
+        init=False,
+        overlaps="groups,users",
     )
     group: Mapped[Group] = relationship(
-        "Group", backref="user_groups", init=False, overlaps="groups,users"
+        "Group",
+        backref=backref("user_groups", overlaps="groups,users"),
+        init=False,
+        overlaps="groups,users",
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
