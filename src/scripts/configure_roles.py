@@ -12,21 +12,21 @@ from src.modules.customers.models.customer import Customer
 GROUPS = [
     {
         "name": "customer",
-        "models": [Customer.__tablename__],
         "permissions": [
             f"{User.__tablename__}.read",
             f"{User.__tablename__}.update_password",
             f"{User.__tablename__}.delete",  # Si tiene el permiso, puede elimina los datos del rol
             f"{Customer.__tablename__}.read",
             f"{Customer.__tablename__}.update",
+            "authentication.jwt",
         ],
     },
     {
         "name": "admin",
-        "models": [Admin.__tablename__],
         "permissions": [
             f"{User.__tablename__}.read",
             f"{Admin.__tablename__}.read",
+            "authentication.jwt",
         ],
     },
 ]
@@ -42,6 +42,8 @@ PERMISSIONS = [
     f"{Customer.__tablename__}.delete",
     # Permisos para el modelo Admin
     f"{Admin.__tablename__}.read",
+    # Permisos generales
+    "authentication.jwt",
 ]
 
 
