@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import RequestValidationError
@@ -7,8 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.common.response import Response
 from src.common.schema import build_response_scheme_400, build_response_scheme_503
 from src.config.database import get_db_session
+from src.modules.authentication.dto import ReadUserDTO
+from src.modules.authentication.repositories.user import UserRepository
 from src.modules.customers.dto import CreateCustomerDTO, ReadCustomerDTO
-from src.modules.customers.repositories.customer import CustomerRepository
 from src.modules.customers.services.create import CreateCustomerService
 
 router = APIRouter(prefix="/customer", tags=["Clientes"])
@@ -20,7 +21,7 @@ async def validations(
 ) -> CreateCustomerDTO:
     """Ejecuta validaciones adicionales para la creación de un cliente."""
 
-    all_errors = []
+    all_errors: list[Any] = []
 
     # Lista de todas las validaciones que queremos correr
     checks = [
@@ -31,7 +32,7 @@ async def validations(
 
     for check in checks:
         try:
-            await check(session=session, repository=CustomerRepository)
+            await check(session=session, user_repo=UserRepository)
         except RequestValidationError as e:
             all_errors.extend(e.errors())
 
@@ -52,15 +53,15 @@ async def validations(
 async def create_customer(
     data: Annotated[CreateCustomerDTO, Depends(validations)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Response[ReadCustomerDTO]:
+) -> Response[ReadUserDTO[ReadCustomerDTO]]:
     """
     Endpoint para la creación de un cliente, recibe una petición con los datos necesarios y ejecuta
     validaciones adicionales. Si todo es correcto, crea el cliente en la base de datos, le asigna
     el rol correspondiente y devuelve su información.
     """
 
-    service = CreateCustomerService(session=session, customer_repo=CustomerRepository)
-    customer = await service.create_customer(data)
+    service = CreateCustomerService(session=session, user_repo=UserRepository)
+    customer = await service.create_customer(data=data)
 
     return Response(
         success=True,
