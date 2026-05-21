@@ -70,36 +70,33 @@ Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 
 ```txt
 # === Aplicación ===
-APP_NAME="API Sacre"
 DEBUG=true
+ADMIN_EMAIL="value"
+ADMIN_PASSWORD="value"
+ADMIN_FIRST_NAMES="value"
+ADMIN_LAST_NAMES="value"
+
 
 # === Base de Datos ===
-# Desarrollo local (SQLite, no requiere servidor)
-DATABASE_URL="sqlite+aiosqlite:///./sacre.db"
-
-# Producción (PostgreSQL)
-# DATABASE_URL="postgresql+asyncpg://user:password@localhost:5432/api_sacre"
+DATABASE_URL="postgresql+asyncpg://user:password@localhost:5432/api_sacre"
 DB_POOL_MAX_OVERFLOW=10
 DB_POOL_SIZE=10
 
+
+# Para Alembic (SYNC/migraciones)
+ALEMBIC_DATABASE_URL="postgresql+psycopg2://user:password@localhost:5432/api_sacre"
+
+
 # === Seguridad ===
-SECRET_KEY="your-super-secret-key-min-32-chars"
+PRIVATE_KEY="value"
+PUBLIC_KEY="value"
+
 
 # === Servidor ===
 HOST="127.0.0.1"
 PORT=8080
 WORKERS=4
 ```
-
-> [!IMPORTANT]
-> Reemplaza los valores de `DATABASE_URL` y `SECRET_KEY` con tus credenciales reales. Nunca subas el archivo `.env` al repositorio.
-
-> [!TIP]
-> Para generar una `SECRET_KEY` segura, ejecuta el siguiente comando:
->
-> ```bash
-> python -c "import secrets; print(secrets.token_urlsafe(64))"
-> ```
 
 ### Paso 3: Instalar hooks
 
@@ -192,6 +189,37 @@ python -m src.scripts.configure_roles
 - Limpia los permisos obsoletos de los grupos si estos fueron removidos de la configuración.
 
 *(Si necesitas agregar nuevos roles o ajustar los permisos de un grupo existente, debes modificar los diccionarios `GROUPS` y `PERMISSIONS` dentro de `src/scripts/configure_roles.py` antes de correr el comando).*
+
+### Creación de Administrador
+
+Para crear un usuario administrador inicial en la base de datos, ejecuta el siguiente comando en la raíz del proyecto:
+
+```bash
+python -m src.scripts.create_admin
+```
+
+**¿Qué hace este script?**
+- Verifica si el usuario ya existe para evitar duplicados.
+- Verifica si existe el grupo de permisos de administrador.
+- Crea el usuario con el rol de administrador y configura su contraseña.
+- Asigna el usuario al grupo de permisos correspondiente.
+- Crea el perfil del administrador en la base de datos.
+
+*(Antes de ejecutar el comando, asegúrate de tener configuradas las siguientes variables de entorno en tu archivo `.env`: `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_FIRST_NAMES` y `ADMIN_LAST_NAMES`).*
+
+### Generación de Claves Asimétricas
+
+Para generar las claves asimétricas (Ed25519) necesarias para la autenticación JWT, ejecuta el siguiente comando en la raíz del proyecto:
+
+```bash
+python -m src.scripts.create_asymmetric_keys
+```
+
+**¿Qué hace este script?**
+- Genera un nuevo par de claves criptográficas asimétricas (privada y pública) utilizando el algoritmo Ed25519.
+- Imprime las claves generadas en la consola en formato PEM listas para ser copiadas.
+
+*(Debes copiar los bloques de texto generados y pegarlos en tu archivo `.env` bajo las variables `PRIVATE_KEY` y `PUBLIC_KEY` respectivamente).*
 
 ## 🔹 7. Contribución
 
