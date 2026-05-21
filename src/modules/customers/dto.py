@@ -1,16 +1,11 @@
-from typing import TYPE_CHECKING
-from uuid import UUID
-
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.constants import ValidationErrorMessages
-from src.modules.authentication.constants import UserEntity
+from src.common.constants import DTOValidationErrorMessages
+from src.modules.authentication.constants import UserEntity, UserRoles
+from src.modules.authentication.repositories.interfaces import IUserRepository
 from src.modules.customers.constants import CustomerEntity, DocumentTypesCustomer
-
-if TYPE_CHECKING:
-    from src.modules.customers.repositories.interfaces import ICustomerRepository
 
 
 class CreateCustomerDTO(BaseModel):
@@ -24,9 +19,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["user@email.com"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR_EMAIL.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR_EMAIL.value,
                 UserEntity.EMAIL_IN_USE.value,
             ]
         },
@@ -38,10 +33,10 @@ class CreateCustomerDTO(BaseModel):
         examples=["6UjSV0QWmYfrFCG8"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.STRING_TOO_SHORT.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.STRING_TOO_SHORT.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
     )
@@ -51,9 +46,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["Juan Pablo"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
     )
@@ -63,9 +58,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["Pérez Gómez"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
     )
@@ -74,10 +69,10 @@ class CreateCustomerDTO(BaseModel):
         examples=DocumentTypesCustomer.values(),
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
-                ValidationErrorMessages.ENUM.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.ENUM.value,
             ]
         },
     )
@@ -87,9 +82,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["12345678-9"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
                 CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
             ]
         },
@@ -100,9 +95,9 @@ class CreateCustomerDTO(BaseModel):
         examples=["+593 123456789"],
         json_schema_extra={
             "x-validation-errors": [
-                ValidationErrorMessages.STRING_TOO_LONG.value,
-                ValidationErrorMessages.MISSING.value,
-                ValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
                 CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
             ]
         },
@@ -111,14 +106,18 @@ class CreateCustomerDTO(BaseModel):
     async def check_email(
         self,
         session: AsyncSession,
-        repository: type["ICustomerRepository"],
+        user_repo: type[IUserRepository],
     ) -> None:
         """Ejecuta validaciones para el correo electrónico del cliente."""
 
         # Validar que el correo electrónico no esté registrado en la base de datos
-        email_exists = await repository.exists(session, email=self.email)
+        exists = await user_repo.exists_user(
+            session=session,
+            filters={"email": self.email},
+            role=UserRoles.CUSTOMER.value,
+        )
 
-        if email_exists:
+        if exists:
             raise RequestValidationError(
                 errors=[
                     {
@@ -132,14 +131,18 @@ class CreateCustomerDTO(BaseModel):
     async def check_phone(
         self,
         session: AsyncSession,
-        repository: type["ICustomerRepository"],
+        user_repo: type[IUserRepository],
     ) -> None:
         """Ejecuta validaciones para el número de teléfono del cliente."""
 
         # Validar que el número de teléfono no esté registrado en la base de datos
-        phone_exists = await repository.exists(session, phone=self.phone)
+        exists = await user_repo.exists_user(
+            session=session,
+            filters={"phone": self.phone},
+            role=UserRoles.CUSTOMER.value,
+        )
 
-        if phone_exists:
+        if exists:
             raise RequestValidationError(
                 errors=[
                     {
@@ -153,14 +156,18 @@ class CreateCustomerDTO(BaseModel):
     async def check_document_number(
         self,
         session: AsyncSession,
-        repository: type["ICustomerRepository"],
+        user_repo: type[IUserRepository],
     ) -> None:
         """Ejecuta validaciones para el número de documento del cliente."""
 
         # Validar que el número de documento no esté registrado en la base de datos
-        document_exists = await repository.exists(session, document_number=self.document_number)
+        exists = await user_repo.exists_user(
+            session=session,
+            filters={"document_number": self.document_number},
+            role=UserRoles.CUSTOMER.value,
+        )
 
-        if document_exists:
+        if exists:
             raise RequestValidationError(
                 errors=[
                     {
@@ -175,10 +182,6 @@ class CreateCustomerDTO(BaseModel):
 class ReadCustomerDTO(BaseModel):
     """DTO para la lectura de datos de un cliente"""
 
-    id: UUID = Field(
-        description=CustomerEntity.ID_DESCRIPTION.value,
-        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
-    )
     first_names: str = Field(
         description=CustomerEntity.FIRST_NAMES_DESCRIPTION.value,
         examples=["Juan Pablo"],

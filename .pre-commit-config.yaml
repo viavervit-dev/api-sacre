@@ -17,6 +17,6 @@ repos:
     hooks:
       - id: mypy
         args: ["--config-file=pyproject.toml"]
-        additional_dependencies: [pydantic, pydantic-settings]
+        additional_dependencies: [pydantic, pydantic-settings, fastapi]
         stages: [pre-commit]
         files: ^src/

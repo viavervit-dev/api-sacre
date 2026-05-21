@@ -3,7 +3,7 @@ from enum import Enum
 ROLE = "customer"
 
 
-class ValidationErrorMessages(Enum):
+class DTOValidationErrorMessages(Enum):
     """Enumeración que define constantes relacionadas con los mensajes de error de validación.
 
     Los tipos de error corresponden a los códigos de error de Pydantic v2.
@@ -21,7 +21,7 @@ class ValidationErrorMessages(Enum):
     STRING_PATTERN_MISMATCH = "El formato del texto no es válido."
     STRING_UNICODE = "El texto contiene caracteres no válidos."
 
-    # Correo electrónico (EmailStr via email-validator)
+    # Correo electrónico
     VALUE_ERROR_EMAIL = "El correo electrónico no tiene un formato válido."
 
     # Números enteros
@@ -59,3 +59,16 @@ class ValidationErrorMessages(Enum):
 
     # Genérico
     VALUE_ERROR = "El valor ingresado no es válido."
+
+
+class ExceptionErrorMessages(Enum):
+    """
+    Enumeración que define constantes relacionadas con los mensajes de error para excepciones
+    generales.
+    """
+
+    DB_UNAVAILABLE = "El servicio de base de datos no está disponible."
+    REQUEST_DATA_INVALID = "Los datos enviados en la petición no son válidos."
+    AUTHENTICATION_FAILED = "Correo electrónico o contraseña incorrecta."
+    JWT_INVALID = "Token JWT inválido."
+    JWT_EXPIRED = "Token JWT expirado."

@@ -13,6 +13,9 @@ from src.config.database import check_db_connection, close_db_pool, create_db_po
 from src.config.exception_handlers import register_exception_handlers
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
+from src.modules.authentication.routers.jwt.authenticate_admin import (
+    router as jwt_login_admin_router,
+)
 from src.modules.customers.routers.create import router as create_customer_router
 
 
@@ -67,7 +70,7 @@ def openapi() -> dict[str, Any]:
     return app.openapi_schema
 
 
-app.openapi = openapi
+app.openapi = openapi  # type: ignore[method-assign]
 
 
 # Registra los manejadores de excepciones personalizados
@@ -77,6 +80,7 @@ register_exception_handlers(app=app)
 # Configura el router principal para la API, con un prefijo para todas las rutas v1
 v1_router = APIRouter(prefix="/api/v1")
 v1_router.include_router(router=create_customer_router)
+v1_router.include_router(router=jwt_login_admin_router)
 app.include_router(router=v1_router)
 
 

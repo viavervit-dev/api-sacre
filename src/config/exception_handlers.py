@@ -1,8 +1,10 @@
+import jwt
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import OperationalError
 
-from src.common.constants import ValidationErrorMessages
+from src.common.constants import DTOValidationErrorMessages, ExceptionErrorMessages
+from src.common.exceptions import AuthenticationError
 from src.common.response import Response
 from src.config.serialization import JSONResponse
 
@@ -19,42 +21,42 @@ def register_exception_handlers(app: FastAPI) -> None:
 
         translations = {
             # Campos requeridos
-            "missing": ValidationErrorMessages.MISSING.value,
-            "extra_forbidden": ValidationErrorMessages.EXTRA_FORBIDDEN.value,
+            "missing": DTOValidationErrorMessages.MISSING.value,
+            "extra_forbidden": DTOValidationErrorMessages.EXTRA_FORBIDDEN.value,
             # Texto
-            "string_type": ValidationErrorMessages.STRING_TYPE.value,
-            "string_too_long": ValidationErrorMessages.STRING_TOO_LONG.value,
-            "string_too_short": ValidationErrorMessages.STRING_TOO_SHORT.value,
-            "string_pattern_mismatch": ValidationErrorMessages.STRING_PATTERN_MISMATCH.value,
-            "string_unicode": ValidationErrorMessages.STRING_UNICODE.value,
+            "string_type": DTOValidationErrorMessages.STRING_TYPE.value,
+            "string_too_long": DTOValidationErrorMessages.STRING_TOO_LONG.value,
+            "string_too_short": DTOValidationErrorMessages.STRING_TOO_SHORT.value,
+            "string_pattern_mismatch": DTOValidationErrorMessages.STRING_PATTERN_MISMATCH.value,
+            "string_unicode": DTOValidationErrorMessages.STRING_UNICODE.value,
             # Números enteros
-            "int_type": ValidationErrorMessages.INT_TYPE.value,
-            "int_parsing": ValidationErrorMessages.INT_PARSING.value,
+            "int_type": DTOValidationErrorMessages.INT_TYPE.value,
+            "int_parsing": DTOValidationErrorMessages.INT_PARSING.value,
             # Números decimales
-            "float_type": ValidationErrorMessages.FLOAT_TYPE.value,
-            "float_parsing": ValidationErrorMessages.FLOAT_PARSING.value,
+            "float_type": DTOValidationErrorMessages.FLOAT_TYPE.value,
+            "float_parsing": DTOValidationErrorMessages.FLOAT_PARSING.value,
             # Booleanos (bool)
-            "bool_type": ValidationErrorMessages.BOOL_TYPE.value,
-            "bool_parsing": ValidationErrorMessages.BOOL_PARSING.value,
+            "bool_type": DTOValidationErrorMessages.BOOL_TYPE.value,
+            "bool_parsing": DTOValidationErrorMessages.BOOL_PARSING.value,
             # Restricciones numéricas
-            "greater_than": ValidationErrorMessages.GREATER_THAN.value,
-            "greater_than_equal": ValidationErrorMessages.GREATER_THAN_EQUAL.value,
-            "less_than": ValidationErrorMessages.LESS_THAN.value,
-            "less_than_equal": ValidationErrorMessages.LESS_THAN_EQUAL.value,
-            "multiple_of": ValidationErrorMessages.MULTIPLE_OF.value,
-            "finite_number": ValidationErrorMessages.FINITE_NUMBER.value,
+            "greater_than": DTOValidationErrorMessages.GREATER_THAN.value,
+            "greater_than_equal": DTOValidationErrorMessages.GREATER_THAN_EQUAL.value,
+            "less_than": DTOValidationErrorMessages.LESS_THAN.value,
+            "less_than_equal": DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+            "multiple_of": DTOValidationErrorMessages.MULTIPLE_OF.value,
+            "finite_number": DTOValidationErrorMessages.FINITE_NUMBER.value,
             # Enumeraciones
-            "enum": ValidationErrorMessages.ENUM.value,
-            "literal_error": ValidationErrorMessages.LITERAL_ERROR.value,
+            "enum": DTOValidationErrorMessages.ENUM.value,
+            "literal_error": DTOValidationErrorMessages.LITERAL_ERROR.value,
             # UUID
-            "uuid_type": ValidationErrorMessages.UUID_TYPE.value,
-            "uuid_parsing": ValidationErrorMessages.UUID_PARSING.value,
-            "uuid_version": ValidationErrorMessages.UUID_VERSION.value,
+            "uuid_type": DTOValidationErrorMessages.UUID_TYPE.value,
+            "uuid_parsing": DTOValidationErrorMessages.UUID_PARSING.value,
+            "uuid_version": DTOValidationErrorMessages.UUID_VERSION.value,
             # JSON
-            "json_invalid": ValidationErrorMessages.JSON_INVALID.value,
-            "json_type": ValidationErrorMessages.JSON_TYPE.value,
+            "json_invalid": DTOValidationErrorMessages.JSON_INVALID.value,
+            "json_type": DTOValidationErrorMessages.JSON_TYPE.value,
             # Genérico (fallback)
-            "value_error": ValidationErrorMessages.VALUE_ERROR.value,
+            "value_error": DTOValidationErrorMessages.VALUE_ERROR.value,
         }
 
         errors_dict = {}
@@ -69,7 +71,7 @@ def register_exception_handlers(app: FastAPI) -> None:
                 if error_type == "domain_validation":
                     errors_dict[field] = error_msg or "Error de validación."
                 elif error_type == "value_error" and "email" in error_msg:
-                    errors_dict[field] = ValidationErrorMessages.VALUE_ERROR_EMAIL.value
+                    errors_dict[field] = DTOValidationErrorMessages.VALUE_ERROR_EMAIL.value
                 else:
                     errors_dict[field] = translations.get(
                         error_type, "El valor ingresado es incorrecto."
@@ -80,7 +82,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             media_type="application/json",
             content=Response(
                 success=False,
-                message="Error de validación en los datos enviados.",
+                message=ExceptionErrorMessages.REQUEST_DATA_INVALID.value,
                 data=errors_dict,
             ).model_dump(),
         )
@@ -96,7 +98,55 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content=Response(
                 success=False,
-                message="El servicio de base de datos no está disponible.",
+                message=ExceptionErrorMessages.DB_UNAVAILABLE.value,
+                data=None,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(jwt.ExpiredSignatureError)
+    async def expired_token_jwt_handler(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: jwt.ExpiredSignatureError,
+    ) -> JSONResponse:
+        """Manejador de error para tokens JWT expirados."""
+
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=Response(
+                success=False,
+                message=ExceptionErrorMessages.JWT_EXPIRED.value,
+                data=None,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(jwt.InvalidTokenError)
+    async def invalid_token_jwt_handler(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: jwt.InvalidTokenError,
+    ) -> JSONResponse:
+        """Manejador de error para tokens JWT inválidos o corruptos."""
+
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=Response(
+                success=False,
+                message=ExceptionErrorMessages.JWT_INVALID.value,
+                data=None,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(AuthenticationError)
+    async def authentication_error_handler(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: AuthenticationError,
+    ) -> JSONResponse:
+        """Manejador de error genérico para fallos en la autenticación."""
+
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=Response(
+                success=False,
+                message=ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
                 data=None,
             ).model_dump(),
         )

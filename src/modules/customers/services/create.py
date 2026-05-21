@@ -1,19 +1,44 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.modules.authentication.constants import UserRoles
+from src.modules.authentication.dto import ReadUserDTO
+from src.modules.authentication.repositories.interfaces import IUserRepository
 from src.modules.customers.dto import CreateCustomerDTO, ReadCustomerDTO
-from src.modules.customers.repositories.interfaces import ICustomerRepository
 
 
 class CreateCustomerService:
     """Servicio para la creación de clientes en la base de datos."""
 
-    def __init__(self, customer_repo: type[ICustomerRepository], session: AsyncSession) -> None:
-        self.customer_repo = customer_repo
+    def __init__(self, user_repo: type[IUserRepository], session: AsyncSession) -> None:
+        self.user_repo = user_repo
         self.session = session
 
-    async def create_customer(self, data: CreateCustomerDTO) -> ReadCustomerDTO:
+    async def create_customer(self, data: CreateCustomerDTO) -> ReadUserDTO[ReadCustomerDTO]:
         """Crea un nuevo cliente en la base de datos."""
 
-        customer = await self.customer_repo.create_customer(data=data, session=self.session)
+        # Extrae los campos de usuario y perfil del DTO de entrada para pasarlos al repositorio
+        user_fields = ["email", "password"]
+        profile_fields = ["first_names", "last_names", "document_type", "document_number", "phone"]
+        user_data = {field: getattr(data, field) for field in user_fields}
+        profile_data = {field: getattr(data, field) for field in profile_fields}
 
-        return customer
+        user_instance, profile_instance = await self.user_repo.create_user(
+            session=self.session,
+            user_data=user_data,
+            profile_data=profile_data,
+            role=UserRoles.CUSTOMER.value,
+        )
+        profile = ReadCustomerDTO.model_construct(
+            first_names=profile_instance.first_names,
+            last_names=profile_instance.last_names,
+            document_type=profile_instance.document_type,
+            document_number=profile_instance.document_number,
+            phone=profile_instance.phone,
+        )
+        user = ReadUserDTO[ReadCustomerDTO].model_construct(
+            id=user_instance.id,
+            email=user_instance.email,
+            role_data=profile,
+        )
+
+        return user

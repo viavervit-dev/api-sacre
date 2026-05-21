@@ -41,20 +41,24 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # === Aplicación ===
-    app_name: str
+    # Aplicación
+    app_name: str = "API Sacre"
     app_version: str = Field(default_factory=get_app_version)
     debug: bool
 
-    # === Base de Datos ===
+    # Base de Datos
     database_url: AnyUrl
     db_pool_size: int = Field(ge=1, le=100)
     db_pool_max_overflow: int = Field(ge=0, le=100)
 
-    # === Seguridad ===
-    secret_key: str = Field(min_length=32)
+    # Seguridad
+    private_key: str
+    public_key: str
+    jwt_algorithm: str = "EdDSA"
+    access_token_expire: int = 15  # 15 minutos
+    refresh_token_expire: int = 5760  # 4 días
 
-    # === Servidor ===
+    # Servidor
     host: str
     port: int
     workers: int = Field(ge=1, le=32)

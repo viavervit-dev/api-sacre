@@ -23,6 +23,7 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 psycopg2-binary = "^2.9.11"
 python-dotenv = "^1.2.2"
 pydantic = {extras = ["email"], version = "^2.12.5"}
+pyjwt = {extras = ["crypto"], version = "^2.12.1"}
 
 [dependency-groups]
 development = [
