@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.authentication.constants import UserRoles
-from src.modules.authentication.dto import ReadUserDTO
-from src.modules.authentication.repositories.interfaces import IUserRepository
+from src.modules.auth.constants import UserRoles
+from src.modules.auth.dto import ReadUserDTO
+from src.modules.auth.repositories.interfaces import IUserRepository
 from src.modules.customers.dto import CreateCustomerDTO, ReadCustomerDTO
 
 

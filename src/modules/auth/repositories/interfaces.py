@@ -4,7 +4,7 @@ from typing import Any, Literal, overload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.admins.models.admin import Admin
-from src.modules.authentication.models.user import User
+from src.modules.auth.models.user import User
 from src.modules.customers.models.customer import Customer
 
 

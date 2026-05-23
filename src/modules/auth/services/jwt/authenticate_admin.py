@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.exceptions import AuthenticationError
-from src.modules.authentication.constants import UserRoles
-from src.modules.authentication.dto import AdminCredentialsDTO
-from src.modules.authentication.jwt import create_access_token, create_refresh_token
-from src.modules.authentication.repositories.interfaces import IUserRepository
+from src.modules.auth.constants import UserRoles
+from src.modules.auth.dto import AdminCredentialsDTO
+from src.modules.auth.jwt import create_access_token, create_refresh_token
+from src.modules.auth.repositories.interfaces import IUserRepository
 
 
 class AuthAdminService:

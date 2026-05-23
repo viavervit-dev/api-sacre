@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
 from src.config.database import Base
-from src.modules.authentication.constants import GroupEntity, PermissionEntity
+from src.modules.auth.constants import GroupEntity, PermissionEntity
 
 
 class Permission(MappedAsDataclass, Base):

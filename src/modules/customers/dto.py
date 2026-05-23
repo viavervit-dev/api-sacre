@@ -3,8 +3,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.constants import DTOValidationErrorMessages
-from src.modules.authentication.constants import UserEntity, UserRoles
-from src.modules.authentication.repositories.interfaces import IUserRepository
+from src.modules.auth.constants import UserEntity, UserRoles
+from src.modules.auth.repositories.interfaces import IUserRepository
 from src.modules.customers.constants import CustomerEntity, DocumentTypesCustomer
 
 

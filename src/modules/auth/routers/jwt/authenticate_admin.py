@@ -10,15 +10,15 @@ from src.common.schema import (
 )
 from src.config.database import get_db_session
 from src.config.parameters import settings
-from src.modules.authentication.dto import AdminCredentialsDTO
-from src.modules.authentication.repositories.user import UserRepository
-from src.modules.authentication.services.jwt.authenticate_admin import AuthAdminService
+from src.modules.auth.dto import AdminCredentialsDTO
+from src.modules.auth.repositories.user import UserRepository
+from src.modules.auth.services.jwt.authenticate_admin import AuthAdminService
 
 router = APIRouter(prefix="/authentication", tags=["Autenticación"])
 
 
 @router.post(
-    path="/jwt/admin",
+    path="/jwt/admin/",
     response_description="Administrador autenticado exitosamente.",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={

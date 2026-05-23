@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
 
 from src.config.database import Base
-from src.modules.authentication.constants import JWTEntity
+from src.modules.auth.constants import JWTEntity
 
 
 class JWTBlacklist(MappedAsDataclass, Base):

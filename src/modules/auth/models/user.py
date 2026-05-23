@@ -7,8 +7,8 @@ from sqlalchemy.orm import Mapped, MappedAsDataclass, backref, mapped_column, re
 
 from src.config.database import Base
 from src.modules.admins.models.admin import Admin
-from src.modules.authentication.constants import UserEntity
-from src.modules.authentication.models.permission import Group
+from src.modules.auth.constants import UserEntity
+from src.modules.auth.models.permission import Group
 from src.modules.customers.models.customer import Customer
 
 

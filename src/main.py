@@ -13,10 +13,9 @@ from src.config.database import check_db_connection, close_db_pool, create_db_po
 from src.config.exception_handlers import register_exception_handlers
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
-from src.modules.authentication.routers.jwt.authenticate_admin import (
-    router as jwt_login_admin_router,
-)
-from src.modules.customers.routers.create import router as create_customer_router
+from src.modules.auth.routers.jwt.authenticate_admin import router as jwt_login_admin
+from src.modules.customers.routers.create import router as create_customer
+from src.modules.products.routers.create_category import router as create_category_product
 
 
 @asynccontextmanager
@@ -79,8 +78,9 @@ register_exception_handlers(app=app)
 
 # Configura el router principal para la API, con un prefijo para todas las rutas v1
 v1_router = APIRouter(prefix="/api/v1")
-v1_router.include_router(router=create_customer_router)
-v1_router.include_router(router=jwt_login_admin_router)
+v1_router.include_router(router=create_customer)
+v1_router.include_router(router=jwt_login_admin)
+v1_router.include_router(router=create_category_product)
 app.include_router(router=v1_router)
 
 

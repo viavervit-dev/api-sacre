@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.common.response import Response
 from src.common.schema import build_response_scheme_400, build_response_scheme_503
 from src.config.database import get_db_session
-from src.modules.authentication.dto import ReadUserDTO
-from src.modules.authentication.repositories.user import UserRepository
+from src.modules.auth.dto import ReadUserDTO
+from src.modules.auth.repositories.user import UserRepository
 from src.modules.customers.dto import CreateCustomerDTO, ReadCustomerDTO
 from src.modules.customers.services.create import CreateCustomerService
 

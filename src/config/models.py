@@ -11,9 +11,9 @@ migraciones con autogenerate. Cada vez que crees un nuevo modelo, agrégalo a es
 from src.modules.admins.models.admin import Admin
 
 # Modelos del módulo de autenticación
-from src.modules.authentication.models.jwt import JWTBlacklist
-from src.modules.authentication.models.permission import Group, Permission, PermissionGroup
-from src.modules.authentication.models.user import User, UserGroup
+from src.modules.auth.models.jwt import JWTBlacklist
+from src.modules.auth.models.permission import Group, Permission, PermissionGroup
+from src.modules.auth.models.user import User, UserGroup
 
 # Modelos del módulo de clientes
 from src.modules.customers.models.customer import Customer
