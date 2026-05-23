@@ -32,6 +32,7 @@ api-sacre/
 │   │   └── serialization.py        # Configuración de serialización JSON
 │   ├── modules/                    # Módulos de negocio (separados por dominio)
 │   │   └── <nombre_del_modulo>/    # Estructura genérica de un módulo
+│   │       ├── constants.py        # Constantes específicas del módulo
 │   │       ├── dto.py              # Esquemas de transferencia de datos (Pydantic)
 │   │       ├── models/             # Entidades ORM del dominio
 │   │       ├── repositories/       # Acceso a base de datos (Patrón Repository)
@@ -45,6 +46,15 @@ api-sacre/
 │   ├── create_branch.md            # Proceso para crear nuevas ramas
 │   └── create_commit.md            # Convenciones de mensajes de commit
 ```
+
+### 🏛️ Patrones de Diseño Aplicados
+
+Para mantener la estructura modular y el código altamente mantenible y escalable, en cada módulo hacemos uso de los siguientes patrones de diseño:
+
+- **Inyección de Dependencias (Dependency Injection)**: En lugar de instanciar dependencias directamente (como la conexión a la base de datos o los validadores), utilizamos el sistema `Depends` de FastAPI. Esto se observa en los `routers/`, donde inyectamos la sesión de BD (`AsyncSession`), datos del *request* validados y otras utilidades que son posteriormente transferidas hacia la capa de servicios. Esto desacopla las responsabilidades y facilita el testing.
+- **Patrón Repositorio (Repository)**: Toda la interacción directa con la base de datos (consultas con SQLAlchemy) está centralizada en los `repositories/`. La capa de negocio o los controladores no realizan llamadas SQL/ORM directas; utilizan los métodos abstraídos en el repositorio.
+- **DTO (Data Transfer Object)**: Empleamos modelos de Pydantic en `dto.py` para definir los contratos de entrada y salida. Estos garantizan que los datos que entran al sistema sean válidos estructuralmente antes de llegar a la lógica de negocio, y estandarizan lo que la API responde.
+- **Capa de Servicios (Service Layer)**: Los casos de uso y la lógica de negocio pura se manejan de forma centralizada en los `services/`. Los routers solo actúan como orquestadores: reciben la petición HTTP, inyectan las dependencias, delegan el procesamiento al servicio, y finalmente retornan la respuesta.
 
 ## 🔹 3. Tecnologías
 
@@ -98,21 +108,21 @@ PORT=8080
 WORKERS=4
 ```
 
-### Paso 3: Instalar hooks
+### Paso 3: Instalar dependencias
+
+Este comando instalará todas las dependencias del proyecto.
+
+```txt
+poetry install
+```
+
+### Paso 4: Instalar hooks
 
 Estos comandos instalarán los hooks de [pre-commit](https://pre-commit.com/) configurados en el proyecto para validación de código y mensajes de commit.
 
 ```txt
 pre-commit install
 pre-commit install --hook-type commit-msg
-```
-
-### Paso 4: Instalar dependencias
-
-Este comando instalará todas las dependencias del proyecto.
-
-```txt
-poetry install
 ```
 
 ### Paso 5: Iniciar servidor de desarrollo
