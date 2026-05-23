@@ -53,7 +53,7 @@ exclude = [
     "*.egg-info",
     "dist",
     "build",
-    "alembic/versions",
+    "alembic",
 ]
 
 [tool.ruff.lint]
@@ -165,5 +165,5 @@ exclude = [
     "dist",
     "build",
     ".mypy_cache",
-    "alembic/versions",
+    "alembic",
 ]

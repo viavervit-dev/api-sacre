@@ -20,8 +20,8 @@ class Admin(MappedAsDataclass, Base):
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.users.id"),
         doc=AdminEntity.ID_USER_DESCRIPTION.value,
-        nullable=False,
         unique=True,
+        nullable=False,
     )
     first_names: Mapped[str] = mapped_column(
         String(length=AdminEntity.FIRST_NAMES_MAX_LENGTH.value),
@@ -43,4 +43,5 @@ class Admin(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=AdminEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
+        nullable=False,
     )

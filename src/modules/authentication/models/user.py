@@ -67,6 +67,7 @@ class User(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=UserEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
+        nullable=False,
     )
 
     def set_password(self, password: str) -> None:
@@ -141,4 +142,5 @@ class UserGroup(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc="Fecha y hora de la creación del registro.",
         default_factory=lambda: datetime.now(tz=UTC),
+        nullable=False,
     )
