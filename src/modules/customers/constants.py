@@ -1,7 +1,5 @@
 from enum import Enum, StrEnum
 
-ROLE = "customer"
-
 
 class CustomerEntity(Enum):
     """Enumeración que define constantes relacionadas con la entidad `Customer`."""

@@ -9,7 +9,7 @@ from src.modules.customers.constants import CustomerEntity, DocumentTypesCustome
 
 
 class CreateCustomerDTO(BaseModel):
-    """DTO para la creación de un cliente"""
+    """DTO para la creación de un cliente."""
 
     model_config = ConfigDict(use_enum_values=True)
 
