@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
 from src.config.database import Base
-from src.modules.authentication.constants import GroupEntity, PermissionEntity
+from src.modules.auth.constants import GroupEntity, PermissionEntity
 
 
 class Permission(MappedAsDataclass, Base):
@@ -38,6 +38,7 @@ class Permission(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=PermissionEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
+        nullable=False,
     )
 
 
@@ -71,6 +72,7 @@ class Group(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=GroupEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
+        nullable=False,
     )
 
     @property
@@ -116,4 +118,5 @@ class PermissionGroup(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc="Fecha y hora de la creación del registro.",
         default_factory=lambda: datetime.now(tz=UTC),
+        nullable=False,
     )

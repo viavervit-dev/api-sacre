@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.modules.admins.models.admin import Admin
-from src.modules.authentication.constants import UserRoles
-from src.modules.authentication.models.permission import Group, PermissionGroup
-from src.modules.authentication.models.user import User, UserGroup
-from src.modules.authentication.repositories.interfaces import IUserRepository
+from src.modules.auth.constants import UserRoles
+from src.modules.auth.models.permission import Group, PermissionGroup
+from src.modules.auth.models.user import User, UserGroup
+from src.modules.auth.repositories.interfaces import IUserRepository
 from src.modules.customers.models.customer import Customer
 
 

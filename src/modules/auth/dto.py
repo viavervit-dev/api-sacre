@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field
 
 from src.common.constants import DTOValidationErrorMessages
-from src.modules.authentication.constants import UserEntity
+from src.modules.auth.constants import UserEntity
 
 T = TypeVar("T")
 

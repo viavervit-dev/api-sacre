@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.authentication.constants import UserRoles
-from src.modules.authentication.dto import ReadUserDTO
-from src.modules.authentication.repositories.interfaces import IUserRepository
+from src.modules.auth.constants import UserRoles
+from src.modules.auth.dto import ReadUserDTO
+from src.modules.auth.repositories.interfaces import IUserRepository
 from src.modules.customers.dto import CreateCustomerDTO, ReadCustomerDTO
 
 
@@ -10,8 +10,8 @@ class CreateCustomerService:
     """Servicio para la creación de clientes en la base de datos."""
 
     def __init__(self, user_repo: type[IUserRepository], session: AsyncSession) -> None:
-        self.user_repo = user_repo
-        self.session = session
+        self.__user_repo = user_repo
+        self.__session = session
 
     async def create_customer(self, data: CreateCustomerDTO) -> ReadUserDTO[ReadCustomerDTO]:
         """Crea un nuevo cliente en la base de datos."""
@@ -22,8 +22,8 @@ class CreateCustomerService:
         user_data = {field: getattr(data, field) for field in user_fields}
         profile_data = {field: getattr(data, field) for field in profile_fields}
 
-        user_instance, profile_instance = await self.user_repo.create_user(
-            session=self.session,
+        user_instance, profile_instance = await self.__user_repo.create_user(
+            session=self.__session,
             user_data=user_data,
             profile_data=profile_data,
             role=UserRoles.CUSTOMER.value,

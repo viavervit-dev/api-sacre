@@ -7,8 +7,8 @@ from sqlalchemy.orm import Mapped, MappedAsDataclass, backref, mapped_column, re
 
 from src.config.database import Base
 from src.modules.admins.models.admin import Admin
-from src.modules.authentication.constants import UserEntity
-from src.modules.authentication.models.permission import Group
+from src.modules.auth.constants import UserEntity
+from src.modules.auth.models.permission import Group
 from src.modules.customers.models.customer import Customer
 
 
@@ -67,6 +67,7 @@ class User(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=UserEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
+        nullable=False,
     )
 
     def set_password(self, password: str) -> None:
@@ -141,4 +142,5 @@ class UserGroup(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc="Fecha y hora de la creación del registro.",
         default_factory=lambda: datetime.now(tz=UTC),
+        nullable=False,
     )

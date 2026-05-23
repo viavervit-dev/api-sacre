@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import close_db_pool, create_db_pool, get_db_session
 from src.modules.admins.models.admin import Admin
-from src.modules.authentication.models.permission import Group, Permission, PermissionGroup
-from src.modules.authentication.models.user import User
+from src.modules.auth.models.permission import Group, Permission, PermissionGroup
+from src.modules.auth.models.user import User
 from src.modules.customers.models.customer import Customer
 
 
