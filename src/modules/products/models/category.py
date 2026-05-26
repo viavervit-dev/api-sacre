@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
 from src.config.database import Base
 from src.modules.products.constants import CategoryEntity
 
+# Constantes para validaciones de campos numéricos
 MAXIMUM_PRODUCTS = CategoryEntity.MAXIMUM_NUMBER_PRODUCTS.value
 MINIMUM_PRODUCTS = CategoryEntity.MINIMUM_NUMBER_PRODUCTS.value
 

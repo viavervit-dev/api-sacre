@@ -7,23 +7,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.common.response import Response
 from src.common.schema import build_response_scheme_400, build_response_scheme_503
 from src.config.database import get_db_session
-from src.modules.products.dto import CreateCategoryDTO, ReadCategoryDTO
+from src.modules.products.dto import CreateProductDTO, ReadProductDTO
 from src.modules.products.repositories.product import ProductRepository
-from src.modules.products.services.create_category import CreateCategoryService
+from src.modules.products.services.create_product import CreateProductService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 
 
 async def validations(
-    data: CreateCategoryDTO,
+    data: CreateProductDTO,
     session: Annotated[AsyncSession, Depends(get_db_session)],
-) -> CreateCategoryDTO:
-    """Ejecuta validaciones adicionales para la creación de una categoría."""
+) -> CreateProductDTO:
+    """Ejecuta validaciones adicionales para la creación de un producto."""
 
     all_errors: list[Any] = []
 
     # Lista de todas las validaciones que queremos correr
-    checks = [data.check_name]
+    checks = [data.check_name, data.check_images_urls, data.check_categories]
 
     for check in checks:
         try:
@@ -38,29 +38,29 @@ async def validations(
 
 
 @router.post(
-    path="/category/",
-    response_description="Categoría creada exitosamente.",
+    path="/",
+    response_description="Producto creado exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
-        400: build_response_scheme_400(dto_class=CreateCategoryDTO),
+        400: build_response_scheme_400(dto_class=CreateProductDTO),
         503: build_response_scheme_503(db_unavailable=True),
     },
 )
-async def create_category(
-    data: Annotated[CreateCategoryDTO, Depends(validations)],
+async def create_product(
+    data: Annotated[CreateProductDTO, Depends(validations)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Response[ReadCategoryDTO]:
+) -> Response[ReadProductDTO]:
     """
-    Endpoint para la creación de una categoría de productos, recibe una petición con los datos
-    necesarios y ejecuta validaciones adicionales. Si todo es correcto, crea la categoría en la
-    base de datos y devuelve su información.
+    Endpoint para la creación de un producto, recibe una petición con los datos necesarios y
+    ejecuta validaciones adicionales. Si todo es correcto, crea el producto en la base de datos
+    y devuelve su información.
     """
 
-    service = CreateCategoryService(session=session, product_repo=ProductRepository)
-    category = await service.create_category(data=data)
+    service = CreateProductService(session=session, product_repo=ProductRepository)
+    product = await service.create_product(data=data)
 
     return Response(
         success=True,
-        message="Categoría creada exitosamente.",
-        data=category,
+        message="Producto creado exitosamente.",
+        data=product,
     )

@@ -15,11 +15,7 @@ class CategoryRepository(ICategoryRepository):
     """
 
     @classmethod
-    async def create_category(
-        cls,
-        session: AsyncSession,
-        data: dict[str, Any],
-    ) -> Category:
+    async def create_category(cls, session: AsyncSession, data: dict[str, Any]) -> Category:
 
         instance = Category(**data)
         session.add(instance)

@@ -31,6 +31,8 @@ class DTOValidationErrorMessages(Enum):
     # Números decimales
     FLOAT_TYPE = "El campo debe ser un número."
     FLOAT_PARSING = "El valor ingresado no puede convertirse a número."
+    DECIMAL_MAX_PLACES = "EL valor no puede tener más decimales."
+    DECIMAL_MAX_DIGITS = "El valor no puede tener más dígitos."
 
     # Booleanos
     BOOL_TYPE = "El campo debe ser verdadero o falso."

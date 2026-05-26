@@ -20,3 +20,4 @@ from src.modules.customers.models.customer import Customer
 
 # Modelos del módulo de productos
 from src.modules.products.models.category import Category
+from src.modules.products.models.product import Product
