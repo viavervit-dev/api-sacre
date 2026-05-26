@@ -1,3 +1,5 @@
+from typing import Any
+
 import jwt
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -35,6 +37,8 @@ def register_exception_handlers(app: FastAPI) -> None:
             # Números decimales
             "float_type": DTOValidationErrorMessages.FLOAT_TYPE.value,
             "float_parsing": DTOValidationErrorMessages.FLOAT_PARSING.value,
+            "decimal_max_places": DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
+            "decimal_max_digits": DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
             # Booleanos (bool)
             "bool_type": DTOValidationErrorMessages.BOOL_TYPE.value,
             "bool_parsing": DTOValidationErrorMessages.BOOL_PARSING.value,
@@ -59,23 +63,45 @@ def register_exception_handlers(app: FastAPI) -> None:
             "value_error": DTOValidationErrorMessages.VALUE_ERROR.value,
         }
 
-        errors_dict = {}
+        errors_dict: dict[str, Any] = {}
 
         for error in exc.errors():
-            field = str(error["loc"][-1]) if error["loc"] else "unknown"
+            loc = error.get("loc", ())
 
-            if field not in errors_dict:
-                error_type = error.get("type", "")
-                error_msg = error.get("msg", "")
+            # Ignoramos 'body', 'query', etc. si están en la raíz
+            if len(loc) > 1 and loc[0] in ("body", "query", "path", "header", "cookie"):
+                path = loc[1:]
+            else:
+                path = loc if loc else ("unknown",)
 
-                if error_type == "domain_validation":
-                    errors_dict[field] = error_msg or "Error de validación."
-                elif error_type == "value_error" and "email" in error_msg:
-                    errors_dict[field] = DTOValidationErrorMessages.VALUE_ERROR_EMAIL.value
+            error_type = error.get("type", "")
+            error_msg = error.get("msg", "")
+
+            if error_type == "domain_validation":
+                msg = error_msg or "Error de validación."
+            elif error_type == "value_error" and "email" in error_msg:
+                msg = DTOValidationErrorMessages.VALUE_ERROR_EMAIL.value
+            else:
+                msg = translations.get(error_type, "El valor ingresado es incorrecto.")
+
+            current_level = errors_dict
+
+            for i, key in enumerate(path):
+                key_str = str(key)
+
+                if i == len(path) - 1:
+                    # Nodo hoja
+                    if key_str not in current_level:
+                        current_level[key_str] = msg
+                    elif isinstance(current_level[key_str], dict):
+                        current_level[key_str]["__all__"] = msg
                 else:
-                    errors_dict[field] = translations.get(
-                        error_type, "El valor ingresado es incorrecto."
-                    )
+                    # Nodo intermedio
+                    if key_str not in current_level:
+                        current_level[key_str] = {}
+                    elif not isinstance(current_level[key_str], dict):
+                        current_level[key_str] = {"__all__": current_level[key_str]}
+                    current_level = current_level[key_str]
 
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,

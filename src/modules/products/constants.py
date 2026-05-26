@@ -44,6 +44,8 @@ class ProductEntity(Enum):
 
     # Mensajes de error
     NAME_IN_USE = "Este nombre ya está registrado."
+    URL_INVALID = "La URL proporcionada no es válida."
+    CATEGORY_NOT_FOUND = "Esta categoría no existe."
 
     # Propiedades para los campos de la entidad
     NAME_MAX_LENGTH = 60
