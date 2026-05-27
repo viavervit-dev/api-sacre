@@ -15,14 +15,21 @@ class ICategoryRepository(ABC):
 
     @classmethod
     @abstractmethod
-    async def create_category(cls, session: AsyncSession, data: dict[str, Any]) -> Category:
+    async def create_category(cls, db: AsyncSession, data: dict[str, Any]) -> Category:
         """Crea una nueva cateogria de prductos en la base de datos."""
 
         pass
 
     @classmethod
     @abstractmethod
-    async def exists_category(cls, session: AsyncSession, filters: dict[str, Any]) -> bool:
+    async def add_product_to_category(cls, db: AsyncSession, name: str):
+        """Incrementa el contador de productos asociados a una categoría en la base de datos."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
+    async def exists_category(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
         """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
 
         pass
@@ -36,14 +43,15 @@ class IProductRepository(ICategoryRepository):
 
     @classmethod
     @abstractmethod
-    async def create_product(cls, session: AsyncSession, data: dict[str, Any]) -> Product:
+    async def create_product(cls, db: AsyncSession, data: dict[str, Any]) -> Product:
         """Crea un nuevo producto en la base de datos."""
 
         pass
 
+
     @classmethod
     @abstractmethod
-    async def exists_product(cls, session: AsyncSession, filters: dict[str, Any]) -> bool:
+    async def exists_product(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
         """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
 
         pass

@@ -59,7 +59,7 @@ PERMISSIONS = [
 ]
 
 
-async def run(session: AsyncSession) -> None:
+async def run(db: AsyncSession) -> None:
     """
     Script de configuración de roles y permisos. Este script se encarga de:
     1. Crear los permisos definidos en la lista `PERMISSIONS` si no existen.
@@ -70,30 +70,30 @@ async def run(session: AsyncSession) -> None:
 
     # 1. Crear todos los permisos definidos en PERMISSIONS en la base de datos
     for perm_name in PERMISSIONS:
-        perm_result = await session.execute(select(Permission).filter_by(name=perm_name))
+        perm_result = await db.execute(select(Permission).filter_by(name=perm_name))
         permission = perm_result.scalar_one_or_none()
 
         if not permission:
             permission = Permission(name=perm_name)
-            session.add(permission)
-            await session.flush()
+            db.add(permission)
+            await db.flush()
 
     # 2. Configurar los grupos y sus respectivos permisos definidos en GROUPS
     for group_data in GROUPS:
         role_name = group_data["name"]
 
-        group_result = await session.execute(select(Group).filter_by(name=role_name))
+        group_result = await db.execute(select(Group).filter_by(name=role_name))
         group = group_result.scalar_one_or_none()
 
         if not group:
             group = Group(name=role_name)
-            session.add(group)
-            await session.flush()
+            db.add(group)
+            await db.flush()
 
         expected_permission_ids = set()
 
         for perm_name in group_data["permissions"]:
-            perm_result = await session.execute(select(Permission).filter_by(name=perm_name))
+            perm_result = await db.execute(select(Permission).filter_by(name=perm_name))
             permission = perm_result.scalar_one_or_none()
 
             # Validación de integridad: Si el permiso no existe, se lanza una excepción
@@ -105,27 +105,30 @@ async def run(session: AsyncSession) -> None:
             expected_permission_ids.add(permission.id)
 
             # Asociar Permiso al Grupo mediante PermissionGroup
-            pg_result = await session.execute(
-                select(PermissionGroup).filter_by(group_id=group.id, permission_id=permission.id)
+            # fmt: off
+            pg_result = await db.execute(
+                select(PermissionGroup)
+                .filter_by(group_id=group.id, permission_id=permission.id)
             )
+            # fmt: on
             permission_group = pg_result.scalar_one_or_none()
 
             if not permission_group:
                 permission_group = PermissionGroup(group_id=group.id, permission_id=permission.id)
-                session.add(permission_group)
-                await session.flush()
+                db.add(permission_group)
+                await db.flush()
 
         # 3. Limpiar permisos antiguos que ya no corresponden al grupo
-        pg_result = await session.execute(select(PermissionGroup).filter_by(group_id=group.id))
+        pg_result = await db.execute(select(PermissionGroup).filter_by(group_id=group.id))
         current_permission_groups = pg_result.scalars().all()
 
         for pg in current_permission_groups:
             if pg.permission_id not in expected_permission_ids:
-                await session.delete(pg)
+                await db.delete(pg)
 
-        await session.flush()
+        await db.flush()
 
-    await session.commit()
+    await db.commit()
 
 
 async def main() -> None:
@@ -134,8 +137,8 @@ async def main() -> None:
     await create_db_pool()
 
     try:
-        async for session in get_db_session():
-            await run(session=session)
+        async for db in get_db_session():
+            await run(db=db)
     except Exception as e:
         raise e
     finally:

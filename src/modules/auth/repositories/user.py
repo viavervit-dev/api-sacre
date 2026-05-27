@@ -22,7 +22,7 @@ class UserRepository(IUserRepository):
     @classmethod
     async def get_user(
         cls,
-        session: AsyncSession,
+        db: AsyncSession,
         filters: dict[str, Any],
         role: str,
     ) -> tuple[User | None, Any]:
@@ -44,7 +44,7 @@ class UserRepository(IUserRepository):
         else:
             raise ValueError(f"El rol '{role}' no tiene una relación definida o no existe.")
 
-        result = await session.execute(query)
+        result = await db.execute(query)
         user_account = result.scalar_one_or_none()
         user_profile: Customer | Admin | None = None
 
@@ -73,14 +73,14 @@ class UserRepository(IUserRepository):
     @classmethod
     async def create_user(
         cls,
-        session: AsyncSession,
+        db: AsyncSession,
         user_data: dict[str, Any],
         profile_data: dict[str, Any],
         role: str,
     ) -> tuple[User, Any]:
 
         # Obtenemos el grupo correspondiente al rol para asignarlo al usuario
-        result = await session.execute(select(Group).filter_by(name=role))
+        result = await db.execute(select(Group).filter_by(name=role))
         role_instance = result.scalar_one_or_none()
 
         if not role_instance:
@@ -111,18 +111,18 @@ class UserRepository(IUserRepository):
         elif role == UserRoles.ADMINISTRATOR.value:
             user_instance.admin = cast(Admin, profile_instance)
 
-        session.add(user_instance)
-        await session.flush()
+        db.add(user_instance)
+        await db.flush()
 
         # Asignar el rol al nuevo usuario
         user_group = UserGroup(user_id=user_instance.id, group_id=role_instance.id)
-        session.add(user_group)
-        await session.flush()
+        db.add(user_group)
+        await db.flush()
 
         return user_instance, profile_instance
 
     @classmethod
-    async def exists_user(cls, session: AsyncSession, filters: dict[str, Any], role: str) -> bool:
+    async def exists_user(cls, db: AsyncSession, filters: dict[str, Any], role: str) -> bool:
 
         query = select(User.id)
 
@@ -159,6 +159,6 @@ class UserRepository(IUserRepository):
             query = query.where(*relation_filters)
 
         exists_query = select(query.exists())
-        result = await session.execute(exists_query)
+        result = await db.execute(exists_query)
 
         return result.scalar_one()

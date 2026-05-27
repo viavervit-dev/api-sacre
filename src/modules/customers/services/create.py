@@ -9,9 +9,9 @@ from src.modules.customers.dto import CreateCustomerDTO, ReadCustomerDTO
 class CreateCustomerService:
     """Servicio para la creación de clientes en la base de datos."""
 
-    def __init__(self, user_repo: type[IUserRepository], session: AsyncSession) -> None:
+    def __init__(self, user_repo: type[IUserRepository], db: AsyncSession) -> None:
         self.__user_repo = user_repo
-        self.__session = session
+        self.__db = db
 
     async def create_customer(self, data: CreateCustomerDTO) -> ReadUserDTO[ReadCustomerDTO]:
         """Crea un nuevo cliente en la base de datos."""
@@ -23,7 +23,7 @@ class CreateCustomerService:
         profile_data = {field: getattr(data, field) for field in profile_fields}
 
         user_instance, profile_instance = await self.__user_repo.create_user(
-            session=self.__session,
+            db=self.__db,
             user_data=user_data,
             profile_data=profile_data,
             role=UserRoles.CUSTOMER.value,

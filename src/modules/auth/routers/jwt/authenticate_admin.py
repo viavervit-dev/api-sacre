@@ -29,7 +29,7 @@ router = APIRouter(prefix="/authentication", tags=["Autenticación"])
 )
 async def authenticate_admin(
     credentials: AdminCredentialsDTO,
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
     response: Response,
 ) -> None:
     """
@@ -37,7 +37,7 @@ async def authenticate_admin(
     con los tokens de acceso y refresco.
     """
 
-    service = AuthAdminService(user_repo=UserRepository, session=session)
+    service = AuthAdminService(user_repo=UserRepository, db=db)
     access_token, refresh_token = await service.authenticate_admin(credentials=credentials)
     response.set_cookie(
         key="access_token",

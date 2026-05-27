@@ -50,13 +50,13 @@ class CreateCategoryDTO(BaseModel):
 
     async def check_name(
         self,
-        session: AsyncSession,
+        db: AsyncSession,
         product_repo: type[IProductRepository],
     ) -> None:
         """Ejecuta validaciones para el nombre de la categoría."""
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos
-        exists = await product_repo.exists_category(session=session, filters={"name": self.name})
+        exists = await product_repo.exists_category(db=db, filters={"name": self.name})
 
         if exists:
             raise RequestValidationError(
@@ -274,13 +274,13 @@ class CreateProductDTO(BaseModel):
 
     async def check_name(
         self,
-        session: AsyncSession,
+        db: AsyncSession,
         product_repo: type[IProductRepository],
     ) -> None:
         """Ejecuta validaciones para el nombre del producto."""
 
         # Validar que el nombre del producto no esté registrado en la base de datos
-        exists = await product_repo.exists_product(session=session, filters={"name": self.name})
+        exists = await product_repo.exists_product(db=db, filters={"name": self.name})
 
         if exists:
             raise RequestValidationError(
@@ -295,7 +295,7 @@ class CreateProductDTO(BaseModel):
 
     async def check_images_urls(
         self,
-        session: AsyncSession,
+        db: AsyncSession,
         product_repo: type[IProductRepository],
     ) -> None:
         """Valida que cada elemento de la lista de imágenes sea una URL válida."""
@@ -320,7 +320,7 @@ class CreateProductDTO(BaseModel):
 
     async def check_categories(
         self,
-        session: AsyncSession,
+        db: AsyncSession,
         product_repo: type[IProductRepository],
     ) -> None:
         """Ejecuta validaciones para el campo `categories` del producto."""
@@ -329,8 +329,8 @@ class CreateProductDTO(BaseModel):
 
         for i, category in enumerate(self.categories):
             exists = await product_repo.exists_category(
-                session=session,
                 filters={"name": category},
+                db=db,
             )
 
             if not exists:

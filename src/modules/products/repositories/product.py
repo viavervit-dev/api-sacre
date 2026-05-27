@@ -15,19 +15,19 @@ class ProductRepository(IProductRepository, CategoryRepository):
     """
 
     @classmethod
-    async def create_product(cls, session: AsyncSession, data: dict[str, Any]) -> Product:
+    async def create_product(cls, db: AsyncSession, data: dict[str, Any]) -> Product:
 
         instance = Product(**data)
-        session.add(instance)
-        await session.flush()
+        db.add(instance)
+        await db.flush()
 
         return instance
 
     @classmethod
-    async def exists_product(cls, session: AsyncSession, filters: dict[str, Any]) -> bool:
+    async def exists_product(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
 
         query = select(Product.id).filter_by(**filters)
         exists_query = select(query.exists())
-        result = await session.execute(exists_query)
+        result = await db.execute(exists_query)
 
         return result.scalar_one()

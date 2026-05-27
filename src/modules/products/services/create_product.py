@@ -7,23 +7,28 @@ from src.modules.products.repositories.interfaces import IProductRepository
 class CreateProductService:
     """Servicio para la creación de productos en la base de datos."""
 
-    def __init__(self, product_repo: type[IProductRepository], session: AsyncSession) -> None:
+    def __init__(self, product_repo: type[IProductRepository], db: AsyncSession) -> None:
         self.__product_repo = product_repo
-        self.__session = session
+        self.__db = db
 
     async def create_product(self, data: CreateProductDTO) -> ReadProductDTO:
         """Crea un nuevo producto en la base de datos."""
 
         product_data = data.model_dump()
 
+        # Asignar el estado del producto según el stock total
         if product_data["stock_total"] > 0:
-            product_data["status"] = True  # Asignar estado activo por defecto
+            product_data["status"] = True
         else:
-            product_data["status"] = False  # Asignar estado inactivo por defecto
+            product_data["status"] = False
+
+        # Incrementar el contador de productos asociados a cada categoría
+        for category in product_data["categories"]:
+            await self.__product_repo.add_product_to_category(db=self.__db, name=category)
 
         product_instance = await self.__product_repo.create_product(
-            session=self.__session,
             data=product_data,
+            db=self.__db,
         )
         product = ReadProductDTO.model_construct(
             id=product_instance.id,

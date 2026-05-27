@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.products.models.category import Category
@@ -15,19 +15,32 @@ class CategoryRepository(ICategoryRepository):
     """
 
     @classmethod
-    async def create_category(cls, session: AsyncSession, data: dict[str, Any]) -> Category:
+    async def create_category(cls, db: AsyncSession, data: dict[str, Any]) -> Category:
 
         instance = Category(**data)
-        session.add(instance)
-        await session.flush()
+        db.add(instance)
+        await db.flush()
 
         return instance
 
     @classmethod
-    async def exists_category(cls, session: AsyncSession, filters: dict[str, Any]) -> bool:
+    async def add_product_to_category(cls, db: AsyncSession, name: str):
+        # fmt: off
+        stmt = (
+            update(Category).where(Category.name == name)
+            .values({Category.product_count: Category.product_count + 1})
+            .returning(Category)
+        )
+        # fmt: off
+
+        await db.execute(stmt)
+        await db.commit()
+
+    @classmethod
+    async def exists_category(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
 
         query = select(Category.id).filter_by(**filters)
         exists_query = select(query.exists())
-        result = await session.execute(exists_query)
+        result = await db.execute(exists_query)
 
         return result.scalar_one()

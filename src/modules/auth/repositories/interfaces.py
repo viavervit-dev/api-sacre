@@ -18,7 +18,7 @@ class IUserRepository(ABC):
     @overload
     async def get_user(
         cls,
-        session: AsyncSession,
+        db: AsyncSession,
         filters: dict[str, Any],
         role: Literal["customer"],
     ) -> tuple[User | None, Customer]: ...
@@ -27,7 +27,7 @@ class IUserRepository(ABC):
     @overload
     async def get_user(
         cls,
-        session: AsyncSession,
+        db: AsyncSession,
         filters: dict[str, Any],
         role: Literal["admin"],
     ) -> tuple[User | None, Admin]: ...
@@ -36,7 +36,7 @@ class IUserRepository(ABC):
     @abstractmethod
     async def get_user(
         cls,
-        session: AsyncSession,
+        db: AsyncSession,
         filters: dict[str, Any],
         role: str,
     ) -> tuple[User | None, Any]:
@@ -46,7 +46,7 @@ class IUserRepository(ABC):
 
     @classmethod
     @abstractmethod
-    async def exists_user(cls, session: AsyncSession, filters: dict[str, Any], role: str) -> bool:
+    async def exists_user(cls, db: AsyncSession, filters: dict[str, Any], role: str) -> bool:
         """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
 
         pass
@@ -55,7 +55,7 @@ class IUserRepository(ABC):
     @overload
     async def create_user(
         cls,
-        session: AsyncSession,
+        db: AsyncSession,
         user_data: dict[str, Any],
         profile_data: dict[str, Any],
         role: Literal["customer"],
@@ -65,7 +65,7 @@ class IUserRepository(ABC):
     @overload
     async def create_user(
         cls,
-        session: AsyncSession,
+        db: AsyncSession,
         user_data: dict[str, Any],
         profile_data: dict[str, Any],
         role: Literal["admin"],
@@ -75,7 +75,7 @@ class IUserRepository(ABC):
     @abstractmethod
     async def create_user(
         cls,
-        session: AsyncSession,
+        db: AsyncSession,
         user_data: dict[str, Any],
         profile_data: dict[str, Any],
         role: str,
