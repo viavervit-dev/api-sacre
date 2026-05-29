@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,11 +44,29 @@ class IProductRepository(ICategoryRepository):
 
     @classmethod
     @abstractmethod
+    async def get_product_by_id(cls, db: AsyncSession, id: UUID) -> Product:
+        """Obtiene un producto por su ID."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
     async def create_product(cls, db: AsyncSession, data: dict[str, Any]) -> Product:
         """Crea un nuevo producto en la base de datos."""
 
         pass
 
+    @classmethod
+    @abstractmethod
+    async def update_product(
+        cls,
+        db: AsyncSession,
+        update_data: dict[str, Any],
+        id: UUID,
+    ) -> Product:
+        """Modifica los datos de un producto en la base de datos."""
+
+        pass
 
     @classmethod
     @abstractmethod

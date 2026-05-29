@@ -1,6 +1,7 @@
 from typing import Any
+from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.products.models.product import Product
@@ -15,6 +16,11 @@ class ProductRepository(IProductRepository, CategoryRepository):
     """
 
     @classmethod
+    async def get_product_by_id(cls, db: AsyncSession, id: UUID) -> Product:
+
+        return await db.get_one(Product, id)
+
+    @classmethod
     async def create_product(cls, db: AsyncSession, data: dict[str, Any]) -> Product:
 
         instance = Product(**data)
@@ -22,6 +28,26 @@ class ProductRepository(IProductRepository, CategoryRepository):
         await db.flush()
 
         return instance
+
+    @classmethod
+    async def update_product(
+        cls,
+        db: AsyncSession,
+        update_data: dict[str, Any],
+        id: UUID,
+    ) -> Product:
+        # fmt: off
+        stmt = (
+            update(Product).where(Product.id == id)
+            .values(**update_data)
+            .returning(Product)
+        )
+        # fmt: on
+
+        result = await db.execute(stmt)
+        await db.commit()
+
+        return result.scalar_one()
 
     @classmethod
     async def exists_product(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
