@@ -35,6 +35,7 @@ class ProductEntity(Enum):
     IMAGES_DESCRIPTION = "Lista de URLs de imágenes del producto."
     PRICE_NETO_DESCRIPTION = "Precio NETO del producto, sin impuestos."
     PRICE_SALE_DESCRIPTION = "Precio de venta del producto, con impuestos."
+    PROFIT_MARGIN_DESCRIPTION = "Margen de ganancia aplicado al producto."
     IVA_DESCRIPTION = "Impuesto al valor agregado aplicado al producto."
     STOCK_TOTAL_DESCRIPTION = "Cantidad total de unidades existentes."
     STOCK_HAND_DESCRIPTION = "Unidades reservadas temporalmente en carritos de compra activos."
@@ -63,6 +64,10 @@ class ProductEntity(Enum):
     PRICE_SALE_DECIMAL_PLACES = 2
     PRICE_SALE_MAX_VALUE = Decimal(value="10000.00")
     PRICE_SALE_MIN_VALUE = Decimal(value="0.00")
+    PROFIT_MARGIN_MAX_DIGITS = 5
+    PROFIT_MARGIN_DECIMAL_PLACES = 4
+    PROFIT_MARGIN_MAX_VALUE = Decimal(value="2.0000")
+    PROFIT_MARGIN_MIN_VALUE = Decimal(value="0.0000")
     IVA_MAX_DIGITS = 5
     IVA_DECIMAL_PLACES = 4
     IVA_MAX_VALUE = Decimal(value="1.0000")
