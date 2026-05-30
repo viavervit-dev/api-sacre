@@ -23,7 +23,7 @@ class ICategoryRepository(ABC):
 
     @classmethod
     @abstractmethod
-    async def add_product_to_category(cls, db: AsyncSession, name: str):
+    async def add_product_to_category(cls, db: AsyncSession, name: str) -> None:
         """Incrementa el contador de productos asociados a una categoría en la base de datos."""
 
         pass

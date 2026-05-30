@@ -1,6 +1,7 @@
+from decimal import Decimal
 from enum import Enum
 
-ROLE = "customer"
+TWO_DECIMAL_PLACES = Decimal("0.01")
 
 
 class DTOValidationErrorMessages(Enum):
@@ -74,3 +75,4 @@ class ExceptionErrorMessages(Enum):
     AUTHENTICATION_FAILED = "Correo electrónico o contraseña incorrecta."
     JWT_INVALID = "Token JWT inválido."
     JWT_EXPIRED = "Token JWT expirado."
+    RESOURCE_NOT_FOUND = "El recurso solicitado no fue encontrado."

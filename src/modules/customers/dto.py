@@ -69,7 +69,6 @@ class CreateCustomerDTO(BaseModel):
         examples=DocumentTypesCustomer.values(),
         json_schema_extra={
             "x-validation-errors": [
-                DTOValidationErrorMessages.STRING_TOO_LONG.value,
                 DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
                 DTOValidationErrorMessages.ENUM.value,

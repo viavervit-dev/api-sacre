@@ -24,7 +24,7 @@ class CategoryRepository(ICategoryRepository):
         return instance
 
     @classmethod
-    async def add_product_to_category(cls, db: AsyncSession, name: str):
+    async def add_product_to_category(cls, db: AsyncSession, name: str) -> None:
         # fmt: off
         stmt = (
             update(Category).where(Category.name == name)

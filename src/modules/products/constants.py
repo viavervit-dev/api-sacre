@@ -46,6 +46,7 @@ class ProductEntity(Enum):
     NAME_IN_USE = "Este nombre ya está registrado."
     URL_INVALID = "La URL proporcionada no es válida."
     CATEGORY_NOT_FOUND = "Esta categoría no existe."
+    STOCK_TOTAL_INVALID = "El stock total no puede ser menor al stock en reserva."
 
     # Propiedades para los campos de la entidad
     NAME_MAX_LENGTH = 60
@@ -72,3 +73,16 @@ class ProductEntity(Enum):
     STOCK_HAND_MIN_VALUE = 0
     STOCK_SALE_MAX_VALUE = 10000
     STOCK_SALE_MIN_VALUE = 0
+
+
+class VatRatesProduct(Enum):
+    """Enumeración que define las tasas de IVA para un producto."""
+
+    OPTION_1 = Decimal(value="0.0000")
+    OPTION_2 = Decimal(value="0.1500")
+
+    @classmethod
+    def values(cls) -> list[Decimal]:
+        """Devuelve una lista de los valores de la enumeración."""
+
+        return [item.value for item in cls]
