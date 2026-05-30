@@ -17,6 +17,7 @@ from src.modules.auth.routers.jwt.authenticate_admin import router as jwt_login_
 from src.modules.customers.routers.create import router as create_customer
 from src.modules.products.routers.create_category import router as create_category_product
 from src.modules.products.routers.create_prodcut import router as create_prodcut
+from src.modules.products.routers.update_product import router as update_product
 
 
 @asynccontextmanager
@@ -83,6 +84,7 @@ v1_router.include_router(router=create_customer)
 v1_router.include_router(router=jwt_login_admin)
 v1_router.include_router(router=create_category_product)
 v1_router.include_router(router=create_prodcut)
+v1_router.include_router(router=update_product)
 app.include_router(router=v1_router)
 
 

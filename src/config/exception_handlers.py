@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import OperationalError
 
 from src.common.constants import DTOValidationErrorMessages, ExceptionErrorMessages
-from src.common.exceptions import AuthenticationError
+from src.common.exceptions import AuthenticationError, ResourceNotFound
 from src.common.response import Response
 from src.config.serialization import JSONResponse
 
@@ -15,7 +15,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     """Registra todos los manejadores comunes y customizados de excepciones."""
 
     @app.exception_handler(RequestValidationError)
-    async def validation_error_handler(  # pyright: ignore[reportUnusedFunction]
+    async def validation_error(  # pyright: ignore[reportUnusedFunction]
         request: Request,
         exc: RequestValidationError,
     ) -> JSONResponse:
@@ -114,7 +114,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(OperationalError)
-    async def db_unavailable_handler(  # pyright: ignore[reportUnusedFunction]
+    async def db_unavailable(  # pyright: ignore[reportUnusedFunction]
         request: Request,
         exc: OperationalError,
     ) -> JSONResponse:
@@ -130,7 +130,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(jwt.ExpiredSignatureError)
-    async def expired_token_jwt_handler(  # pyright: ignore[reportUnusedFunction]
+    async def expired_token_jwt(  # pyright: ignore[reportUnusedFunction]
         request: Request,
         exc: jwt.ExpiredSignatureError,
     ) -> JSONResponse:
@@ -146,7 +146,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(jwt.InvalidTokenError)
-    async def invalid_token_jwt_handler(  # pyright: ignore[reportUnusedFunction]
+    async def invalid_token_jwt(  # pyright: ignore[reportUnusedFunction]
         request: Request,
         exc: jwt.InvalidTokenError,
     ) -> JSONResponse:
@@ -162,7 +162,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(AuthenticationError)
-    async def authentication_error_handler(  # pyright: ignore[reportUnusedFunction]
+    async def authentication_error(  # pyright: ignore[reportUnusedFunction]
         request: Request,
         exc: AuthenticationError,
     ) -> JSONResponse:
@@ -173,6 +173,22 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=Response(
                 success=False,
                 message=ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
+                data=None,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(ResourceNotFound)
+    async def resource_not_found(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: ResourceNotFound,
+    ) -> JSONResponse:
+        """Manejador de error para recursos no encontrados."""
+
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=Response(
+                success=False,
+                message=ExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
                 data=None,
             ).model_dump(),
         )

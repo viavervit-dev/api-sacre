@@ -48,6 +48,31 @@ def build_response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
     }
 
 
+def build_response_scheme_404() -> dict[str, Any]:
+    """Genera un esquema de respuesta para errores **404**."""
+
+    return {
+        "description": "Recurso no encontrado.",
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean"},
+                        "message": {"type": "string"},
+                        "data": {"type": "object"},
+                    },
+                },
+                "example": {
+                    "success": False,
+                    "message": ExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
+                    "data": {},
+                },
+            }
+        },
+    }
+
+
 def build_response_scheme_503(db_unavailable: bool) -> dict[str, Any]:
     """
     Genera un esquema de respuesta para errores **503** cuando algún componente de la API

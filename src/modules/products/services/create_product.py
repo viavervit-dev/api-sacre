@@ -1,5 +1,9 @@
+from decimal import ROUND_HALF_UP, Decimal
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.common.constants import TWO_DECIMAL_PLACES
+from src.modules.products.constants import VatRatesProduct
 from src.modules.products.dto import CreateProductDTO, ReadProductDTO
 from src.modules.products.repositories.interfaces import IProductRepository
 
@@ -25,6 +29,20 @@ class CreateProductService:
         # Incrementar el contador de productos asociados a cada categoría
         for category in product_data["categories"]:
             await self.__product_repo.add_product_to_category(db=self.__db, name=category)
+
+        # Calcular el precio de venta a partir del precio neto e IVA
+        price_neto: Decimal = product_data["price_neto"]
+        iva: VatRatesProduct = product_data["iva"]
+        product_data["iva"] = iva.value
+        raw_price_sale = price_neto * (Decimal("1.0000") + iva.value)
+        product_data["price_sale"] = raw_price_sale.quantize(
+            exp=TWO_DECIMAL_PLACES,
+            rounding=ROUND_HALF_UP,
+        )
+
+        # Inicializar el stock en mano y el stock de venta en 0
+        product_data["stock_hand"] = 0
+        product_data["stock_sale"] = 0
 
         product_instance = await self.__product_repo.create_product(
             data=product_data,
