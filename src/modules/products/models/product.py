@@ -13,6 +13,8 @@ PRICE_NETO_MAX = ProductEntity.PRICE_NETO_MAX_VALUE.value
 PRICE_NETO_MIN = ProductEntity.PRICE_NETO_MIN_VALUE.value
 PRICE_SALE_MAX = ProductEntity.PRICE_SALE_MAX_VALUE.value
 PRICE_SALE_MIN = ProductEntity.PRICE_SALE_MIN_VALUE.value
+PROFIT_MAX = ProductEntity.PROFIT_MARGIN_MAX_VALUE.value
+PROFIT_MIN = ProductEntity.PROFIT_MARGIN_MIN_VALUE.value
 IVA_MAX = ProductEntity.IVA_MAX_VALUE.value
 IVA_MIN = ProductEntity.IVA_MIN_VALUE.value
 STOCK_TOTAL_MAX = ProductEntity.STOCK_TOTAL_MAX_VALUE.value
@@ -82,6 +84,19 @@ class Product(MappedAsDataclass, Base):
             name="price_sale_range",
         ),
         doc=ProductEntity.PRICE_SALE_DESCRIPTION.value,
+        nullable=False,
+    )
+    profit_margin: Mapped[Decimal] = mapped_column(
+        Numeric(
+            precision=ProductEntity.PROFIT_MARGIN_MAX_DIGITS.value,
+            scale=ProductEntity.PROFIT_MARGIN_DECIMAL_PLACES.value,
+            asdecimal=True,
+        ),
+        CheckConstraint(
+            sqltext=f"profit_margin >= {PROFIT_MIN} AND profit_margin <= {PROFIT_MAX}",
+            name="profit_margin_range",
+        ),
+        doc=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
         nullable=False,
     )
     iva: Mapped[Decimal] = mapped_column(

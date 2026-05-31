@@ -7,9 +7,9 @@ from src.modules.products.repositories.interfaces import IProductRepository
 class CreateCategoryService:
     """Servicio para la creación de categorías de productos en la base de datos."""
 
-    def __init__(self, product_repo: type[IProductRepository], session: AsyncSession) -> None:
+    def __init__(self, product_repo: type[IProductRepository], db: AsyncSession) -> None:
         self.__product_repo = product_repo
-        self.__session = session
+        self.__db = db
 
     async def create_category(self, data: CreateCategoryDTO) -> ReadCategoryDTO:
         """Crea una nueva categoría de productos en la base de datos."""
@@ -18,7 +18,7 @@ class CreateCategoryService:
         category_data["status"] = False  # Asignar estado activo por defecto
         category_data["product_count"] = 0  # Asignar contador de productos por defecto
         categpry_instance = await self.__product_repo.create_category(
-            session=self.__session,
+            db=self.__db,
             data=category_data,
         )
         category = ReadCategoryDTO.model_construct(

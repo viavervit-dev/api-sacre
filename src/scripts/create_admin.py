@@ -16,7 +16,7 @@ load_dotenv()
 
 
 async def run(
-    session: AsyncSession,
+    db: AsyncSession,
     email: str,
     password: str,
     first_names: str,
@@ -25,7 +25,7 @@ async def run(
     """Crea un usuario administrador en la base de datos."""
 
     # Verificar si el usuario ya existe
-    result = await session.execute(select(User).filter_by(email=email))
+    result = await db.execute(select(User).filter_by(email=email))
     user = result.scalar_one_or_none()
 
     if user:
@@ -33,7 +33,7 @@ async def run(
         return
 
     # Verificar si el grupo de permisos del administrador existe
-    result = await session.execute(select(Group).filter_by(name=UserRoles.ADMINISTRATOR.value))
+    result = await db.execute(select(Group).filter_by(name=UserRoles.ADMINISTRATOR.value))
     permission_group = result.scalar_one_or_none()
 
     if not permission_group:
@@ -46,16 +46,16 @@ async def run(
         email=email,
     )
     user_account.set_password(password=password)
-    session.add(user_account)
+    db.add(user_account)
 
-    await session.flush()
+    await db.flush()
 
     # Asignar el Usuario al grupo de permisos del administrador
     admin_group = UserGroup(
         user_id=user_account.id,
         group_id=permission_group.id,
     )
-    session.add(admin_group)
+    db.add(admin_group)
 
     # 5. Crear el perfil del Administrador
     user_profile = Admin(
@@ -63,9 +63,9 @@ async def run(
         first_names=first_names,
         last_names=last_names,
     )
-    session.add(user_profile)
+    db.add(user_profile)
 
-    await session.commit()
+    await db.commit()
 
     print("Administrador creado exitosamente")
 
@@ -74,9 +74,9 @@ async def main() -> None:
     await create_db_pool()
 
     try:
-        async for session in get_db_session():
+        async for db in get_db_session():
             await run(
-                session=session,
+                db=db,
                 email=str(os.getenv(key="ADMIN_EMAIL")),
                 password=str(os.getenv(key="ADMIN_PASSWORD")),
                 first_names=str(os.getenv(key="ADMIN_FIRST_NAMES")),

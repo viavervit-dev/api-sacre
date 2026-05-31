@@ -17,7 +17,7 @@ router = APIRouter(prefix="/customer", tags=["Clientes"])
 
 async def validations(
     data: CreateCustomerDTO,
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> CreateCustomerDTO:
     """Ejecuta validaciones adicionales para la creación de un cliente."""
 
@@ -32,7 +32,7 @@ async def validations(
 
     for check in checks:
         try:
-            await check(session=session, user_repo=UserRepository)
+            await check(db=db, user_repo=UserRepository)
         except RequestValidationError as e:
             all_errors.extend(e.errors())
 
@@ -52,7 +52,7 @@ async def validations(
 )
 async def create_customer(
     data: Annotated[CreateCustomerDTO, Depends(validations)],
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> Response[ReadUserDTO[ReadCustomerDTO]]:
     """
     Endpoint para la creación de un cliente, recibe una petición con los datos necesarios y ejecuta
@@ -60,7 +60,7 @@ async def create_customer(
     el rol correspondiente y devuelve su información.
     """
 
-    service = CreateCustomerService(session=session, user_repo=UserRepository)
+    service = CreateCustomerService(db=db, user_repo=UserRepository)
     customer = await service.create_customer(data=data)
 
     return Response(

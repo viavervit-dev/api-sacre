@@ -10,9 +10,9 @@ from src.modules.auth.repositories.interfaces import IUserRepository
 class AuthAdminService:
     """Servicio para la autenticación de administradores."""
 
-    def __init__(self, user_repo: type[IUserRepository], session: AsyncSession) -> None:
-        self.user_repo = user_repo
-        self.session = session
+    def __init__(self, user_repo: type[IUserRepository], db: AsyncSession) -> None:
+        self.__user_repo = user_repo
+        self.__db = db
 
     async def authenticate_admin(self, credentials: AdminCredentialsDTO) -> tuple[str, str]:
         """
@@ -22,8 +22,8 @@ class AuthAdminService:
 
         password = credentials.password
         email = credentials.email
-        user_account, _ = await self.user_repo.get_user(
-            session=self.session,
+        user_account, _ = await self.__user_repo.get_user(
+            db=self.__db,
             filters={"email": email},
             role=UserRoles.ADMINISTRATOR.value,
         )

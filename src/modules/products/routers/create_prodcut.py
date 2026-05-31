@@ -16,7 +16,7 @@ router = APIRouter(prefix="/product", tags=["Productos"])
 
 async def validations(
     data: CreateProductDTO,
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> CreateProductDTO:
     """Ejecuta validaciones adicionales para la creación de un producto."""
 
@@ -27,7 +27,7 @@ async def validations(
 
     for check in checks:
         try:
-            await check(session=session, product_repo=ProductRepository)
+            await check(db=db, product_repo=ProductRepository)
         except RequestValidationError as e:
             all_errors.extend(e.errors())
 
@@ -48,7 +48,7 @@ async def validations(
 )
 async def create_product(
     data: Annotated[CreateProductDTO, Depends(validations)],
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> Response[ReadProductDTO]:
     """
     Endpoint para la creación de un producto, recibe una petición con los datos necesarios y
@@ -56,7 +56,7 @@ async def create_product(
     y devuelve su información.
     """
 
-    service = CreateProductService(session=session, product_repo=ProductRepository)
+    service = CreateProductService(db=db, product_repo=ProductRepository)
     product = await service.create_product(data=data)
 
     return Response(

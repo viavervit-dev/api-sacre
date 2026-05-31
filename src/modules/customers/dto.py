@@ -69,7 +69,6 @@ class CreateCustomerDTO(BaseModel):
         examples=DocumentTypesCustomer.values(),
         json_schema_extra={
             "x-validation-errors": [
-                DTOValidationErrorMessages.STRING_TOO_LONG.value,
                 DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
                 DTOValidationErrorMessages.ENUM.value,
@@ -105,16 +104,16 @@ class CreateCustomerDTO(BaseModel):
 
     async def check_email(
         self,
-        session: AsyncSession,
+        db: AsyncSession,
         user_repo: type[IUserRepository],
     ) -> None:
         """Ejecuta validaciones para el correo electrónico del cliente."""
 
         # Validar que el correo electrónico no esté registrado en la base de datos
         exists = await user_repo.exists_user(
-            session=session,
             filters={"email": self.email},
             role=UserRoles.CUSTOMER.value,
+            db=db,
         )
 
         if exists:
@@ -130,16 +129,16 @@ class CreateCustomerDTO(BaseModel):
 
     async def check_phone(
         self,
-        session: AsyncSession,
+        db: AsyncSession,
         user_repo: type[IUserRepository],
     ) -> None:
         """Ejecuta validaciones para el número de teléfono del cliente."""
 
         # Validar que el número de teléfono no esté registrado en la base de datos
         exists = await user_repo.exists_user(
-            session=session,
             filters={"phone": self.phone},
             role=UserRoles.CUSTOMER.value,
+            db=db,
         )
 
         if exists:
@@ -155,16 +154,16 @@ class CreateCustomerDTO(BaseModel):
 
     async def check_document_number(
         self,
-        session: AsyncSession,
+        db: AsyncSession,
         user_repo: type[IUserRepository],
     ) -> None:
         """Ejecuta validaciones para el número de documento del cliente."""
 
         # Validar que el número de documento no esté registrado en la base de datos
         exists = await user_repo.exists_user(
-            session=session,
             filters={"document_number": self.document_number},
             role=UserRoles.CUSTOMER.value,
+            db=db,
         )
 
         if exists:
