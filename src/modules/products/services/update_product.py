@@ -25,13 +25,11 @@ class UpdateProductService:
             raise ResourceNotFound()
 
         product_data = data.model_dump()
-        price_neto: Decimal | None = product_data.get("price_neto", None)
-        iva: VatRatesProduct | None = product_data.get("iva", None)
-        stock_total: int | None = product_data.get("stock_total", None)
-
         product_instance = await self.__product_repo.get_product_by_id(db=self.__db, id=id)
 
-        # Validar que el stock total no sea menor al stock en reserva
+        # Validaciones de stock_total en relación a stock_hand
+        stock_total: int | None = product_data.get("stock_total", None)
+
         if stock_total and stock_total < product_instance.stock_hand:
             raise RequestValidationError(
                 errors=[
@@ -42,33 +40,20 @@ class UpdateProductService:
                     }
                 ]
             )
-
-        # Actualizar el estado del producto si se requiere
         if stock_total and stock_total == 0 and product_instance.stock_hand == 0:
             product_data["status"] = False
 
-        # Calcular el precio de venta a partir del precio neto e IVA
-        if iva and not price_neto:
-            product_data["iva"] = iva.value
-            raw_price_sale = product_instance.price_neto * (Decimal("1.0000") + iva.value)
-            product_data["price_sale"] = raw_price_sale.quantize(
-                exp=TWO_DECIMAL_PLACES,
-                rounding=ROUND_HALF_UP,
-            )
-        if price_neto and not iva:
-            raw_price_sale = price_neto * (Decimal("1.0000") + product_instance.iva)
-            product_data["price_sale"] = raw_price_sale.quantize(
-                exp=TWO_DECIMAL_PLACES,
-                rounding=ROUND_HALF_UP,
-            )
-        if price_neto and iva:
-            product_data["iva"] = iva.value
-            raw_price_sale = price_neto * (Decimal("1.0000") + iva.value)
-            product_data["price_sale"] = raw_price_sale.quantize(
-                exp=TWO_DECIMAL_PLACES,
-                rounding=ROUND_HALF_UP,
-            )
+        # Calcular el precio de venta
+        price_neto: Decimal | None = product_data.get("price_neto", None)
+        profit_margin: Decimal | None = product_data.get("profit_margin", None)
+        iva: VatRatesProduct | None = product_data.get("iva", None)
+        product_data["price_sale"] = self.__calculate_sale_price(
+            price_neto=price_neto or product_instance.price_neto,
+            iva=iva.value if iva else product_instance.iva,
+            profit_margin=profit_margin or product_instance.profit_margin,
+        )
 
+        # Actualizar el producto en la base de datos
         product_instance = await self.__product_repo.update_product(
             update_data=product_data,
             db=self.__db,
@@ -83,6 +68,7 @@ class UpdateProductService:
             images=product_instance.images,
             price_neto=product_instance.price_neto,
             price_sale=product_instance.price_sale,
+            profit_margin=product_instance.profit_margin,
             iva=product_instance.iva,
             stock_total=product_instance.stock_total,
             stock_hand=product_instance.stock_hand,
@@ -91,3 +77,19 @@ class UpdateProductService:
         )
 
         return product
+
+    @staticmethod
+    def __calculate_sale_price(
+        price_neto: Decimal,
+        iva: Decimal,
+        profit_margin: Decimal,
+    ) -> Decimal:
+        """Calcula el precio de venta a partir del precio neto, IVA y margen de beneficio."""
+
+        raw_price_sale = price_neto * (Decimal("1.0000") + profit_margin)
+        raw_price_sale = raw_price_sale * (Decimal("1.0000") + iva)
+
+        return raw_price_sale.quantize(
+            exp=TWO_DECIMAL_PLACES,
+            rounding=ROUND_HALF_UP,
+        )

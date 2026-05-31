@@ -201,6 +201,24 @@ class CreateProductDTO(BaseModel):
             ]
         },
     )
+    profit_margin: Decimal = Field(
+        ge=ProductEntity.PROFIT_MARGIN_MIN_VALUE.value,
+        le=ProductEntity.PROFIT_MARGIN_MAX_VALUE.value,
+        max_digits=ProductEntity.PROFIT_MARGIN_MAX_DIGITS.value,
+        decimal_places=ProductEntity.PROFIT_MARGIN_DECIMAL_PLACES.value,
+        description=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
+        examples=[Decimal("0.1600")],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.GREATER_THAN_EQUAL.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
+            ]
+        },
+    )
     iva: VatRatesProduct = Field(
         description=ProductEntity.IVA_DESCRIPTION.value,
         examples=VatRatesProduct.values(),
@@ -418,6 +436,25 @@ class UpdateProductDTO(BaseModel):
             ]
         },
     )
+    profit_margin: Decimal | None = Field(
+        ge=ProductEntity.PROFIT_MARGIN_MIN_VALUE.value,
+        le=ProductEntity.PROFIT_MARGIN_MAX_VALUE.value,
+        max_digits=ProductEntity.PROFIT_MARGIN_MAX_DIGITS.value,
+        decimal_places=ProductEntity.PROFIT_MARGIN_DECIMAL_PLACES.value,
+        description=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
+        default=None,
+        examples=[Decimal("0.1600")],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.GREATER_THAN_EQUAL.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
+            ]
+        },
+    )
     iva: VatRatesProduct | None = Field(
         description=ProductEntity.IVA_DESCRIPTION.value,
         default=None,
@@ -605,6 +642,10 @@ class ReadProductDTO(BaseModel):
     price_sale: Decimal = Field(
         description=ProductEntity.PRICE_SALE_DESCRIPTION.value,
         examples=[Decimal("15.00")],
+    )
+    profit_margin: Decimal = Field(
+        description=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
+        examples=[Decimal("0.16")],
     )
     iva: Decimal = Field(
         description=ProductEntity.IVA_DESCRIPTION.value,

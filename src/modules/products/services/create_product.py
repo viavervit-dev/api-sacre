@@ -3,7 +3,6 @@ from decimal import ROUND_HALF_UP, Decimal
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.constants import TWO_DECIMAL_PLACES
-from src.modules.products.constants import VatRatesProduct
 from src.modules.products.dto import CreateProductDTO, ReadProductDTO
 from src.modules.products.repositories.interfaces import IProductRepository
 
@@ -30,14 +29,11 @@ class CreateProductService:
         for category in product_data["categories"]:
             await self.__product_repo.add_product_to_category(db=self.__db, name=category)
 
-        # Calcular el precio de venta a partir del precio neto e IVA
-        price_neto: Decimal = product_data["price_neto"]
-        iva: VatRatesProduct = product_data["iva"]
-        product_data["iva"] = iva.value
-        raw_price_sale = price_neto * (Decimal("1.0000") + iva.value)
-        product_data["price_sale"] = raw_price_sale.quantize(
-            exp=TWO_DECIMAL_PLACES,
-            rounding=ROUND_HALF_UP,
+        # Calcular el precio de venta
+        product_data["price_sale"] = self.__calculate_sale_price(
+            price_neto=data.price_neto,
+            iva=data.iva.value,
+            profit_margin=data.profit_margin,
         )
 
         # Inicializar el stock en mano y el stock de venta en 0
@@ -57,6 +53,7 @@ class CreateProductService:
             images=product_instance.images,
             price_neto=product_instance.price_neto,
             price_sale=product_instance.price_sale,
+            profit_margin=product_instance.profit_margin,
             iva=product_instance.iva,
             stock_total=product_instance.stock_total,
             stock_hand=product_instance.stock_hand,
@@ -65,3 +62,19 @@ class CreateProductService:
         )
 
         return product
+
+    @staticmethod
+    def __calculate_sale_price(
+        price_neto: Decimal,
+        iva: Decimal,
+        profit_margin: Decimal,
+    ) -> Decimal:
+        """Calcula el precio de venta a partir del precio neto, IVA y margen de beneficio."""
+
+        raw_price_sale = price_neto * (Decimal("1.0000") + profit_margin)
+        raw_price_sale = raw_price_sale * (Decimal("1.0000") + iva)
+
+        return raw_price_sale.quantize(
+            exp=TWO_DECIMAL_PLACES,
+            rounding=ROUND_HALF_UP,
+        )
