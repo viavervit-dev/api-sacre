@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.schema import (
-    build_response_scheme_400,
-    build_response_scheme_401,
-    build_response_scheme_503,
+    response_scheme_400,
+    response_scheme_401,
+    response_scheme_503,
 )
 from src.config.database import get_db_session
 from src.config.parameters import settings
@@ -22,9 +22,9 @@ router = APIRouter(prefix="/authentication", tags=["Autenticación"])
     response_description="Administrador autenticado exitosamente.",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
-        400: build_response_scheme_400(dto_class=AdminCredentialsDTO),
-        401: build_response_scheme_401(jwt_auth=True, jwt_invalid=True, jwt_expired=True),
-        503: build_response_scheme_503(db_unavailable=True),
+        400: response_scheme_400(dto_class=AdminCredentialsDTO),
+        401: response_scheme_401(jwt_auth_failed=True, jwt_invalid=True, jwt_expired=True),
+        503: response_scheme_503(db_unavailable=True),
     },
 )
 async def authenticate_admin(
