@@ -6,7 +6,13 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import OperationalError
 
 from src.common.constants import DTOValidationErrorMessages, ExceptionErrorMessages
-from src.common.exceptions import AuthenticationError, ResourceNotFound
+from src.common.exceptions import (
+    AuthenticationFailed,
+    MissingJWT,
+    PermissionDenied,
+    ResourceNotFound,
+    UserNotFound,
+)
 from src.common.response import Response
 from src.config.serialization import JSONResponse
 
@@ -161,10 +167,10 @@ def register_exception_handlers(app: FastAPI) -> None:
             ).model_dump(),
         )
 
-    @app.exception_handler(AuthenticationError)
+    @app.exception_handler(AuthenticationFailed)
     async def authentication_error(  # pyright: ignore[reportUnusedFunction]
         request: Request,
-        exc: AuthenticationError,
+        exc: AuthenticationFailed,
     ) -> JSONResponse:
         """Manejador de error genérico para fallos en la autenticación."""
 
@@ -173,6 +179,22 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=Response(
                 success=False,
                 message=ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
+                data=None,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(MissingJWT)
+    async def missing_jwt(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: MissingJWT,
+    ) -> JSONResponse:
+        """Manejador de error para tokens JWT faltantes."""
+
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=Response(
+                success=False,
+                message=ExceptionErrorMessages.JWT_MISSING.value,
                 data=None,
             ).model_dump(),
         )
@@ -189,6 +211,38 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=Response(
                 success=False,
                 message=ExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
+                data=None,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(UserNotFound)
+    async def user_not_found(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: UserNotFound,
+    ) -> JSONResponse:
+        """Manejador de error para usuarios no encontrados."""
+
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=Response(
+                success=False,
+                message=ExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
+                data=None,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(PermissionDenied)
+    async def permission_denied(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: PermissionDenied,
+    ) -> JSONResponse:
+        """Manejador de error para permisos denegados."""
+
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content=Response(
+                success=False,
+                message=ExceptionErrorMessages.PERMISSION_DENIED.value,
                 data=None,
             ).model_dump(),
         )
