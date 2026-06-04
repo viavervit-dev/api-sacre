@@ -14,8 +14,8 @@ from src.common.schema import (
 from src.config.database import get_db_session
 from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
+from src.modules.auth.dependencies import UserPermissionChecker
 from src.modules.auth.models.user import User
-from src.modules.auth.permissions import UserPermissionChecker
 from src.modules.products.dto import CreateCategoryDTO, ReadCategoryDTO
 from src.modules.products.models.category import Category
 from src.modules.products.repositories.product import ProductRepository

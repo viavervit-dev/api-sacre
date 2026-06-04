@@ -1,13 +1,12 @@
 from decimal import ROUND_HALF_UP, Decimal
-from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.constants import TWO_DECIMAL_PLACES
-from src.common.exceptions import ResourceNotFound
 from src.modules.products.constants import ProductEntity, VatRatesProduct
 from src.modules.products.dto import ReadProductDTO, UpdateProductDTO
+from src.modules.products.models.product import Product
 from src.modules.products.repositories.interfaces import IProductRepository
 
 
@@ -18,14 +17,14 @@ class UpdateProductService:
         self.__product_repo = product_repo
         self.__db = db
 
-    async def update_product(self, data: UpdateProductDTO, id: UUID) -> ReadProductDTO:
+    async def update_product(
+        self,
+        data: UpdateProductDTO,
+        product_instance: Product,
+    ) -> ReadProductDTO:
         """Actualiza los datos de un producto en la base de datos."""
 
-        if not await self.__product_repo.exists_product(db=self.__db, filters={"id": id}):
-            raise ResourceNotFound()
-
         product_data = data.model_dump()
-        product_instance = await self.__product_repo.get_product_by_id(db=self.__db, id=id)
 
         # Validaciones de stock_total en relación a stock_hand
         stock_total: int | None = product_data.get("stock_total", None)
@@ -57,7 +56,7 @@ class UpdateProductService:
         product_instance = await self.__product_repo.update_product(
             update_data=product_data,
             db=self.__db,
-            id=id,
+            id=product_instance.id,
         )
         product = ReadProductDTO.model_construct(
             id=product_instance.id,
