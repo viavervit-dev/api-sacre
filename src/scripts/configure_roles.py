@@ -1,62 +1,11 @@
 import asyncio
-from typing import TypedDict
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import close_db_pool, create_db_pool, get_db_session
-from src.modules.admins.models.admin import Admin
 from src.modules.auth.models.permission import Group, Permission, PermissionGroup
-from src.modules.auth.models.user import User
-from src.modules.customers.models.customer import Customer
-
-
-class RoleGroupConfig(TypedDict):
-    """
-    Estructura de configuración para un grupo de roles. Define el nombre del grupo y los
-    permisos asociados a ese grupo.
-    """
-
-    name: str
-    permissions: list[str]
-
-
-GROUPS: list[RoleGroupConfig] = [
-    {
-        "name": "customer",
-        "permissions": [
-            f"{User.__tablename__}.read",
-            f"{User.__tablename__}.update_password",
-            f"{User.__tablename__}.delete",  # Si tiene el permiso, puede elimina los datos del rol
-            f"{Customer.__tablename__}.read",
-            f"{Customer.__tablename__}.update",
-            "authentication.jwt",
-        ],
-    },
-    {
-        "name": "admin",
-        "permissions": [
-            f"{User.__tablename__}.read",
-            f"{Admin.__tablename__}.read",
-            "authentication.jwt",
-        ],
-    },
-]
-
-PERMISSIONS = [
-    # Permisos para el modelo User
-    f"{User.__tablename__}.read",
-    f"{User.__tablename__}.delete",
-    f"{User.__tablename__}.update_password",
-    # Permisos para el modelo Customer
-    f"{Customer.__tablename__}.read",
-    f"{Customer.__tablename__}.update",
-    f"{Customer.__tablename__}.delete",
-    # Permisos para el modelo Admin
-    f"{Admin.__tablename__}.read",
-    # Permisos generales
-    "authentication.jwt",
-]
+from src.modules.auth.permissions import GROUPS, PERMISSIONS
 
 
 async def run(db: AsyncSession) -> None:

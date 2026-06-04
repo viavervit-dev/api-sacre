@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.response import Response
-from src.common.schema import build_response_scheme_400, build_response_scheme_503
+from src.common.schema import response_scheme_400, response_scheme_503
 from src.config.database import get_db_session
 from src.modules.auth.dto import ReadUserDTO
 from src.modules.auth.repositories.user import UserRepository
@@ -46,8 +46,8 @@ async def validations(
     path="/",
     response_description="Cliente creado exitosamente.",
     responses={
-        400: build_response_scheme_400(dto_class=CreateCustomerDTO),
-        503: build_response_scheme_503(db_unavailable=True),
+        400: response_scheme_400(dto_class=CreateCustomerDTO),
+        503: response_scheme_503(db_unavailable=True),
     },
 )
 async def create_customer(

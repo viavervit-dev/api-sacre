@@ -25,7 +25,7 @@ class UserRepository(IUserRepository):
         db: AsyncSession,
         filters: dict[str, Any],
         role: str,
-    ) -> tuple[User | None, Any]:
+    ) -> tuple[User, Any]:
 
         # Construye la consulta base desempaquetando el diccionario de filtros
         query = select(User).filter_by(**filters)
@@ -45,8 +45,8 @@ class UserRepository(IUserRepository):
             raise ValueError(f"El rol '{role}' no tiene una relación definida o no existe.")
 
         result = await db.execute(query)
-        user_account = result.scalar_one_or_none()
-        user_profile: Customer | Admin | None = None
+        user_account = result.scalar_one()
+        user_profile: Customer | Admin
 
         # Valida que el usuario tenga la relación correspondiente a su rol y construye el DTO
         if role == UserRoles.CUSTOMER.value:
@@ -54,8 +54,8 @@ class UserRepository(IUserRepository):
                 raise ValueError(
                     f"El usuario '{user_account.id}' no existe en la tabla de su rol."
                 )
-            if user_account:
-                user_profile = user_account.customer
+
+            user_profile = user_account.customer
 
             return user_account, user_profile
         if role == UserRoles.ADMINISTRATOR.value:
@@ -63,12 +63,12 @@ class UserRepository(IUserRepository):
                 raise ValueError(
                     f"El usuario '{user_account.id}' no existe en la tabla de su rol."
                 )
-            if user_account:
-                user_profile = user_account.admin
+
+            user_profile = user_account.admin
 
             return user_account, user_profile
 
-        return user_account, user_profile
+        raise ValueError(f"El rol '{role}' no tiene una relación definida o no existe.")
 
     @classmethod
     async def create_user(

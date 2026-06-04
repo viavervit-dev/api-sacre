@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from src.common.constants import ExceptionErrorMessages
 
 
-def build_response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
+def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
     """
     Genera un esquema de respuesta para errores **400** basado en las validaciones definidas
     en el DTO de la solicitud.
@@ -48,7 +48,84 @@ def build_response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
     }
 
 
-def build_response_scheme_404() -> dict[str, Any]:
+def response_scheme_401(
+    jwt_auth_failed: bool = False,
+    jwt_missing: bool = False,
+    jwt_invalid: bool = False,
+    jwt_expired: bool = False,
+    jwt_user_not_found: bool = False,
+) -> dict[str, Any]:
+    """
+    Genera un esquema de respuesta para errores **401** cuando se hace una solicitud no autorizada.
+    """
+
+    scheme: dict[str, Any] = {
+        "description": "Solicitud no autorizada por algunos de los siguientes motivos.",
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean"},
+                        "message": {"type": "string"},
+                        "data": {"type": "object"},
+                    },
+                },
+                "examples": {},
+            }
+        },
+    }
+
+    if jwt_auth_failed:
+        scheme["content"]["application/json"]["examples"]["jwt_auth"] = {
+            "summary": "Credenciales invalidas",
+            "value": {
+                "success": False,
+                "message": ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
+                "data": {},
+            },
+        }
+    if jwt_missing:
+        scheme["content"]["application/json"]["examples"]["jwt_missing"] = {
+            "summary": "JWT faltante",
+            "value": {
+                "success": False,
+                "message": ExceptionErrorMessages.JWT_MISSING.value,
+                "data": {},
+            },
+        }
+    if jwt_invalid:
+        scheme["content"]["application/json"]["examples"]["invalid_jwt"] = {
+            "summary": "JWT inválido",
+            "value": {
+                "success": False,
+                "message": ExceptionErrorMessages.JWT_INVALID.value,
+                "data": {},
+            },
+        }
+    if jwt_expired:
+        scheme["content"]["application/json"]["examples"]["expired_jwt"] = {
+            "summary": "JWT expirado",
+            "value": {
+                "success": False,
+                "message": ExceptionErrorMessages.JWT_EXPIRED.value,
+                "data": {},
+            },
+        }
+    if jwt_user_not_found:
+        scheme["content"]["application/json"]["examples"]["user_not_found"] = {
+            "summary": "JWT usuario no encontrado",
+            "value": {
+                "success": False,
+                "message": ExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
+                "data": {},
+            },
+        }
+
+    return scheme
+
+
+def response_scheme_404() -> dict[str, Any]:
     """Genera un esquema de respuesta para errores **404**."""
 
     return {
@@ -73,7 +150,32 @@ def build_response_scheme_404() -> dict[str, Any]:
     }
 
 
-def build_response_scheme_503(db_unavailable: bool) -> dict[str, Any]:
+def response_scheme_403() -> dict[str, Any]:
+    """Genera un esquema de respuesta para errores **403**."""
+
+    return {
+        "description": "Acceso denegado.",
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean"},
+                        "message": {"type": "string"},
+                        "data": {"type": "object"},
+                    },
+                },
+                "example": {
+                    "success": False,
+                    "message": ExceptionErrorMessages.PERMISSION_DENIED.value,
+                    "data": {},
+                },
+            }
+        },
+    }
+
+
+def response_scheme_503(db_unavailable: bool = False) -> dict[str, Any]:
     """
     Genera un esquema de respuesta para errores **503** cuando algún componente de la API
     no está disponible.
@@ -102,63 +204,6 @@ def build_response_scheme_503(db_unavailable: bool) -> dict[str, Any]:
             "value": {
                 "success": False,
                 "message": ExceptionErrorMessages.DB_UNAVAILABLE.value,
-                "data": {},
-            },
-        }
-
-    return scheme
-
-
-def build_response_scheme_401(
-    jwt_auth: bool,
-    jwt_invalid: bool,
-    jwt_expired: bool,
-) -> dict[str, Any]:
-    """
-    Genera un esquema de respuesta para errores **401** cuando se hace una solicitud no autorizada.
-    """
-
-    scheme: dict[str, Any] = {
-        "description": "Solicitud no autorizada por algunos de los siguientes motivos.",
-        "content": {
-            "application/json": {
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "success": {"type": "boolean"},
-                        "message": {"type": "string"},
-                        "data": {"type": "object"},
-                    },
-                },
-                "examples": {},
-            }
-        },
-    }
-
-    if jwt_auth:
-        scheme["content"]["application/json"]["examples"]["jwt_auth"] = {
-            "summary": "Autenticación JWT",
-            "value": {
-                "success": False,
-                "message": ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
-                "data": {},
-            },
-        }
-    if jwt_invalid:
-        scheme["content"]["application/json"]["examples"]["invalid_jwt"] = {
-            "summary": "JWT inválido",
-            "value": {
-                "success": False,
-                "message": ExceptionErrorMessages.JWT_INVALID.value,
-                "data": {},
-            },
-        }
-    if jwt_expired:
-        scheme["content"]["application/json"]["examples"]["expired_jwt"] = {
-            "summary": "JWT expirado",
-            "value": {
-                "success": False,
-                "message": ExceptionErrorMessages.JWT_EXPIRED.value,
                 "data": {},
             },
         }

@@ -7,16 +7,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.response import Response
 from src.common.schema import (
-    build_response_scheme_400,
-    build_response_scheme_404,
-    build_response_scheme_503,
+    response_scheme_400,
+    response_scheme_401,
+    response_scheme_403,
+    response_scheme_404,
+    response_scheme_503,
 )
 from src.config.database import get_db_session
+from src.modules.admins.models.admin import Admin
+from src.modules.auth.constants import UserRoles
+from src.modules.auth.dependencies import UserPermissionChecker
+from src.modules.auth.models.user import User
+from src.modules.products.dependencies import get_product
 from src.modules.products.dto import ReadProductDTO, UpdateProductDTO
+from src.modules.products.models.product import Product
 from src.modules.products.repositories.product import ProductRepository
 from src.modules.products.services.update_product import UpdateProductService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
+require_admin = UserPermissionChecker(
+    allowed_role=UserRoles.ADMINISTRATOR.value,
+    permission=f"{Product.__tablename__}.update",
+)
 
 
 async def validations(
@@ -47,14 +59,19 @@ async def validations(
     response_description="Producto actualizado exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
-        400: build_response_scheme_400(dto_class=UpdateProductDTO),
-        404: build_response_scheme_404(),
-        503: build_response_scheme_503(db_unavailable=True),
+        400: response_scheme_400(dto_class=UpdateProductDTO),
+        401: response_scheme_401(
+            jwt_missing=True,
+            jwt_invalid=True,
+            jwt_expired=True,
+            jwt_user_not_found=True,
+        ),
+        403: response_scheme_403(),
+        404: response_scheme_404(),
+        503: response_scheme_503(db_unavailable=True),
     },
 )
 async def update_product(
-    data: Annotated[UpdateProductDTO, Depends(validations)],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
     product_id: Annotated[
         UUID,
         Path(
@@ -63,6 +80,10 @@ async def update_product(
             example="123e4567-e89b-12d3-a456-426614174000",
         ),
     ],
+    user: Annotated[tuple[User, Admin], Depends(require_admin)],
+    product: Annotated[Product, Depends(get_product)],
+    data: Annotated[UpdateProductDTO, Depends(validations)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> Response[ReadProductDTO]:
     """
     Endpoint para la actualización de un producto, recibe una petición con los datos necesarios y
@@ -71,10 +92,10 @@ async def update_product(
     """
 
     service = UpdateProductService(db=db, product_repo=ProductRepository)
-    product = await service.update_product(id=product_id, data=data)
+    updated_product = await service.update_product(product_instance=product, data=data)
 
     return Response(
         success=True,
         message="Producto actualizado exitosamente.",
-        data=product,
+        data=updated_product,
     )

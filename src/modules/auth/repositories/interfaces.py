@@ -21,7 +21,7 @@ class IUserRepository(ABC):
         db: AsyncSession,
         filters: dict[str, Any],
         role: Literal["customer"],
-    ) -> tuple[User | None, Customer]: ...
+    ) -> tuple[User, Customer]: ...
 
     @classmethod
     @overload
@@ -30,7 +30,7 @@ class IUserRepository(ABC):
         db: AsyncSession,
         filters: dict[str, Any],
         role: Literal["admin"],
-    ) -> tuple[User | None, Admin]: ...
+    ) -> tuple[User, Admin]: ...
 
     @classmethod
     @abstractmethod
@@ -39,7 +39,7 @@ class IUserRepository(ABC):
         db: AsyncSession,
         filters: dict[str, Any],
         role: str,
-    ) -> tuple[User | None, Any]:
+    ) -> tuple[User, Any]:
         """Obtiene un usuario que coincida con los filtros proporcionados."""
 
         pass

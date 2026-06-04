@@ -2,11 +2,8 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
 import jwt
-from fastapi.security import HTTPBearer
 
 from src.config.parameters import settings
-
-security = HTTPBearer(auto_error=False)
 
 
 def create_access_token(user_id: UUID, user_role: str) -> str:
@@ -17,7 +14,7 @@ def create_access_token(user_id: UUID, user_role: str) -> str:
 
     now = datetime.now(tz=UTC)
     payload = {
-        "sub": str(user_id),  # Requerido si usas 'subject' en jwt.decode()
+        "sub": str(user_id),
         "user_role": user_role,
         "exp": now + timedelta(minutes=settings.access_token_expire),
         "nbf": now,
@@ -54,3 +51,6 @@ def create_refresh_token(user_id: UUID) -> str:
     )
 
     return encoded_jwt
+
+
+

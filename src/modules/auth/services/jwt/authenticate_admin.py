@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.exceptions import AuthenticationError
+from src.common.exceptions import AuthenticationFailed
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dto import AdminCredentialsDTO
 from src.modules.auth.jwt import create_access_token, create_refresh_token
@@ -29,11 +29,11 @@ class AuthAdminService:
         )
 
         if not user_account:
-            raise AuthenticationError()
+            raise AuthenticationFailed()
         if not user_account.has_permission(permission_name="authentication.jwt"):
-            raise AuthenticationError()
+            raise AuthenticationFailed()
         if not user_account.verify_password(password=password):
-            raise AuthenticationError()
+            raise AuthenticationFailed()
 
         access_token = create_access_token(
             user_id=user_account.id,
