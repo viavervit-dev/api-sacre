@@ -23,6 +23,18 @@ class ICategoryRepository(ABC):
 
     @classmethod
     @abstractmethod
+    async def update_category(
+        cls,
+        db: AsyncSession,
+        update_data: dict[str, Any],
+        id: UUID,
+    ) -> Category:
+        """Modifica los datos de una categoria de producto en la base de datos."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
     async def add_product_to_category(cls, db: AsyncSession, name: str) -> None:
         """Incrementa el contador de productos asociados a una categoría en la base de datos."""
 
