@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.exceptions import ResourceNotFound
 from src.config.database import get_db_session
+from src.modules.products.models.category import Category
 from src.modules.products.models.product import Product
 from src.modules.products.repositories.product import ProductRepository
 
@@ -34,3 +35,29 @@ async def get_product(
     product = await ProductRepository.get_product_by_id(id=product_id, db=db)
 
     return product
+
+
+async def get_category(
+    category_id: Annotated[
+        UUID,
+        Path(
+            title="ID de la categoria del producto.",
+            description="El identificador único en formato UUID v4.",
+            example="123e4567-e89b-12d3-a456-426614174000",
+        ),
+    ],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
+) -> Category:
+    """
+    Intercepta el ID de la categoría de la URL, busca la categoría en la base de datos y la
+    retorna. Si la categoría no existe, lanza un error 404.
+    """
+
+    exists = await ProductRepository.exists_category(filters={"id": category_id}, db=db)
+
+    if not exists:
+        raise ResourceNotFound()
+
+    category = await ProductRepository.get_category_by_id(id=category_id, db=db)
+
+    return category

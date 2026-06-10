@@ -16,6 +16,13 @@ class ICategoryRepository(ABC):
 
     @classmethod
     @abstractmethod
+    async def get_category_by_id(cls, db: AsyncSession, id: UUID) -> Category:
+        """Obtiene una categoría de producto por su ID."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
     async def create_category(cls, db: AsyncSession, data: dict[str, Any]) -> Category:
         """Crea una nueva cateogria de prductos en la base de datos."""
 

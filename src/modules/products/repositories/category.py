@@ -16,6 +16,11 @@ class CategoryRepository(ICategoryRepository):
     """
 
     @classmethod
+    async def get_category_by_id(cls, db: AsyncSession, id: UUID) -> Category:
+
+        return await db.get_one(Category, id)
+
+    @classmethod
     async def create_category(cls, db: AsyncSession, data: dict[str, Any]) -> Category:
 
         instance = Category(**data)

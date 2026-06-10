@@ -78,4 +78,4 @@ class ExceptionErrorMessages(Enum):
     JWT_EXPIRED = "Token JWT expirado."
     JWT_USER_NOT_FOUND = "Usuario asociado al JWT no encontrado."
     RESOURCE_NOT_FOUND = "El recurso solicitado no fue encontrado."
-    PERMISSION_DENIED = "El usuario no tiene los permisos necesarios para acceder a este recurso."
+    PERMISSION_DENIED = "El usuario no tiene los permisos necesarios."
