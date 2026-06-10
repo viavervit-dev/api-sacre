@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +16,11 @@ class CategoryRepository(ICategoryRepository):
     """
 
     @classmethod
+    async def get_category_by_id(cls, db: AsyncSession, id: UUID) -> Category:
+
+        return await db.get_one(Category, id)
+
+    @classmethod
     async def create_category(cls, db: AsyncSession, data: dict[str, Any]) -> Category:
 
         instance = Category(**data)
@@ -22,6 +28,26 @@ class CategoryRepository(ICategoryRepository):
         await db.flush()
 
         return instance
+
+    @classmethod
+    async def update_category(
+        cls,
+        db: AsyncSession,
+        update_data: dict[str, Any],
+        id: UUID,
+    ) -> Category:
+        # fmt: off
+        stmt = (
+            update(Category).where(Category.id == id)
+            .values(**update_data)
+            .returning(Category)
+        )
+        # fmt: on
+
+        result = await db.execute(stmt)
+        await db.commit()
+
+        return result.scalar_one()
 
     @classmethod
     async def add_product_to_category(cls, db: AsyncSession, name: str) -> None:
