@@ -78,6 +78,78 @@ class CreateCategoryDTO(BaseModel):
             )
 
 
+class UpdateCategoryDTO(BaseModel):
+    """DTO para la creación de una categoria de producto."""
+
+    name: str = Field(
+        max_length=CategoryEntity.NAME_MAX_LENGTH.value,
+        description=CategoryEntity.NAME_DESCRIPTION.value,
+        examples=["Rosarios"],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                CategoryEntity.NAME_IN_USE.value,
+            ]
+        },
+    )
+    description: str = Field(
+        max_length=CategoryEntity.DESCRIPTION_MAX_LENGTH.value,
+        description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
+        examples=[
+            "Descubre nuestra colección de rosarios, elaborados con dedicación y pensados para "
+            "acompañarte en cada momento de oración y reflexión. Contamos con una amplia variedad "
+            "de diseños que combinan tradición, elegancia y calidad, ideales tanto para uso "
+            "personal como para regalo."
+        ],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+    )
+
+    @model_validator(mode="after")
+    def check_at_least_one_field(self) -> "UpdateCategoryDTO":
+        """Valida que el cliente haya enviado al menos un campo en en el `body` de la petición."""
+
+        # self.model_fields_set contiene los campos enviados explícitamente.
+        # Si su longitud es 0, significa que enviaron un JSON vacío {}.
+        if len(self.model_fields_set) == 0:
+            raise ValueError(
+                "Se debe proporcionar al menos un campo válido para actualizar el producto."
+            )
+
+        return self
+
+    async def check_name(
+        self,
+        db: AsyncSession,
+        product_repo: type[IProductRepository],
+    ) -> None:
+        """Ejecuta validaciones para el nombre de la categoría."""
+
+        if not self.name:
+            return None
+
+        # Validar que el nombre de la categoría no esté registrado en la base de datos
+        exists = await product_repo.exists_category(db=db, filters={"name": self.name})
+
+        if exists:
+            raise RequestValidationError(
+                errors=[
+                    {
+                        "loc": ("body", "name"),
+                        "msg": CategoryEntity.NAME_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                ]
+            )
+
+
 class ReadCategoryDTO(BaseModel):
     """DTO para la lectura de una categoría de producto."""
 
@@ -485,9 +557,8 @@ class UpdateProductDTO(BaseModel):
 
     @model_validator(mode="after")
     def check_at_least_one_field(self) -> "UpdateProductDTO":
-        """
-        Valida que el cliente haya enviado al menos un campo en el JSON.
-        """
+        """Valida que el cliente haya enviado al menos un campo en en el `body` de la petición."""
+
         # self.model_fields_set contiene los campos enviados explícitamente.
         # Si su longitud es 0, significa que enviaron un JSON vacío {}.
         if len(self.model_fields_set) == 0:
