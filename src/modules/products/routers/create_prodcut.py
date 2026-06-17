@@ -16,7 +16,7 @@ from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserPermissionChecker
 from src.modules.auth.models.user import User
-from src.modules.products.dto import CreateProductDTO, ReadProductDTO
+from src.modules.products.dto import CreateProductDTO, PrivateReadProductDTO
 from src.modules.products.models.product import Product
 from src.modules.products.repositories.product import ProductRepository
 from src.modules.products.services.create_product import CreateProductService
@@ -53,7 +53,7 @@ async def validations(
 
 @router.post(
     path="/",
-    response_description="Producto creado exitosamente.",
+    response_description="**(CREATED)** Producto creado exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
         400: response_scheme_400(dto_class=CreateProductDTO),
@@ -71,7 +71,7 @@ async def create_product(
     user: Annotated[tuple[User, Admin], Depends(require_admin)],
     data: Annotated[CreateProductDTO, Depends(validations)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Response[ReadProductDTO]:
+) -> Response[PrivateReadProductDTO]:
     """
     Endpoint para la creación de un producto, recibe una petición con los datos necesarios y
     ejecuta validaciones adicionales. Si todo es correcto, crea el producto en la base de datos
@@ -83,6 +83,7 @@ async def create_product(
 
     return Response(
         success=True,
+        pagination=False,
         message="Producto creado exitosamente.",
         data=product,
     )

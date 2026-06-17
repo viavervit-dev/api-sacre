@@ -19,7 +19,7 @@ from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserPermissionChecker
 from src.modules.auth.models.user import User
 from src.modules.products.dependencies import get_product
-from src.modules.products.dto import ReadProductDTO, UpdateProductDTO
+from src.modules.products.dto import PrivateReadProductDTO, UpdateProductDTO
 from src.modules.products.models.product import Product
 from src.modules.products.repositories.product import ProductRepository
 from src.modules.products.services.update_product import UpdateProductService
@@ -56,7 +56,7 @@ async def validations(
 
 @router.patch(
     path="/{product_id}/",
-    response_description="Producto actualizado exitosamente.",
+    response_description="**(OK)** Producto actualizado exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
         400: response_scheme_400(dto_class=UpdateProductDTO),
@@ -84,7 +84,7 @@ async def update_product(
     product: Annotated[Product, Depends(get_product)],
     data: Annotated[UpdateProductDTO, Depends(validations)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Response[ReadProductDTO]:
+) -> Response[PrivateReadProductDTO]:
     """
     Endpoint para la actualización de un producto, recibe una petición con los datos necesarios y
     ejecuta validaciones adicionales. Si todo es correcto, actualiza el producto en la base de
@@ -96,6 +96,7 @@ async def update_product(
 
     return Response(
         success=True,
+        pagination=False,
         message="Producto actualizado exitosamente.",
         data=updated_product,
     )

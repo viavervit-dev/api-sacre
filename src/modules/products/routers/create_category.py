@@ -53,7 +53,7 @@ async def validations(
 
 @router.post(
     path="/category/",
-    response_description="Categoría creada exitosamente.",
+    response_description="**(CREATED)** Categoría creada exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
         400: response_scheme_400(dto_class=CreateCategoryDTO),
@@ -83,6 +83,7 @@ async def create_category(
 
     return Response(
         success=True,
+        pagination=False,
         message="Categoría creada exitosamente.",
         data=category,
     )

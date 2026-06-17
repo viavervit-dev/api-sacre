@@ -114,6 +114,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             media_type="application/json",
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.REQUEST_DATA_INVALID.value,
                 data=errors_dict,
             ).model_dump(),
@@ -130,6 +131,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.DB_UNAVAILABLE.value,
                 data=None,
             ).model_dump(),
@@ -146,6 +148,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.JWT_EXPIRED.value,
                 data=None,
             ).model_dump(),
@@ -162,6 +165,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.JWT_INVALID.value,
                 data=None,
             ).model_dump(),
@@ -178,6 +182,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
                 data=None,
             ).model_dump(),
@@ -194,6 +199,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.JWT_MISSING.value,
                 data=None,
             ).model_dump(),
@@ -210,6 +216,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
                 data=None,
             ).model_dump(),
@@ -226,6 +233,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
                 data=None,
             ).model_dump(),
@@ -242,6 +250,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             content=Response(
                 success=False,
+                pagination=False,
                 message=ExceptionErrorMessages.PERMISSION_DENIED.value,
                 data=None,
             ).model_dump(),

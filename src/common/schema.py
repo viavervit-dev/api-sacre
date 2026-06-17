@@ -24,13 +24,14 @@ def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
         }
 
     return {
-        "description": "Error de validación en los datos de la petición.",
+        "description": "**(BAD_REQUEST)** Error de validación en los datos de la petición.",
         "content": {
             "application/json": {
                 "schema": {
                     "type": "object",
                     "properties": {
                         "success": {"type": "boolean"},
+                        "pagination": {"type": "boolean"},
                         "message": {"type": "string"},
                         "data": {
                             "type": "object",
@@ -40,6 +41,7 @@ def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
                 },
                 "example": {
                     "success": False,
+                    "pagination": False,
                     "message": ExceptionErrorMessages.REQUEST_DATA_INVALID.value,
                     "data": errors_example,
                 },
@@ -60,13 +62,15 @@ def response_scheme_401(
     """
 
     scheme: dict[str, Any] = {
-        "description": "Solicitud no autorizada por algunos de los siguientes motivos.",
+        "description": "**(UNAUTHORIZED)** Solicitud no autorizada por algunos de los siguientes "
+        "motivos.",
         "content": {
             "application/json": {
                 "schema": {
                     "type": "object",
                     "properties": {
                         "success": {"type": "boolean"},
+                        "pagination": {"type": "boolean"},
                         "message": {"type": "string"},
                         "data": {"type": "object"},
                     },
@@ -81,6 +85,7 @@ def response_scheme_401(
             "summary": "Credenciales invalidas",
             "value": {
                 "success": False,
+                "pagination": False,
                 "message": ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
                 "data": {},
             },
@@ -90,6 +95,7 @@ def response_scheme_401(
             "summary": "JWT faltante",
             "value": {
                 "success": False,
+                "pagination": False,
                 "message": ExceptionErrorMessages.JWT_MISSING.value,
                 "data": {},
             },
@@ -99,6 +105,7 @@ def response_scheme_401(
             "summary": "JWT inválido",
             "value": {
                 "success": False,
+                "pagination": False,
                 "message": ExceptionErrorMessages.JWT_INVALID.value,
                 "data": {},
             },
@@ -108,6 +115,7 @@ def response_scheme_401(
             "summary": "JWT expirado",
             "value": {
                 "success": False,
+                "pagination": False,
                 "message": ExceptionErrorMessages.JWT_EXPIRED.value,
                 "data": {},
             },
@@ -117,6 +125,7 @@ def response_scheme_401(
             "summary": "JWT usuario no encontrado",
             "value": {
                 "success": False,
+                "pagination": False,
                 "message": ExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
                 "data": {},
             },
@@ -129,19 +138,21 @@ def response_scheme_404() -> dict[str, Any]:
     """Genera un esquema de respuesta para errores **404**."""
 
     return {
-        "description": "Recurso no encontrado.",
+        "description": "**(NOT_FOUND)** Recurso no encontrado.",
         "content": {
             "application/json": {
                 "schema": {
                     "type": "object",
                     "properties": {
                         "success": {"type": "boolean"},
+                        "pagination": {"type": "boolean"},
                         "message": {"type": "string"},
                         "data": {"type": "object"},
                     },
                 },
                 "example": {
                     "success": False,
+                    "pagination": False,
                     "message": ExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
                     "data": {},
                 },
@@ -154,19 +165,21 @@ def response_scheme_403() -> dict[str, Any]:
     """Genera un esquema de respuesta para errores **403**."""
 
     return {
-        "description": "Acceso denegado.",
+        "description": "**(FORBIDDEN)** Acceso denegado.",
         "content": {
             "application/json": {
                 "schema": {
                     "type": "object",
                     "properties": {
                         "success": {"type": "boolean"},
+                        "pagination": {"type": "boolean"},
                         "message": {"type": "string"},
                         "data": {"type": "object"},
                     },
                 },
                 "example": {
                     "success": False,
+                    "pagination": False,
                     "message": ExceptionErrorMessages.PERMISSION_DENIED.value,
                     "data": {},
                 },
@@ -182,13 +195,14 @@ def response_scheme_503(db_unavailable: bool = False) -> dict[str, Any]:
     """
 
     scheme: dict[str, Any] = {
-        "description": "Algún componente de la API no está disponible.",
+        "description": "**(SERVICE_UNAVAILABLE)** Algún componente de la API no está disponible.",
         "content": {
             "application/json": {
                 "schema": {
                     "type": "object",
                     "properties": {
                         "success": {"type": "boolean"},
+                        "pagination": {"type": "boolean"},
                         "message": {"type": "string"},
                         "data": {"type": "object"},
                     },
@@ -203,6 +217,7 @@ def response_scheme_503(db_unavailable: bool = False) -> dict[str, Any]:
             "summary": "Base de datos",
             "value": {
                 "success": False,
+                "pagination": False,
                 "message": ExceptionErrorMessages.DB_UNAVAILABLE.value,
                 "data": {},
             },
