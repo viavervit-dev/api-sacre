@@ -17,6 +17,7 @@ from src.modules.auth.routers.jwt.authenticate_admin import router as jwt_login_
 from src.modules.customers.routers.create import router as create_customer
 from src.modules.products.routers.create_category import router as create_category
 from src.modules.products.routers.create_prodcut import router as create_prodcut
+from src.modules.products.routers.get_product import router as get_product
 from src.modules.products.routers.update_category import router as update_category
 from src.modules.products.routers.update_product import router as update_product
 
@@ -87,6 +88,7 @@ v1_router.include_router(router=create_category)
 v1_router.include_router(router=update_category)
 v1_router.include_router(router=create_prodcut)
 v1_router.include_router(router=update_product)
+v1_router.include_router(router=get_product)
 app.include_router(router=v1_router)
 
 
@@ -101,7 +103,7 @@ class HealthCheck(BaseModel):
     tags=["Utilidades"],
     responses={
         200: {
-            "description": "Estado de salud de los componentes de la API.",
+            "description": "**(OK)** Estado de salud de los componentes de la API.",
             "model": Response[HealthCheck],
             "content": {
                 "application/json": {
@@ -110,6 +112,7 @@ class HealthCheck(BaseModel):
                             "summary": "Disponibles",
                             "value": {
                                 "success": True,
+                                "pagination": False,
                                 "message": "Todos los componentes de la API están disponibles.",
                                 "data": {"database": "healthy"},
                             },
@@ -118,6 +121,7 @@ class HealthCheck(BaseModel):
                             "summary": "No disponibles",
                             "value": {
                                 "success": True,
+                                "pagination": False,
                                 "message": "Algunos componentes de la API no están disponibles.",
                                 "data": {"database": "unhealthy"},
                             },
@@ -144,6 +148,7 @@ async def health_check(response: FastAPIResponse) -> Response[HealthCheck]:
 
     return Response(
         success=healthy,
+        pagination=False,
         message="Estado de salud de la API.",
         data=HealthCheck(**checks),
     )

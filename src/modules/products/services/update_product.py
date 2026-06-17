@@ -1,16 +1,16 @@
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import Decimal
 
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.constants import TWO_DECIMAL_PLACES
 from src.modules.products.constants import ProductEntity, VatRatesProduct
-from src.modules.products.dto import ReadProductDTO, UpdateProductDTO
+from src.modules.products.dto import PrivateReadProductDTO, UpdateProductDTO
 from src.modules.products.models.product import Product
 from src.modules.products.repositories.interfaces import IProductRepository
+from src.modules.products.services.utils import ProductServiceBase
 
 
-class UpdateProductService:
+class UpdateProductService(ProductServiceBase):
     """Servicio para la actualización de productos en la base de datos."""
 
     def __init__(self, product_repo: type[IProductRepository], db: AsyncSession) -> None:
@@ -21,7 +21,7 @@ class UpdateProductService:
         self,
         data: UpdateProductDTO,
         product_instance: Product,
-    ) -> ReadProductDTO:
+    ) -> PrivateReadProductDTO:
         """Actualiza los datos de un producto en la base de datos."""
 
         product_data = data.model_dump()
@@ -46,7 +46,7 @@ class UpdateProductService:
         price_neto: Decimal | None = product_data.get("price_neto", None)
         profit_margin: Decimal | None = product_data.get("profit_margin", None)
         iva: VatRatesProduct | None = product_data.get("iva", None)
-        product_data["price_sale"] = self.__calculate_sale_price(
+        product_data["price_sale"] = self._calculate_sale_price(
             price_neto=price_neto or product_instance.price_neto,
             iva=iva.value if iva else product_instance.iva,
             profit_margin=profit_margin or product_instance.profit_margin,
@@ -58,7 +58,7 @@ class UpdateProductService:
             db=self.__db,
             id=product_instance.id,
         )
-        product = ReadProductDTO.model_construct(
+        product = PrivateReadProductDTO.model_construct(
             id=product_instance.id,
             name=product_instance.name,
             categories=product_instance.categories,
@@ -76,19 +76,3 @@ class UpdateProductService:
         )
 
         return product
-
-    @staticmethod
-    def __calculate_sale_price(
-        price_neto: Decimal,
-        iva: Decimal,
-        profit_margin: Decimal,
-    ) -> Decimal:
-        """Calcula el precio de venta a partir del precio neto, IVA y margen de beneficio."""
-
-        raw_price_sale = price_neto * (Decimal("1.0000") + profit_margin)
-        raw_price_sale = raw_price_sale * (Decimal("1.0000") + iva)
-
-        return raw_price_sale.quantize(
-            exp=TWO_DECIMAL_PLACES,
-            rounding=ROUND_HALF_UP,
-        )

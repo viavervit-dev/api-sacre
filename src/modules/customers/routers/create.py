@@ -65,6 +65,7 @@ async def create_customer(
 
     return Response(
         success=True,
+        pagination=False,
         message="Cliente creado exitosamente.",
         data=customer,
     )

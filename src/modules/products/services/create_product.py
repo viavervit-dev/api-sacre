@@ -1,20 +1,18 @@
-from decimal import ROUND_HALF_UP, Decimal
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.constants import TWO_DECIMAL_PLACES
-from src.modules.products.dto import CreateProductDTO, ReadProductDTO
+from src.modules.products.dto import CreateProductDTO, PrivateReadProductDTO
 from src.modules.products.repositories.interfaces import IProductRepository
+from src.modules.products.services.utils import ProductServiceBase
 
 
-class CreateProductService:
+class CreateProductService(ProductServiceBase):
     """Servicio para la creación de productos en la base de datos."""
 
     def __init__(self, product_repo: type[IProductRepository], db: AsyncSession) -> None:
         self.__product_repo = product_repo
         self.__db = db
 
-    async def create_product(self, data: CreateProductDTO) -> ReadProductDTO:
+    async def create_product(self, data: CreateProductDTO) -> PrivateReadProductDTO:
         """Crea un nuevo producto en la base de datos."""
 
         product_data = data.model_dump()
@@ -30,7 +28,7 @@ class CreateProductService:
             await self.__product_repo.add_product_to_category(db=self.__db, name=category)
 
         # Calcular el precio de venta
-        product_data["price_sale"] = self.__calculate_sale_price(
+        product_data["price_sale"] = self._calculate_sale_price(
             price_neto=data.price_neto,
             iva=data.iva.value,
             profit_margin=data.profit_margin,
@@ -44,7 +42,7 @@ class CreateProductService:
             data=product_data,
             db=self.__db,
         )
-        product = ReadProductDTO.model_construct(
+        product = PrivateReadProductDTO.model_construct(
             id=product_instance.id,
             name=product_instance.name,
             categories=product_instance.categories,
@@ -62,19 +60,3 @@ class CreateProductService:
         )
 
         return product
-
-    @staticmethod
-    def __calculate_sale_price(
-        price_neto: Decimal,
-        iva: Decimal,
-        profit_margin: Decimal,
-    ) -> Decimal:
-        """Calcula el precio de venta a partir del precio neto, IVA y margen de beneficio."""
-
-        raw_price_sale = price_neto * (Decimal("1.0000") + profit_margin)
-        raw_price_sale = raw_price_sale * (Decimal("1.0000") + iva)
-
-        return raw_price_sale.quantize(
-            exp=TWO_DECIMAL_PLACES,
-            rounding=ROUND_HALF_UP,
-        )

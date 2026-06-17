@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     # Aplicación
     app_name: str = "API Sacre"
     app_version: str = Field(default_factory=get_app_version)
+    pagination_limit: int = 50
     debug: bool
 
     # Base de Datos

@@ -670,7 +670,7 @@ class UpdateProductDTO(BaseModel):
             raise RequestValidationError(errors=errors)
 
 
-class ReadProductDTO(BaseModel):
+class PrivateReadProductDTO(BaseModel):
     """DTO para la lectura de un producto."""
 
     id: UUID = Field(
@@ -737,4 +737,50 @@ class ReadProductDTO(BaseModel):
     status: bool = Field(
         description=ProductEntity.STATUS_DESCRIPTION.value,
         examples=[True, False],
+    )
+
+
+class PublicReadProductDTO(BaseModel):
+    """DTO para la lectura de un producto."""
+
+    id: UUID = Field(
+        description=ProductEntity.ID_DESCRIPTION.value,
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    )
+    name: str = Field(
+        description=ProductEntity.NAME_DESCRIPTION.value,
+        examples=["Rosario de madera"],
+    )
+    categories: list[str] = Field(
+        description=ProductEntity.CATEGORIES_DESCRIPTION.value,
+        examples=[["Rosarios", "Madera"]],
+    )
+    description_short: str = Field(
+        description=ProductEntity.DESCRIPTION_SHORT_DESCRIPTION.value,
+        examples=["Rosario hecho a mano con cuentas de madera."],
+    )
+    description_long: str = Field(
+        description=ProductEntity.DESCRIPTION_LONG_DESCRIPTION.value,
+        examples=[
+            "Este rosario está fabricado a mano utilizando madera de alta calidad, ideal para "
+            "orar en el día a día. Cuenta con un diseño elegante y tradicional."
+        ],
+    )
+    images: list[str] = Field(
+        description=ProductEntity.IMAGES_DESCRIPTION.value,
+        examples=[
+            [
+                "https://example.com/image1.jpg",
+                "https://example.com/image2.jpg",
+                "https://example.com/image3.jpg",
+            ]
+        ],
+    )
+    price_sale: Decimal = Field(
+        description=ProductEntity.PRICE_SALE_DESCRIPTION.value,
+        examples=[Decimal("15.00")],
+    )
+    stock_sale: int = Field(
+        description=ProductEntity.STOCK_SALE_DESCRIPTION.value,
+        examples=[20],
     )
