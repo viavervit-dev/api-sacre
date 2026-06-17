@@ -150,8 +150,11 @@ class UpdateCategoryDTO(BaseModel):
             )
 
 
-class ReadCategoryDTO(BaseModel):
-    """DTO para la lectura de una categoría de producto."""
+class PrivateReadCategoryDTO(BaseModel):
+    """
+    DTO para la lectura de una categoría de producto con información completa, incluyendo campos
+    que solo deberían ser visibles para administradores.
+    """
 
     id: UUID = Field(
         description=CategoryEntity.ID_DESCRIPTION.value,
@@ -177,6 +180,32 @@ class ReadCategoryDTO(BaseModel):
     status: bool = Field(
         description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
         examples=[True, False],
+    )
+
+
+class PublicReadCategoryDTO(BaseModel):
+    """DTO para la lectura de una categoría de producto con información pública."""
+
+    id: UUID = Field(
+        description=CategoryEntity.ID_DESCRIPTION.value,
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    )
+    name: str = Field(
+        description=CategoryEntity.NAME_DESCRIPTION.value,
+        examples=["Rosarios"],
+    )
+    description: str = Field(
+        description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
+        examples=[
+            "Descubre nuestra colección de rosarios, elaborados con dedicación y pensados para "
+            "acompañarte en cada momento de oración y reflexión. Contamos con una amplia variedad "
+            "de diseños que combinan tradición, elegancia y calidad, ideales tanto para uso "
+            "personal como para regalo."
+        ],
+    )
+    product_count: int = Field(
+        description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
+        examples=[10, 15],
     )
 
 
@@ -671,7 +700,10 @@ class UpdateProductDTO(BaseModel):
 
 
 class PrivateReadProductDTO(BaseModel):
-    """DTO para la lectura de un producto."""
+    """
+    DTO para la lectura de un producto con información completa, incluyendo campos que solo
+    deberían ser visibles para administradores.
+    """
 
     id: UUID = Field(
         description=ProductEntity.ID_DESCRIPTION.value,
@@ -741,7 +773,7 @@ class PrivateReadProductDTO(BaseModel):
 
 
 class PublicReadProductDTO(BaseModel):
-    """DTO para la lectura de un producto."""
+    """DTO para la lectura de un producto con información pública."""
 
     id: UUID = Field(
         description=ProductEntity.ID_DESCRIPTION.value,

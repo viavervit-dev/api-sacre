@@ -16,7 +16,7 @@ from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserPermissionChecker
 from src.modules.auth.models.user import User
-from src.modules.products.dto import CreateCategoryDTO, ReadCategoryDTO
+from src.modules.products.dto import CreateCategoryDTO, PrivateReadCategoryDTO
 from src.modules.products.models.category import Category
 from src.modules.products.repositories.product import ProductRepository
 from src.modules.products.services.create_category import CreateCategoryService
@@ -71,7 +71,7 @@ async def create_category(
     user: Annotated[tuple[User, Admin], Depends(require_admin)],
     data: Annotated[CreateCategoryDTO, Depends(validations)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Response[ReadCategoryDTO]:
+) -> Response[PrivateReadCategoryDTO]:
     """
     Endpoint para la creación de una categoría de productos, recibe una petición con los datos
     necesarios y ejecuta validaciones adicionales. Si todo es correcto, crea la categoría en la

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.products.dto import ReadCategoryDTO, UpdateCategoryDTO
+from src.modules.products.dto import PrivateReadCategoryDTO, UpdateCategoryDTO
 from src.modules.products.models.category import Category
 from src.modules.products.repositories.interfaces import IProductRepository
 
@@ -16,7 +16,7 @@ class UpdateCategoryService:
         self,
         data: UpdateCategoryDTO,
         category_instance: Category,
-    ) -> ReadCategoryDTO:
+    ) -> PrivateReadCategoryDTO:
         """Actualiza los datos de una categoria de producto en la base de datos."""
 
         category_data = data.model_dump()
@@ -27,10 +27,12 @@ class UpdateCategoryService:
             id=category_instance.id,
             db=self.__db,
         )
-        category = ReadCategoryDTO.model_construct(
+        category = PrivateReadCategoryDTO.model_construct(
             id=category_instance.id,
             name=category_instance.name,
             description=category_instance.description,
+            product_count=category_instance.product_count,
+            status=category_instance.status,
         )
 
         return category
