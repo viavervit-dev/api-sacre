@@ -17,6 +17,19 @@ class ICategoryRepository(ABC):
 
     @classmethod
     @abstractmethod
+    async def get_list_categories(
+        cls,
+        offset: int,
+        limit: int,
+        db: AsyncSession,
+        status: bool | None = None,
+    ) -> tuple[Sequence[Category], int]:
+        """Obtiene una secuencia paginada de categorias de productos filtradas por estado."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
     async def get_category_by_id(cls, db: AsyncSession, id: UUID) -> Category:
         """Obtiene una categoría de producto por su ID."""
 

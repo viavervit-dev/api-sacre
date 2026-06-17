@@ -1,7 +1,8 @@
+from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.products.models.category import Category
@@ -14,6 +15,37 @@ class CategoryRepository(ICategoryRepository):
     operaciones en la tabla `product.categories` de la base de datos, resuelve dinámicamente las
     consultas y relaciones.
     """
+
+    @classmethod
+    async def get_list_categories(
+        cls,
+        offset: int,
+        limit: int,
+        db: AsyncSession,
+        status: bool | None = None,
+    ) -> tuple[Sequence[Category], int]:
+
+        # Contamos el total de registros que coinciden con los filtros
+        count_stmt = select(func.count()).select_from(Category)
+
+        if status is not None:
+            count_stmt = count_stmt.where(Category.status == status)
+
+        total_result = await db.execute(count_stmt)
+        total_items = total_result.scalar_one()
+
+        # Luego obtenemos la página de categorias solicitada con los mismos filtros
+        stmt = select(Category)
+
+        if status is not None:
+            stmt = stmt.where(Category.status == status)
+
+        stmt = stmt.order_by(Category.date_joined.desc())
+        stmt = stmt.offset(offset).limit(limit)
+        result = await db.execute(stmt)
+        items = result.scalars().all()
+
+        return items, total_items
 
     @classmethod
     async def get_category_by_id(cls, db: AsyncSession, id: UUID) -> Category:
