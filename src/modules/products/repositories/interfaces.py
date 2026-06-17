@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
@@ -60,6 +61,19 @@ class IProductRepository(ICategoryRepository):
     Interfaz de `ProductRepository`, define el contrato para un repositorio que administra la
     tabla `product.products` en la base de datos.
     """
+
+    @classmethod
+    @abstractmethod
+    async def get_list_products(
+        cls,
+        offset: int,
+        limit: int,
+        db: AsyncSession,
+        status: bool | None = None,
+    ) -> tuple[Sequence[Product], int]:
+        """Obtiene una secuencia paginada de productos filtrados por estado."""
+
+        pass
 
     @classmethod
     @abstractmethod
