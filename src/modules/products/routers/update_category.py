@@ -19,7 +19,7 @@ from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserPermissionChecker
 from src.modules.auth.models.user import User
 from src.modules.products.dependencies import get_category
-from src.modules.products.dto import ReadCategoryDTO, UpdateCategoryDTO
+from src.modules.products.dto import PrivateReadCategoryDTO, UpdateCategoryDTO
 from src.modules.products.models.category import Category
 from src.modules.products.repositories.product import ProductRepository
 from src.modules.products.services.update_category import UpdateCategoryService
@@ -84,7 +84,7 @@ async def update_category(
     category: Annotated[Category, Depends(get_category)],
     data: Annotated[UpdateCategoryDTO, Depends(validations)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Response[ReadCategoryDTO]:
+) -> Response[PrivateReadCategoryDTO]:
     """
     Endpoint para la actualización de una categoria de producto, recibe una petición con los datos
     necesarios y ejecuta validaciones adicionales. Si todo es correcto, actualiza la categoria en
