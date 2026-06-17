@@ -20,7 +20,7 @@ class Customer(MappedAsDataclass, Base):
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.users.id"),
         doc=CustomerEntity.ID_USER_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
         unique=True,
     )
     first_names: Mapped[str] = mapped_column(
@@ -60,5 +60,5 @@ class Customer(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=CustomerEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )

@@ -43,7 +43,7 @@ class User(MappedAsDataclass, Base):
     password_hash: Mapped[str] = mapped_column(
         String(length=UserEntity.PASSWORD_HASH_MAX_LENGTH.value),
         doc=UserEntity.PASSWORD_HASH_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
         init=False,
     )
     role: Mapped[str] = mapped_column(
@@ -67,7 +67,7 @@ class User(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=UserEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )
 
     def set_password(self, password: str) -> None:
@@ -142,5 +142,5 @@ class UserGroup(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc="Fecha y hora de la creación del registro.",
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )

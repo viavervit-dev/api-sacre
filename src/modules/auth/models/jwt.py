@@ -23,17 +23,17 @@ class JWTBlacklist(MappedAsDataclass, Base):
         doc=JWTEntity.TOKEN_DESCRIPTION.value,
         unique=True,
         index=True,
-        nullable=False,
+        nullable=True,
     )
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.users.id", ondelete="CASCADE"),
         doc=JWTEntity.USER_ID_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     expires_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         doc=JWTEntity.EXPIRES_AT_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     id: Mapped[UUID] = mapped_column(
         doc=JWTEntity.ID_DESCRIPTION.value,
@@ -45,5 +45,5 @@ class JWTBlacklist(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=JWTEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )

@@ -38,7 +38,7 @@ class Permission(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=PermissionEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )
 
 
@@ -72,7 +72,7 @@ class Group(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=GroupEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )
 
     @property
@@ -95,12 +95,12 @@ class PermissionGroup(MappedAsDataclass, Base):
     permission_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.permissions.id", ondelete="CASCADE"),
         doc="ID del permiso referenciado",
-        nullable=False,
+        nullable=True,
     )
     group_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.groups.id", ondelete="CASCADE"),
         doc="ID del grupo referenciado",
-        nullable=False,
+        nullable=True,
     )
     id: Mapped[UUID] = mapped_column(
         doc="Identificador único (UUID v4).",
@@ -118,5 +118,5 @@ class PermissionGroup(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc="Fecha y hora de la creación del registro.",
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )

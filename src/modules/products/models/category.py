@@ -25,12 +25,12 @@ class Category(MappedAsDataclass, Base):
         String(length=CategoryEntity.NAME_MAX_LENGTH.value),
         doc=CategoryEntity.NAME_DESCRIPTION.value,
         unique=True,
-        nullable=False,
+        nullable=True,
     )
     description: Mapped[str] = mapped_column(
         String(length=CategoryEntity.DESCRIPTION_MAX_LENGTH.value),
         doc=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     product_count: Mapped[int] = mapped_column(
         Integer,
@@ -39,12 +39,12 @@ class Category(MappedAsDataclass, Base):
             name="product_count_range",
         ),
         doc=CategoryEntity.PRODUCT_NUMBER_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     status: Mapped[bool] = mapped_column(
         Boolean,
         doc=CategoryEntity.STATUS_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     id: Mapped[UUID] = mapped_column(
         doc=CategoryEntity.ID_DESCRIPTION.value,
@@ -56,5 +56,5 @@ class Category(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=CategoryEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )

@@ -38,27 +38,27 @@ class Product(MappedAsDataclass, Base):
         String(length=ProductEntity.NAME_MAX_LENGTH.value),
         doc=ProductEntity.NAME_DESCRIPTION.value,
         unique=True,
-        nullable=False,
+        nullable=True,
     )
     categories: Mapped[list[str]] = mapped_column(
         ARRAY(item_type=String(length=CategoryEntity.NAME_MAX_LENGTH.value)),
         doc=ProductEntity.CATEGORIES_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     description_short: Mapped[str] = mapped_column(
         String(length=ProductEntity.DESCRIPTION_SHORT_MAX_LENGTH.value),
         doc=ProductEntity.DESCRIPTION_SHORT_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     description_long: Mapped[str] = mapped_column(
         String(length=ProductEntity.DESCRIPTION_LONG_MAX_LENGTH.value),
         doc=ProductEntity.DESCRIPTION_LONG_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     images: Mapped[list[str]] = mapped_column(
         ARRAY(item_type=String(length=ProductEntity.URL_IMAGES_MAX_LENGTH.value)),
         doc=ProductEntity.IMAGES_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     price_neto: Mapped[Decimal] = mapped_column(
         Numeric(
@@ -71,7 +71,7 @@ class Product(MappedAsDataclass, Base):
             name="price_neto_range",
         ),
         doc=ProductEntity.PRICE_NETO_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     price_sale: Mapped[Decimal] = mapped_column(
         Numeric(
@@ -84,7 +84,7 @@ class Product(MappedAsDataclass, Base):
             name="price_sale_range",
         ),
         doc=ProductEntity.PRICE_SALE_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     profit_margin: Mapped[Decimal] = mapped_column(
         Numeric(
@@ -97,7 +97,7 @@ class Product(MappedAsDataclass, Base):
             name="profit_margin_range",
         ),
         doc=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     iva: Mapped[Decimal] = mapped_column(
         Numeric(
@@ -110,7 +110,7 @@ class Product(MappedAsDataclass, Base):
             name="iva_range",
         ),
         doc=ProductEntity.IVA_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     stock_total: Mapped[int] = mapped_column(
         Integer,
@@ -119,7 +119,7 @@ class Product(MappedAsDataclass, Base):
             name="stock_total_range",
         ),
         doc=ProductEntity.STOCK_TOTAL_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     stock_hand: Mapped[int] = mapped_column(
         Integer,
@@ -128,7 +128,7 @@ class Product(MappedAsDataclass, Base):
             name="stock_hand_range",
         ),
         doc=ProductEntity.STOCK_HAND_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     stock_sale: Mapped[int] = mapped_column(
         Integer,
@@ -137,12 +137,13 @@ class Product(MappedAsDataclass, Base):
             name="stock_sale_range",
         ),
         doc=ProductEntity.STOCK_SALE_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
     )
     status: Mapped[bool] = mapped_column(
         Boolean,
         doc=ProductEntity.STATUS_DESCRIPTION.value,
-        nullable=False,
+        nullable=True,
+        index=True,
     )
     id: Mapped[UUID] = mapped_column(
         doc=ProductEntity.ID_DESCRIPTION.value,
@@ -154,5 +155,5 @@ class Product(MappedAsDataclass, Base):
         DateTime(timezone=True),
         doc=ProductEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),
-        nullable=False,
+        nullable=True,
     )
