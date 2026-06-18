@@ -23,8 +23,8 @@ from src.modules.products.services.create_product import CreateProductService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(
-    allowed_role=UserRoles.ADMINISTRATOR.value,
-    permission=f"{Product.__tablename__}.create",
+    allowed_roles=[UserRoles.ADMINISTRATOR.value],
+    permissions={UserRoles.ADMINISTRATOR.value: f"{Product.__tablename__}.create"},
 )
 
 

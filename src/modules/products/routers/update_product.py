@@ -26,8 +26,8 @@ from src.modules.products.services.update_product import UpdateProductService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(
-    allowed_role=UserRoles.ADMINISTRATOR.value,
-    permission=f"{Product.__tablename__}.update",
+    allowed_roles=[UserRoles.ADMINISTRATOR.value],
+    permissions={UserRoles.ADMINISTRATOR.value: f"{Product.__tablename__}.update"},
 )
 
 

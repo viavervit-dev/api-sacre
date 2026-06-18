@@ -23,8 +23,14 @@ from src.modules.products.services.get_category import GetCategoryService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserOptionalPermissionChecker(
-    allowed_role=UserRoles.ADMINISTRATOR.value,
-    permission=f"{Category.__tablename__}.read",
+    allowed_roles=[
+        UserRoles.ADMINISTRATOR.value,
+        UserRoles.CUSTOMER.value,
+    ],
+    permissions={
+        UserRoles.ADMINISTRATOR.value: f"{Category.__tablename__}.read.private",
+        UserRoles.CUSTOMER.value: f"{Category.__tablename__}.read.public",
+    },
 )
 
 
@@ -148,10 +154,17 @@ async def get_list_categories(
     """
 
     user_account, _ = user
+    private = False
+    status = True
+
+    if user_account and user_account.role == UserRoles.ADMINISTRATOR.value:
+        private = True
+        status = None
+
     service = GetCategoryService(db=db, product_repo=ProductRepository)
     categories, total_items = await service.get_list_categories(
-        private=bool(user_account),
-        status=None if not bool(user_account) else True,
+        private=private,
+        status=status,
         offset=offset,
         limit=limit,
     )

@@ -23,8 +23,8 @@ from src.modules.products.services.create_category import CreateCategoryService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(
-    allowed_role=UserRoles.ADMINISTRATOR.value,
-    permission=f"{Category.__tablename__}.create",
+    allowed_roles=[UserRoles.ADMINISTRATOR.value],
+    permissions={UserRoles.ADMINISTRATOR.value: f"{Category.__tablename__}.create"},
 )
 
 
