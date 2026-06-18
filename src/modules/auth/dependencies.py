@@ -121,9 +121,9 @@ async def get_user_optional(
 class UserPermissionChecker:
     """Verifica si el usuario autenticado posee los permisos requeridos."""
 
-    def __init__(self, allowed_role: str, permission: str) -> None:
-        self.__allowed_role = allowed_role
-        self.__permission = permission
+    def __init__(self, allowed_roles: list[str], permissions: dict[str, str]) -> None:
+        self.__allowed_roles = allowed_roles
+        self.__permissions = permissions
 
     async def __call__(
         self,
@@ -134,12 +134,15 @@ class UserPermissionChecker:
         user_account, user_profile = user
 
         # Verificamos si el rol del usuario es el permitido
-        if user_account.role != self.__allowed_role:
+        if user_account.role not in self.__allowed_roles:
             raise PermissionDenied()
 
         # Verificamos si el usuario tiene el permiso específico requerido
-        if not user_account.has_permission(permission_name=self.__permission):
-            raise PermissionDenied()
+        for role, permission in self.__permissions.items():
+            if user_account.role == role and not user_account.has_permission(
+                permission_name=permission
+            ):
+                raise PermissionDenied()
 
         return user_account, user_profile
 
@@ -147,9 +150,9 @@ class UserPermissionChecker:
 class UserOptionalPermissionChecker:
     """Verifica si el usuario autenticado posee los permisos requeridos."""
 
-    def __init__(self, allowed_role: str, permission: str) -> None:
-        self.__allowed_role = allowed_role
-        self.__permission = permission
+    def __init__(self, allowed_roles: list[str], permissions: dict[str, str]) -> None:
+        self.__allowed_roles = allowed_roles
+        self.__permissions = permissions
 
     async def __call__(
         self,
@@ -163,11 +166,14 @@ class UserOptionalPermissionChecker:
             return None, None
 
         # Verificamos si el rol del usuario es el permitido
-        if user_account.role != self.__allowed_role:
+        if user_account.role not in self.__allowed_roles:
             raise PermissionDenied()
 
         # Verificamos si el usuario tiene el permiso específico requerido
-        if not user_account.has_permission(permission_name=self.__permission):
-            raise PermissionDenied()
+        for role, permission in self.__permissions.items():
+            if user_account.role == role and not user_account.has_permission(
+                permission_name=permission
+            ):
+                raise PermissionDenied()
 
         return user_account, user_profile

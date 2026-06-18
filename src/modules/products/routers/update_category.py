@@ -26,8 +26,8 @@ from src.modules.products.services.update_category import UpdateCategoryService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(
-    allowed_role=UserRoles.ADMINISTRATOR.value,
-    permission=f"{Category.__tablename__}.update",
+    allowed_roles=[UserRoles.ADMINISTRATOR.value],
+    permissions={UserRoles.ADMINISTRATOR.value: f"{Category.__tablename__}.update"},
 )
 
 
