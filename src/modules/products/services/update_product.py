@@ -20,7 +20,7 @@ class UpdateProductService(ProductServiceBase):
     async def update_product(
         self,
         data: UpdateProductDTO,
-        product_instance: Product,
+        instance: Product,
     ) -> PrivateReadProductDTO:
         """Actualiza los datos de un producto en la base de datos."""
 
@@ -29,7 +29,7 @@ class UpdateProductService(ProductServiceBase):
         # Validaciones de stock_total en relación a stock_hand
         stock_total: int | None = product_data.get("stock_total", None)
 
-        if stock_total and stock_total < product_instance.stock_hand:
+        if stock_total and stock_total < instance.stock_hand:
             raise RequestValidationError(
                 errors=[
                     {
@@ -39,7 +39,7 @@ class UpdateProductService(ProductServiceBase):
                     }
                 ]
             )
-        if stock_total and stock_total == 0 and product_instance.stock_hand == 0:
+        if stock_total and stock_total == 0 and instance.stock_hand == 0:
             product_data["status"] = False
 
         # Calcular el precio de venta
@@ -47,32 +47,32 @@ class UpdateProductService(ProductServiceBase):
         profit_margin: Decimal | None = product_data.get("profit_margin", None)
         iva: VatRatesProduct | None = product_data.get("iva", None)
         product_data["price_sale"] = self._calculate_sale_price(
-            price_neto=price_neto or product_instance.price_neto,
-            iva=iva.value if iva else product_instance.iva,
-            profit_margin=profit_margin or product_instance.profit_margin,
+            price_neto=price_neto or instance.price_neto,
+            iva=iva.value if iva else instance.iva,
+            profit_margin=profit_margin or instance.profit_margin,
         )
 
         # Actualizar el producto en la base de datos
-        product_instance = await self.__product_repo.update_product(
+        instance = await self.__product_repo.update_product(
             update_data=product_data,
+            instance=instance,
             db=self.__db,
-            id=product_instance.id,
         )
         product = PrivateReadProductDTO.model_construct(
-            id=product_instance.id,
-            name=product_instance.name,
-            categories=product_instance.categories,
-            description_short=product_instance.description_short,
-            description_long=product_instance.description_long,
-            images=product_instance.images,
-            price_neto=product_instance.price_neto,
-            price_sale=product_instance.price_sale,
-            profit_margin=product_instance.profit_margin,
-            iva=product_instance.iva,
-            stock_total=product_instance.stock_total,
-            stock_hand=product_instance.stock_hand,
-            stock_sale=product_instance.stock_sale,
-            status=product_instance.status,
+            id=instance.id,
+            name=instance.name,
+            categories=instance.categories,
+            description_short=instance.description_short,
+            description_long=instance.description_long,
+            images=instance.images,
+            price_neto=instance.price_neto,
+            price_sale=instance.price_sale,
+            profit_margin=instance.profit_margin,
+            iva=instance.iva,
+            stock_total=instance.stock_total,
+            stock_hand=instance.stock_hand,
+            stock_sale=instance.stock_sale,
+            status=instance.status,
         )
 
         return product

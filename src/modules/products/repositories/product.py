@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.products.models.product import Product
@@ -66,20 +66,15 @@ class ProductRepository(IProductRepository, CategoryRepository):
         cls,
         db: AsyncSession,
         update_data: dict[str, Any],
-        id: UUID,
+        instance: Product,
     ) -> Product:
-        # fmt: off
-        stmt = (
-            update(Product).where(Product.id == id)
-            .values(**update_data)
-            .returning(Product)
-        )
-        # fmt: on
 
-        result = await db.execute(stmt)
+        for key, value in update_data.items():
+            setattr(instance, key, value)
+
         await db.commit()
 
-        return result.scalar_one()
+        return instance
 
     @classmethod
     async def exists_product(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:

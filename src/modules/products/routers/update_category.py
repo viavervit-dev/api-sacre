@@ -92,7 +92,7 @@ async def update_category(
     """
 
     service = UpdateCategoryService(db=db, product_repo=ProductRepository)
-    updated_category = await service.update_category(category_instance=category, data=data)
+    updated_category = await service.update_category(instance=category, data=data)
 
     return Response(
         success=True,

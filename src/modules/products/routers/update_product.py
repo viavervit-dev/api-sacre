@@ -92,7 +92,7 @@ async def update_product(
     """
 
     service = UpdateProductService(db=db, product_repo=ProductRepository)
-    updated_product = await service.update_product(product_instance=product, data=data)
+    updated_product = await service.update_product(instance=product, data=data)
 
     return Response(
         success=True,
