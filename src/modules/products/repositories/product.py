@@ -48,7 +48,7 @@ class ProductRepository(IProductRepository, CategoryRepository):
         return items, total_items
 
     @classmethod
-    async def get_product_by_id(cls, db: AsyncSession, id: UUID) -> Product:
+    async def get_product(cls, db: AsyncSession, id: UUID) -> Product:
 
         return await db.get_one(Product, id)
 
@@ -75,6 +75,12 @@ class ProductRepository(IProductRepository, CategoryRepository):
         await db.commit()
 
         return instance
+
+    @classmethod
+    async def delete_product(cls, db: AsyncSession, instance: Product) -> None:
+
+        await db.delete(instance)
+        await db.commit()
 
     @classmethod
     async def exists_product(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:

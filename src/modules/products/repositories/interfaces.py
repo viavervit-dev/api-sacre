@@ -116,6 +116,13 @@ class IProductRepository(ICategoryRepository):
 
     @classmethod
     @abstractmethod
+    async def delete_product(cls, db: AsyncSession, instance: Product) -> None:
+        """Elimina un producto de la base de datos."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
     async def exists_product(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
         """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
 
