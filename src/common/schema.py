@@ -56,6 +56,7 @@ def response_scheme_401(
     jwt_invalid: bool = False,
     jwt_expired: bool = False,
     jwt_user_not_found: bool = False,
+    domain_rule_violation: bool = False,
 ) -> dict[str, Any]:
     """
     Genera un esquema de respuesta para errores **401** cuando se hace una solicitud no autorizada.
@@ -127,6 +128,16 @@ def response_scheme_401(
                 "success": False,
                 "pagination": False,
                 "message": ExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
+                "data": {},
+            },
+        }
+    if domain_rule_violation:
+        scheme["content"]["application/json"]["examples"]["domain_rule_violation"] = {
+            "summary": "Violación de regla de dominio",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": ExceptionErrorMessages.DOMAIN_RULE_VIOLATION.value,
                 "data": {},
             },
         }
