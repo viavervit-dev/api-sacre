@@ -8,6 +8,7 @@ from sqlalchemy.exc import OperationalError
 from src.common.constants import DTOValidationErrorMessages, ExceptionErrorMessages
 from src.common.exceptions import (
     AuthenticationFailed,
+    DomainRuleViolation,
     MissingJWT,
     PermissionDenied,
     ResourceNotFound,
@@ -252,6 +253,23 @@ def register_exception_handlers(app: FastAPI) -> None:
                 success=False,
                 pagination=False,
                 message=ExceptionErrorMessages.PERMISSION_DENIED.value,
+                data=None,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(DomainRuleViolation)
+    async def domain_rule_violation(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: DomainRuleViolation,
+    ) -> JSONResponse:
+        """Manejador de error para violaciones de reglas de dominio."""
+
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=Response(
+                success=False,
+                pagination=False,
+                message=ExceptionErrorMessages.DOMAIN_RULE_VIOLATION.value,
                 data=None,
             ).model_dump(),
         )
