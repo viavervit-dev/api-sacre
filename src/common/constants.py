@@ -88,3 +88,4 @@ class ExceptionErrorMessages(Enum):
     JWT_USER_NOT_FOUND = "Usuario asociado al JWT no encontrado."
     RESOURCE_NOT_FOUND = "El recurso solicitado no fue encontrado."
     PERMISSION_DENIED = "El usuario no tiene los permisos necesarios."
+    DOMAIN_RULE_VIOLATION = "La operación viola una regla de dominio."

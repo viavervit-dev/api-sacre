@@ -66,20 +66,15 @@ class CategoryRepository(ICategoryRepository):
         cls,
         db: AsyncSession,
         update_data: dict[str, Any],
-        id: UUID,
+        instance: Category,
     ) -> Category:
-        # fmt: off
-        stmt = (
-            update(Category).where(Category.id == id)
-            .values(**update_data)
-            .returning(Category)
-        )
-        # fmt: on
 
-        result = await db.execute(stmt)
+        for key, value in update_data.items():
+            setattr(instance, key, value)
+
         await db.commit()
 
-        return result.scalar_one()
+        return instance
 
     @classmethod
     async def add_product_to_category(cls, db: AsyncSession, name: str) -> None:

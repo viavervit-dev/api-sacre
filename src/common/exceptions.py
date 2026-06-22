@@ -31,3 +31,9 @@ class PermissionDenied(Exception):
     """
 
     pass
+
+
+class DomainRuleViolation(Exception):
+    """Excepción para violaciones de reglas de dominio."""
+
+    pass

@@ -15,24 +15,24 @@ class UpdateCategoryService:
     async def update_category(
         self,
         data: UpdateCategoryDTO,
-        category_instance: Category,
+        instance: Category,
     ) -> PrivateReadCategoryDTO:
         """Actualiza los datos de una categoria de producto en la base de datos."""
 
         category_data = data.model_dump()
 
         # Actualizar el producto en la base de datos
-        category_instance = await self.__product_repo.update_category(
+        instance = await self.__product_repo.update_category(
             update_data=category_data,
-            id=category_instance.id,
+            instance=instance,
             db=self.__db,
         )
         category = PrivateReadCategoryDTO.model_construct(
-            id=category_instance.id,
-            name=category_instance.name,
-            description=category_instance.description,
-            product_count=category_instance.product_count,
-            status=category_instance.status,
+            id=instance.id,
+            name=instance.name,
+            description=instance.description,
+            product_count=instance.product_count,
+            status=instance.status,
         )
 
         return category

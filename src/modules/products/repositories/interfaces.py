@@ -48,7 +48,7 @@ class ICategoryRepository(ABC):
         cls,
         db: AsyncSession,
         update_data: dict[str, Any],
-        id: UUID,
+        instance: Category,
     ) -> Category:
         """Modifica los datos de una categoria de producto en la base de datos."""
 
@@ -108,9 +108,16 @@ class IProductRepository(ICategoryRepository):
         cls,
         db: AsyncSession,
         update_data: dict[str, Any],
-        id: UUID,
+        instance: Product,
     ) -> Product:
         """Modifica los datos de un producto en la base de datos."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
+    async def delete_product(cls, db: AsyncSession, instance: Product) -> None:
+        """Elimina un producto de la base de datos."""
 
         pass
 
