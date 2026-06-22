@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.modules.products.constants import VatRatesProduct
 from src.modules.products.dto import CreateProductDTO, PrivateReadProductDTO
 from src.modules.products.repositories.interfaces import IProductRepository
 from src.modules.products.services.utils import ProductServiceBase
@@ -16,6 +17,8 @@ class CreateProductService(ProductServiceBase):
         """Crea un nuevo producto en la base de datos."""
 
         product_data = data.model_dump()
+        iva: VatRatesProduct = product_data["iva"]
+        product_data["iva"] = iva.value
 
         # Asignar el estado del producto según el stock total
         if product_data["stock_total"] > 0:
@@ -29,34 +32,34 @@ class CreateProductService(ProductServiceBase):
 
         # Calcular el precio de venta
         product_data["price_sale"] = self._calculate_sale_price(
-            price_neto=data.price_neto,
-            iva=data.iva.value,
-            profit_margin=data.profit_margin,
+            price_neto=product_data["price_neto"],
+            profit_margin=product_data["profit_margin"],
+            iva=product_data["iva"],
         )
 
         # Inicializar el stock en mano y el stock de venta en 0
         product_data["stock_hand"] = 0
         product_data["stock_sale"] = 0
 
-        product_instance = await self.__product_repo.create_product(
+        instance = await self.__product_repo.create_product(
             data=product_data,
             db=self.__db,
         )
         product = PrivateReadProductDTO.model_construct(
-            id=product_instance.id,
-            name=product_instance.name,
-            categories=product_instance.categories,
-            description_short=product_instance.description_short,
-            description_long=product_instance.description_long,
-            images=product_instance.images,
-            price_neto=product_instance.price_neto,
-            price_sale=product_instance.price_sale,
-            profit_margin=product_instance.profit_margin,
-            iva=product_instance.iva,
-            stock_total=product_instance.stock_total,
-            stock_hand=product_instance.stock_hand,
-            stock_sale=product_instance.stock_sale,
-            status=product_instance.status,
+            id=instance.id,
+            name=instance.name,
+            categories=instance.categories,
+            description_short=instance.description_short,
+            description_long=instance.description_long,
+            images=instance.images,
+            price_neto=instance.price_neto,
+            price_sale=instance.price_sale,
+            profit_margin=instance.profit_margin,
+            iva=instance.iva,
+            stock_total=instance.stock_total,
+            stock_hand=instance.stock_hand,
+            stock_sale=instance.stock_sale,
+            status=instance.status,
         )
 
         return product
