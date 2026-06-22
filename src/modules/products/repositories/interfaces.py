@@ -63,6 +63,13 @@ class ICategoryRepository(ABC):
 
     @classmethod
     @abstractmethod
+    async def delete_category(cls, db: AsyncSession, instance: Category) -> None:
+        """Elimina una categoría de la base de datos."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
     async def exists_category(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
         """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
 
