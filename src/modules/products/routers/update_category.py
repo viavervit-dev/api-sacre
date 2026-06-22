@@ -56,7 +56,7 @@ async def validations(
 
 @router.patch(
     path="/category/{category_id}/",
-    response_description="**(OK)** Categoria de producto actualizada exitosamente.",
+    response_description="**(OK)** Categoría de producto actualizada exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
         400: response_scheme_400(dto_class=UpdateCategoryDTO),
