@@ -50,7 +50,9 @@ class ProductRepository(IProductRepository, CategoryRepository):
     @classmethod
     async def get_product(cls, db: AsyncSession, id: UUID) -> Product:
 
-        return await db.get_one(Product, id)
+        product = await db.get_one(Product, id)
+
+        return product
 
     @classmethod
     async def create_product(cls, db: AsyncSession, data: dict[str, Any]) -> Product:

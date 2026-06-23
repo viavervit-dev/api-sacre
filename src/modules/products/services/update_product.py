@@ -24,7 +24,7 @@ class UpdateProductService(ProductServiceBase):
     ) -> PrivateReadProductDTO:
         """Actualiza los datos de un producto en la base de datos."""
 
-        product_data = data.model_dump()
+        product_data = data.model_dump(exclude_unset=True)
 
         # Validaciones de stock_total en relación a stock_hand
         stock_total: int | None = product_data.get("stock_total", None)

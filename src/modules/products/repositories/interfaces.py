@@ -30,7 +30,7 @@ class ICategoryRepository(ABC):
 
     @classmethod
     @abstractmethod
-    async def get_category_by_id(cls, db: AsyncSession, id: UUID) -> Category:
+    async def get_category(cls, db: AsyncSession, id: UUID) -> Category:
         """Obtiene una categoría de producto por su ID."""
 
         pass
@@ -97,7 +97,7 @@ class IProductRepository(ICategoryRepository):
 
     @classmethod
     @abstractmethod
-    async def get_product_by_id(cls, db: AsyncSession, id: UUID) -> Product:
+    async def get_product(cls, db: AsyncSession, id: UUID) -> Product:
         """Obtiene un producto por su ID."""
 
         pass

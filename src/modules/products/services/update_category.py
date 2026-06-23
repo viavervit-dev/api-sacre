@@ -19,7 +19,7 @@ class UpdateCategoryService:
     ) -> PrivateReadCategoryDTO:
         """Actualiza los datos de una categoria de producto en la base de datos."""
 
-        category_data = data.model_dump()
+        category_data = data.model_dump(exclude_unset=True)
 
         # Actualizar el producto en la base de datos
         instance = await self.__product_repo.update_category(
