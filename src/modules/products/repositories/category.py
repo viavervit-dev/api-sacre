@@ -90,6 +90,12 @@ class CategoryRepository(ICategoryRepository):
         await db.commit()
 
     @classmethod
+    async def delete_category(cls, db: AsyncSession, instance: Category) -> None:
+
+        await db.delete(instance)
+        await db.commit()
+
+    @classmethod
     async def exists_category(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
 
         query = select(Category.id).filter_by(**filters)

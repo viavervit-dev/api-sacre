@@ -32,7 +32,7 @@ async def get_product(
     if not exists:
         raise ResourceNotFound()
 
-    product = await ProductRepository.get_product_by_id(id=product_id, db=db)
+    product = await ProductRepository.get_product(id=product_id, db=db)
 
     return product
 
@@ -58,6 +58,6 @@ async def get_category(
     if not exists:
         raise ResourceNotFound()
 
-    category = await ProductRepository.get_category_by_id(id=category_id, db=db)
+    category = await ProductRepository.get_category(id=category_id, db=db)
 
     return category

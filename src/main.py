@@ -17,6 +17,7 @@ from src.modules.auth.routers.jwt.authenticate_admin import router as jwt_login_
 from src.modules.customers.routers.create import router as create_customer
 from src.modules.products.routers.create_category import router as get_category
 from src.modules.products.routers.create_prodcut import router as create_prodcut
+from src.modules.products.routers.delete_category import router as delete_category
 from src.modules.products.routers.delete_product import router as delete_product
 from src.modules.products.routers.get_category import router as create_category
 from src.modules.products.routers.get_product import router as get_product
@@ -93,6 +94,7 @@ v1_router.include_router(router=get_product)
 v1_router.include_router(router=create_prodcut)
 v1_router.include_router(router=update_product)
 v1_router.include_router(router=delete_product)
+v1_router.include_router(router=delete_category)
 app.include_router(router=v1_router)
 
 
