@@ -16,14 +16,14 @@ from src.config.serialization import JSONResponse
 from src.modules.auth.routers.jwt.authenticate_admin import router as jwt_login_admin
 from src.modules.auth.routers.jwt.get_current_user import router as get_current_user
 from src.modules.customers.routers.create import router as create_customer
-from src.modules.products.routers.create_category import router as get_category
-from src.modules.products.routers.create_prodcut import router as create_prodcut
-from src.modules.products.routers.delete_category import router as delete_category
-from src.modules.products.routers.delete_product import router as delete_product
-from src.modules.products.routers.get_category import router as create_category
-from src.modules.products.routers.get_product import router as get_product
-from src.modules.products.routers.update_category import router as update_category
-from src.modules.products.routers.update_product import router as update_product
+from src.modules.products.routers.categories.create_category import router as get_category
+from src.modules.products.routers.categories.delete_category import router as delete_category
+from src.modules.products.routers.categories.get_category import router as create_category
+from src.modules.products.routers.categories.update_category import router as update_category
+from src.modules.products.routers.products.create_prodcut import router as create_prodcut
+from src.modules.products.routers.products.delete_product import router as delete_product
+from src.modules.products.routers.products.get_product import router as get_product
+from src.modules.products.routers.products.update_product import router as update_product
 
 
 @asynccontextmanager
