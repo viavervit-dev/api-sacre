@@ -48,7 +48,7 @@ class CategoryRepository(ICategoryRepository):
         return items, total_items
 
     @classmethod
-    async def get_category_by_id(cls, db: AsyncSession, id: UUID) -> Category:
+    async def get_category(cls, db: AsyncSession, id: UUID) -> Category:
 
         return await db.get_one(Category, id)
 

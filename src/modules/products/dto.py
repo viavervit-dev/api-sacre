@@ -10,7 +10,6 @@ from pydantic import (
     HttpUrl,
     TypeAdapter,
     field_validator,
-    model_validator,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -81,9 +80,10 @@ class CreateCategoryDTO(BaseModel):
 class UpdateCategoryDTO(BaseModel):
     """DTO para la creación de una categoria de producto."""
 
-    name: str = Field(
+    name: str | None = Field(
         max_length=CategoryEntity.NAME_MAX_LENGTH.value,
         description=CategoryEntity.NAME_DESCRIPTION.value,
+        default=None,
         examples=["Rosarios"],
         json_schema_extra={
             "x-validation-errors": [
@@ -94,9 +94,10 @@ class UpdateCategoryDTO(BaseModel):
             ]
         },
     )
-    description: str = Field(
+    description: str | None = Field(
         max_length=CategoryEntity.DESCRIPTION_MAX_LENGTH.value,
         description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
+        default=None,
         examples=[
             "Descubre nuestra colección de rosarios, elaborados con dedicación y pensados para "
             "acompañarte en cada momento de oración y reflexión. Contamos con una amplia variedad "
@@ -111,19 +112,6 @@ class UpdateCategoryDTO(BaseModel):
             ]
         },
     )
-
-    @model_validator(mode="after")
-    def check_at_least_one_field(self) -> "UpdateCategoryDTO":
-        """Valida que el cliente haya enviado al menos un campo en en el `body` de la petición."""
-
-        # self.model_fields_set contiene los campos enviados explícitamente.
-        # Si su longitud es 0, significa que enviaron un JSON vacío {}.
-        if len(self.model_fields_set) == 0:
-            raise ValueError(
-                "Se debe proporcionar al menos un campo válido para actualizar el producto."
-            )
-
-        return self
 
     async def check_name(
         self,
@@ -583,19 +571,6 @@ class UpdateProductDTO(BaseModel):
             ]
         },
     )
-
-    @model_validator(mode="after")
-    def check_at_least_one_field(self) -> "UpdateProductDTO":
-        """Valida que el cliente haya enviado al menos un campo en en el `body` de la petición."""
-
-        # self.model_fields_set contiene los campos enviados explícitamente.
-        # Si su longitud es 0, significa que enviaron un JSON vacío {}.
-        if len(self.model_fields_set) == 0:
-            raise ValueError(
-                "Se debe proporcionar al menos un campo válido para actualizar el producto."
-            )
-
-        return self
 
     @field_validator("iva", mode="before")
     @classmethod
