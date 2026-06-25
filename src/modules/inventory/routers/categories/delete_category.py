@@ -1,0 +1,75 @@
+from typing import Annotated
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, Path, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.common.response import Response
+from src.common.schema import (
+    response_scheme_401,
+    response_scheme_403,
+    response_scheme_404,
+    response_scheme_503,
+)
+from src.config.database import get_db_session
+from src.modules.admins.models.admin import Admin
+from src.modules.auth.constants import UserRoles
+from src.modules.auth.dependencies import UserPermissionChecker
+from src.modules.auth.models.user import User
+from src.modules.inventory.dependencies import get_category
+from src.modules.inventory.models.category import Category
+from src.modules.inventory.repositories.product import ProductRepository
+from src.modules.inventory.services.categories.delete_category import DeleteCategoryService
+
+router = APIRouter(prefix="/inventory", tags=["Inventario"])
+require_admin = UserPermissionChecker(
+    allowed_roles=[UserRoles.ADMINISTRATOR.value],
+    permissions={UserRoles.ADMINISTRATOR.value: f"{Category.__tablename__}.delete"},
+)
+
+
+@router.delete(
+    path="/category/{category_id}/",
+    response_description="**(OK)** Categoría de producto eliminada exitosamente.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        401: response_scheme_401(
+            jwt_missing=True,
+            jwt_invalid=True,
+            jwt_expired=True,
+            jwt_user_not_found=True,
+            domain_rule_violation=True,
+        ),
+        403: response_scheme_403(),
+        404: response_scheme_404(),
+        503: response_scheme_503(db_unavailable=True),
+    },
+)
+async def delete_category(
+    category_id: Annotated[
+        UUID,
+        Path(
+            title="ID de la categoría del producto",
+            description="El identificador único en formato UUID v4.",
+            example="123e4567-e89b-12d3-a456-426614174000",
+        ),
+    ],
+    user: Annotated[tuple[User, Admin], Depends(require_admin)],
+    category: Annotated[Category, Depends(get_category)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
+) -> Response[dict[str, str]]:
+    """
+    Endpoint para la eliminación de una categoría de producto, recibe una petición con los datos
+    necesarios y ejecuta validaciones adicionales. Si todo es correcto, elimina la categoría en la
+    base de datos y devuelve su información.
+    """
+
+    service = DeleteCategoryService(db=db, product_repo=ProductRepository)
+    await service.delete_category(instance=category)
+
+    return Response(
+        success=True,
+        pagination=False,
+        message="Categoría de producto eliminada exitosamente.",
+        data={},
+    )
