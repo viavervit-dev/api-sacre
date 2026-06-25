@@ -35,10 +35,7 @@ class AuthAdminService:
         if not user_account.verify_password(password=password):
             raise AuthenticationFailed()
 
-        access_token = create_access_token(
-            user_id=user_account.id,
-            user_role=user_account.role,
-        )
+        access_token = create_access_token(user_id=user_account.id)
         refresh_token = create_refresh_token(user_id=user_account.id)
 
         return access_token, refresh_token

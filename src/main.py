@@ -14,15 +14,16 @@ from src.config.exception_handlers import register_exception_handlers
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
 from src.modules.auth.routers.jwt.authenticate_admin import router as jwt_login_admin
+from src.modules.auth.routers.jwt.get_current_user import router as get_current_user
 from src.modules.customers.routers.create import router as create_customer
-from src.modules.products.routers.create_category import router as get_category
-from src.modules.products.routers.create_prodcut import router as create_prodcut
-from src.modules.products.routers.delete_category import router as delete_category
-from src.modules.products.routers.delete_product import router as delete_product
-from src.modules.products.routers.get_category import router as create_category
-from src.modules.products.routers.get_product import router as get_product
-from src.modules.products.routers.update_category import router as update_category
-from src.modules.products.routers.update_product import router as update_product
+from src.modules.inventory.routers.categories.create_category import router as get_category
+from src.modules.inventory.routers.categories.delete_category import router as delete_category
+from src.modules.inventory.routers.categories.get_category import router as create_category
+from src.modules.inventory.routers.categories.update_category import router as update_category
+from src.modules.inventory.routers.products.create_prodcut import router as create_prodcut
+from src.modules.inventory.routers.products.delete_product import router as delete_product
+from src.modules.inventory.routers.products.get_product import router as get_product
+from src.modules.inventory.routers.products.update_product import router as update_product
 
 
 @asynccontextmanager
@@ -87,6 +88,7 @@ register_exception_handlers(app=app)
 v1_router = APIRouter(prefix="/api/v1")
 v1_router.include_router(router=create_customer)
 v1_router.include_router(router=jwt_login_admin)
+v1_router.include_router(router=get_current_user)
 v1_router.include_router(router=get_category)
 v1_router.include_router(router=create_category)
 v1_router.include_router(router=update_category)
