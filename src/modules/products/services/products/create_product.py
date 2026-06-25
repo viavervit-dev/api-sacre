@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.modules.products.constants import VatRatesProduct
 from src.modules.products.dto import CreateProductDTO, PrivateReadProductDTO
 from src.modules.products.repositories.interfaces import IProductRepository
-from src.modules.products.services.utils import ProductServiceBase
+from src.modules.products.services.products.utils import ProductServiceBase
 
 
 class CreateProductService(ProductServiceBase):

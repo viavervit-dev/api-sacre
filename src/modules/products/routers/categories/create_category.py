@@ -19,7 +19,7 @@ from src.modules.auth.models.user import User
 from src.modules.products.dto import CreateCategoryDTO, PrivateReadCategoryDTO
 from src.modules.products.models.category import Category
 from src.modules.products.repositories.product import ProductRepository
-from src.modules.products.services.create_category import CreateCategoryService
+from src.modules.products.services.categories.create_category import CreateCategoryService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(

@@ -19,7 +19,7 @@ from src.modules.auth.models.user import User
 from src.modules.products.dependencies import get_category
 from src.modules.products.models.category import Category
 from src.modules.products.repositories.product import ProductRepository
-from src.modules.products.services.delete_category import DeleteCategoryService
+from src.modules.products.services.categories.delete_category import DeleteCategoryService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(

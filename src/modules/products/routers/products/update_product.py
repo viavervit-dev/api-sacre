@@ -22,7 +22,7 @@ from src.modules.products.dependencies import get_product
 from src.modules.products.dto import PrivateReadProductDTO, UpdateProductDTO
 from src.modules.products.models.product import Product
 from src.modules.products.repositories.product import ProductRepository
-from src.modules.products.services.update_product import UpdateProductService
+from src.modules.products.services.products.update_product import UpdateProductService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(

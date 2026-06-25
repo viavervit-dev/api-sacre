@@ -19,7 +19,7 @@ from src.modules.auth.models.user import User
 from src.modules.products.dto import CreateProductDTO, PrivateReadProductDTO
 from src.modules.products.models.product import Product
 from src.modules.products.repositories.product import ProductRepository
-from src.modules.products.services.create_product import CreateProductService
+from src.modules.products.services.products.create_product import CreateProductService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(

@@ -7,7 +7,7 @@ from src.modules.products.constants import ProductEntity, VatRatesProduct
 from src.modules.products.dto import PrivateReadProductDTO, UpdateProductDTO
 from src.modules.products.models.product import Product
 from src.modules.products.repositories.interfaces import IProductRepository
-from src.modules.products.services.utils import ProductServiceBase
+from src.modules.products.services.products.utils import ProductServiceBase
 
 
 class UpdateProductService(ProductServiceBase):

@@ -22,7 +22,7 @@ from src.modules.products.dependencies import get_category
 from src.modules.products.dto import PrivateReadCategoryDTO, UpdateCategoryDTO
 from src.modules.products.models.category import Category
 from src.modules.products.repositories.product import ProductRepository
-from src.modules.products.services.update_category import UpdateCategoryService
+from src.modules.products.services.categories.update_category import UpdateCategoryService
 
 router = APIRouter(prefix="/product", tags=["Productos"])
 require_admin = UserPermissionChecker(
