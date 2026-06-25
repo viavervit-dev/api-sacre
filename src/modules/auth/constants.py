@@ -16,7 +16,9 @@ class UserEntity(Enum):
     EMAIL_DESCRIPTION = "Correo electrónico del usuario."
     PASSWORD_HASH_DESCRIPTION = "Hash encriptado de la contraseña del usuario."
     PASSWORD_DESCRIPTION = "Contraseña del usuario"
-    ROLE_NAME_DESCRIPTION = "Nombre del rol del usuario."
+    FIRST_NAME_DESCRIPTION = "Nombres del usuario."
+    LAST_NAME_DESCRIPTION = "Apellidos del usuario."
+    ROLE_NAME_DESCRIPTION = "Rol del usuario."
     ROLE_DATA_DESCRIPTION = "Datos específicos del rol del usuario."
     DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 

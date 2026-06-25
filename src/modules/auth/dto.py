@@ -50,3 +50,24 @@ class AdminCredentialsDTO(BaseModel):
             ]
         },
     )
+
+
+class CurrentUserDTO(BaseModel):
+    """DTO para las credenciales de autenticación de un administrador."""
+
+    first_names: str = Field(
+        description=UserEntity.FIRST_NAME_DESCRIPTION.value,
+        examples=["John Doe"],
+    )
+    last_names: str = Field(
+        description=UserEntity.LAST_NAME_DESCRIPTION.value,
+        examples=["John Doe"],
+    )
+    email: EmailStr = Field(
+        description=UserEntity.EMAIL_DESCRIPTION.value,
+        examples=["user@email.com"],
+    )
+    role: str = Field(
+        description=UserEntity.ROLE_NAME_DESCRIPTION.value,
+        examples=["administrator", "cliente"],
+    )
