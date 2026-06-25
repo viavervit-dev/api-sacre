@@ -69,5 +69,5 @@ class CurrentUserDTO(BaseModel):
     )
     role: str = Field(
         description=UserEntity.ROLE_NAME_DESCRIPTION.value,
-        examples=["administrator", "cliente"],
+        examples=["admin", "customer"],
     )
