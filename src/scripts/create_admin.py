@@ -43,6 +43,7 @@ async def run(
     # Crear el Usuario
     user_account = User(
         role=UserRoles.ADMINISTRATOR.value,
+        session_version=1,
         email=email,
     )
     user_account.set_password(password=password)

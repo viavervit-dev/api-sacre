@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 import bcrypt
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, MappedAsDataclass, backref, mapped_column, relationship
 
 from src.config.database import Base
@@ -10,6 +10,9 @@ from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserEntity
 from src.modules.auth.models.permission import Group
 from src.modules.customers.models.customer import Customer
+
+# Constantes para validaciones de campos numéricos
+SESSION_VERSION_MIN_VALUE = UserEntity.SESSION_VERSION_MIN_VALUE.value
 
 
 class User(MappedAsDataclass, Base):
@@ -39,6 +42,7 @@ class User(MappedAsDataclass, Base):
         String(length=UserEntity.EMAIL_MAX_LENGTH.value),
         doc=UserEntity.EMAIL_DESCRIPTION.value,
         unique=True,
+        nullable=True,
     )
     password_hash: Mapped[str] = mapped_column(
         String(length=UserEntity.PASSWORD_HASH_MAX_LENGTH.value),
@@ -49,6 +53,16 @@ class User(MappedAsDataclass, Base):
     role: Mapped[str] = mapped_column(
         String(length=UserEntity.ROLE_MAX_LENGTH.value),
         doc=UserEntity.ROLE_NAME_DESCRIPTION.value,
+        nullable=True,
+    )
+    session_version: Mapped[int] = mapped_column(
+        Integer,
+        CheckConstraint(
+            sqltext=f"session_version >= {SESSION_VERSION_MIN_VALUE}",
+            name="session_version_range",
+        ),
+        doc=UserEntity.SESSION_VERSION_DESCRIPTION.value,
+        nullable=True,
     )
     id: Mapped[UUID] = mapped_column(
         doc=UserEntity.ID_DESCRIPTION.value,

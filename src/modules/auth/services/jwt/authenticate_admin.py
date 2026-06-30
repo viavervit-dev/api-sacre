@@ -35,7 +35,13 @@ class AuthAdminService:
         if not user_account.verify_password(password=password):
             raise AuthenticationFailed(message=ExceptionErrorMessages.CREDENTIALS_INVALID.value)
 
-        access_token = create_access_token(user_id=user_account.id)
-        refresh_token = create_refresh_token(user_id=user_account.id)
+        access_token = create_access_token(
+            session_version=user_account.session_version,
+            user_id=user_account.id,
+        )
+        refresh_token = create_refresh_token(
+            session_version=user_account.session_version,
+            user_id=user_account.id,
+        )
 
         return access_token, refresh_token

@@ -20,6 +20,7 @@ class UserEntity(Enum):
     LAST_NAME_DESCRIPTION = "Apellidos del usuario."
     ROLE_NAME_DESCRIPTION = "Rol del usuario."
     ROLE_DATA_DESCRIPTION = "Datos específicos del rol del usuario."
+    SESSION_VERSION_DESCRIPTION = "Control para la revocación global de tokens de acceso."
     DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 
     # Mensajes de error
@@ -31,6 +32,7 @@ class UserEntity(Enum):
     PASSWORD_MAX_LENGTH = 30
     PASSWORD_MIN_LENGTH = 8
     ROLE_MAX_LENGTH = 30
+    SESSION_VERSION_MIN_VALUE = 1
 
 
 class PermissionEntity(Enum):
