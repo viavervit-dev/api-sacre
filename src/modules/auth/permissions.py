@@ -52,6 +52,7 @@ GROUPS: list[RoleGroupConfig] = [
 PERMISSIONS = [
     # Permisos para los modelos del módulo auth
     f"{User.__tablename__}.update_password",
+    f"{User.__tablename__}.delete",
     # Permisos para los modelos del módulo customers
     f"{Customer.__tablename__}.read",
     f"{Customer.__tablename__}.update",

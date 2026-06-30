@@ -2,7 +2,11 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from src.common.constants import ExceptionErrorMessages
+from src.common.constants import ExceptionErrorMessages as CommonExceptionErrorMessages
+from src.modules.auth.constants import ExceptionErrorMessages as AuthExceptionErrorMessages
+from src.modules.inventory.constants import (
+    ExceptionErrorMessages as InventoryExceptionErrorMessages,
+)
 
 
 def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
@@ -42,7 +46,7 @@ def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
                 "example": {
                     "success": False,
                     "pagination": False,
-                    "message": ExceptionErrorMessages.REQUEST_DATA_INVALID.value,
+                    "message": CommonExceptionErrorMessages.REQUEST_DATA_INVALID.value,
                     "data": errors_example,
                 },
             }
@@ -52,11 +56,13 @@ def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
 
 def response_scheme_401(
     jwt_auth_failed: bool = False,
-    jwt_missing: bool = False,
-    jwt_invalid: bool = False,
-    jwt_expired: bool = False,
+    access_jwt_missing: bool = False,
+    refresh_jwt_missing: bool = False,
+    access_jwt_invalid: bool = False,
+    refresh_jwt_invalid: bool = False,
     jwt_user_not_found: bool = False,
-    domain_rule_violation: bool = False,
+    category_has_dependencies: bool = False,
+    product_has_reserved_stock: bool = False,
 ) -> dict[str, Any]:
     """
     Genera un esquema de respuesta para errores **401** cuando se hace una solicitud no autorizada.
@@ -83,61 +89,99 @@ def response_scheme_401(
 
     if jwt_auth_failed:
         scheme["content"]["application/json"]["examples"]["jwt_auth"] = {
-            "summary": "Credenciales invalidas",
+            "summary": "JWT - Credenciales invalidas",
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
+                "message": AuthExceptionErrorMessages.CREDENTIALS_INVALID.value,
                 "data": {},
             },
         }
-    if jwt_missing:
-        scheme["content"]["application/json"]["examples"]["jwt_missing"] = {
-            "summary": "JWT faltante",
+    if access_jwt_missing:
+        scheme["content"]["application/json"]["examples"]["access_jwt_missing"] = {
+            "summary": "JWT - Falta de Token de acceso en Cookie",
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": ExceptionErrorMessages.JWT_MISSING.value,
+                "message": AuthExceptionErrorMessages.ACCESS_JWT_MISSING.value,
                 "data": {},
             },
         }
-    if jwt_invalid:
-        scheme["content"]["application/json"]["examples"]["invalid_jwt"] = {
-            "summary": "JWT inválido",
+    if refresh_jwt_missing:
+        scheme["content"]["application/json"]["examples"]["refresh_jwt_missing"] = {
+            "summary": "JWT - Falta de Token de actualización en Cookie",
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": ExceptionErrorMessages.JWT_INVALID.value,
+                "message": AuthExceptionErrorMessages.REFRESH_JWT_MISSING.value,
                 "data": {},
             },
         }
-    if jwt_expired:
-        scheme["content"]["application/json"]["examples"]["expired_jwt"] = {
-            "summary": "JWT expirado",
+    if access_jwt_invalid:
+        scheme["content"]["application/json"]["examples"]["access_jwt_invalid"] = {
+            "summary": "JWT - Token de acceso inválido",
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": ExceptionErrorMessages.JWT_EXPIRED.value,
+                "message": AuthExceptionErrorMessages.ACCESS_JWT_INVALID.value,
+                "data": {},
+            },
+        }
+        scheme["content"]["application/json"]["examples"]["access_jwt_expired"] = {
+            "summary": "JWT - Token de acceso expirado",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": AuthExceptionErrorMessages.ACCESS_JWT_EXPIRED.value,
+                "data": {},
+            },
+        }
+    if refresh_jwt_invalid:
+        scheme["content"]["application/json"]["examples"]["refresh_jwt_invalid"] = {
+            "summary": "JWT - Token de actualización inválido",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": AuthExceptionErrorMessages.REFRESH_JWT_INVALID.value,
+                "data": {},
+            },
+        }
+        scheme["content"]["application/json"]["examples"]["refresh_jwt_expired"] = {
+            "summary": "JWT - Token de actualización expirado",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": AuthExceptionErrorMessages.REFRESH_JWT_EXPIRED.value,
                 "data": {},
             },
         }
     if jwt_user_not_found:
-        scheme["content"]["application/json"]["examples"]["user_not_found"] = {
-            "summary": "JWT usuario no encontrado",
+        scheme["content"]["application/json"]["examples"]["jwt_user_not_found"] = {
+            "summary": "JWT - Usuario del token de acceso no existe",
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": ExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
+                "message": AuthExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
                 "data": {},
             },
         }
-    if domain_rule_violation:
-        scheme["content"]["application/json"]["examples"]["domain_rule_violation"] = {
+    if category_has_dependencies:
+        scheme["content"]["application/json"]["examples"]["category_has_dependencies"] = {
             "summary": "Violación de regla de dominio",
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": ExceptionErrorMessages.DOMAIN_RULE_VIOLATION.value,
+                "message": InventoryExceptionErrorMessages.CATEGORY_HAS_DEPENDENCIES.value,
+                "data": {},
+            },
+        }
+    if product_has_reserved_stock:
+        scheme["content"]["application/json"]["examples"]["product_has_reserved_stock"] = {
+            "summary": "Violación de regla de dominio",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": InventoryExceptionErrorMessages.PRODUCT_HAS_RESERVED_STOCK.value,
                 "data": {},
             },
         }
@@ -164,7 +208,7 @@ def response_scheme_404() -> dict[str, Any]:
                 "example": {
                     "success": False,
                     "pagination": False,
-                    "message": ExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
+                    "message": CommonExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
                     "data": {},
                 },
             }
@@ -191,7 +235,7 @@ def response_scheme_403() -> dict[str, Any]:
                 "example": {
                     "success": False,
                     "pagination": False,
-                    "message": ExceptionErrorMessages.PERMISSION_DENIED.value,
+                    "message": AuthExceptionErrorMessages.PERMISSION_DENIED.value,
                     "data": {},
                 },
             }
@@ -229,7 +273,7 @@ def response_scheme_503(db_unavailable: bool = False) -> dict[str, Any]:
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": ExceptionErrorMessages.DB_UNAVAILABLE.value,
+                "message": CommonExceptionErrorMessages.DB_UNAVAILABLE.value,
                 "data": {},
             },
         }

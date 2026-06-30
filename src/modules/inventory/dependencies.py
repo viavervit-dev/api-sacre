@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import Depends, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.common.constants import ExceptionErrorMessages
 from src.common.exceptions import ResourceNotFound
 from src.config.database import get_db_session
 from src.modules.inventory.models.category import Category
@@ -30,7 +31,7 @@ async def get_product(
     exists = await ProductRepository.exists_product(filters={"id": product_id}, db=db)
 
     if not exists:
-        raise ResourceNotFound()
+        raise ResourceNotFound(message=ExceptionErrorMessages.RESOURCE_NOT_FOUND.value)
 
     product = await ProductRepository.get_product(id=product_id, db=db)
 
@@ -56,7 +57,7 @@ async def get_category(
     exists = await ProductRepository.exists_category(filters={"id": category_id}, db=db)
 
     if not exists:
-        raise ResourceNotFound()
+        raise ResourceNotFound(message=ExceptionErrorMessages.RESOURCE_NOT_FOUND.value)
 
     category = await ProductRepository.get_category(id=category_id, db=db)
 

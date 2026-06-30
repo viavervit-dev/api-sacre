@@ -5,9 +5,10 @@ import jwt
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.exceptions import MissingJWT, PermissionDenied, UserNotFound
+from src.common.exceptions import InvalidJWT, MissingJWT, PermissionDenied, UserNotFound
 from src.config.database import get_db_session
 from src.config.parameters import settings
+from src.modules.auth.constants import ExceptionErrorMessages
 from src.modules.auth.models.user import User
 from src.modules.auth.repositories.user import UserRepository
 
@@ -18,21 +19,20 @@ class JWTAuthentication:
     desde las cookies HTTPOnly.
     """
 
-    def __init__(self, auto_error: bool = True):
+    def __init__(self, auto_error: bool = True) -> None:
         self.auto_error = auto_error
 
     async def __call__(self, request: Request) -> tuple[str | None, str | None]:
         """Extrae los tokens de acceso y refresco de las cookies de la petición."""
 
         # Extraer tokens exclusivamente de las cookies
-        access_token = request.cookies.get("access_token")
-        refresh_token = request.cookies.get("refresh_token")
+        access_token = request.cookies.get("access_token", None)
+        refresh_token = request.cookies.get("refresh_token", None)
 
-        if not access_token or not refresh_token:
-            if self.auto_error:
-                raise MissingJWT()
-
-            return None, None
+        if not access_token and self.auto_error:
+            raise MissingJWT(message=ExceptionErrorMessages.ACCESS_JWT_MISSING.value)
+        if not refresh_token and self.auto_error:
+            raise MissingJWT(message=ExceptionErrorMessages.REFRESH_JWT_MISSING.value)
 
         return access_token, refresh_token
 
@@ -53,13 +53,19 @@ async def get_user(
     pertenece.
     """
 
-    # Decodificar el token de acceso del usuario
     access_token, _ = tokens
-    payload = jwt.decode(
-        jwt=access_token,
-        key=settings.public_key,
-        algorithms=[settings.jwt_algorithm],
-    )
+
+    try:
+        payload = jwt.decode(
+            jwt=access_token,
+            key=settings.public_key,
+            algorithms=[settings.jwt_algorithm],
+        )
+    except jwt.ExpiredSignatureError:
+        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value)  # noqa
+    except jwt.InvalidTokenError:
+        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value)  # noqa
+
     user_id = UUID(payload["sub"])
 
     # Buscamos el usuario
@@ -70,7 +76,7 @@ async def get_user(
     )
 
     if not exists:
-        raise UserNotFound()
+        raise UserNotFound(message=ExceptionErrorMessages.JWT_USER_NOT_FOUND.value)
 
     return await UserRepository.get_user(
         role=payload["user_role"],
@@ -88,17 +94,22 @@ async def get_user_optional(
     pertenece.
     """
 
-    # Decodificar el token de acceso del usuario
     access_token, _ = tokens
 
     if not access_token:
         return None, None
 
-    payload = jwt.decode(
-        jwt=access_token,
-        key=settings.public_key,
-        algorithms=[settings.jwt_algorithm],
-    )
+    try:
+        payload = jwt.decode(
+            jwt=access_token,
+            key=settings.public_key,
+            algorithms=[settings.jwt_algorithm],
+        )
+    except jwt.ExpiredSignatureError:
+        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value)  # noqa
+    except jwt.InvalidTokenError:
+        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value)  # noqa
+
     user_id = UUID(payload["sub"])
 
     # Buscamos el usuario
@@ -109,7 +120,7 @@ async def get_user_optional(
     )
 
     if not exists:
-        raise UserNotFound()
+        raise UserNotFound(message=ExceptionErrorMessages.JWT_USER_NOT_FOUND.value)
 
     return await UserRepository.get_user(
         role=payload["user_role"],
@@ -135,14 +146,14 @@ class UserPermissionChecker:
 
         # Verificamos si el rol del usuario es el permitido
         if user_account.role not in self.__allowed_roles:
-            raise PermissionDenied()
+            raise PermissionDenied(message=ExceptionErrorMessages.PERMISSION_DENIED.value)
 
         # Verificamos si el usuario tiene el permiso específico requerido
         for role, permission in self.__permissions.items():
             if user_account.role == role and not user_account.has_permission(
                 permission_name=permission
             ):
-                raise PermissionDenied()
+                raise PermissionDenied(message=ExceptionErrorMessages.PERMISSION_DENIED.value)
 
         return user_account, user_profile
 
@@ -167,13 +178,13 @@ class UserOptionalPermissionChecker:
 
         # Verificamos si el rol del usuario es el permitido
         if user_account.role not in self.__allowed_roles:
-            raise PermissionDenied()
+            raise PermissionDenied(message=ExceptionErrorMessages.PERMISSION_DENIED.value)
 
         # Verificamos si el usuario tiene el permiso específico requerido
         for role, permission in self.__permissions.items():
             if user_account.role == role and not user_account.has_permission(
                 permission_name=permission
             ):
-                raise PermissionDenied()
+                raise PermissionDenied(message=ExceptionErrorMessages.PERMISSION_DENIED.value)
 
         return user_account, user_profile

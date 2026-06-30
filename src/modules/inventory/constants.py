@@ -91,3 +91,17 @@ class VatRatesProduct(Enum):
         """Devuelve una lista de los valores de la enumeración."""
 
         return [item.value for item in cls]
+
+
+class ExceptionErrorMessages(Enum):
+    """
+    Enumeración que define constantes relacionadas con los mensajes de error para excepciones
+    generales.
+    """
+
+    CATEGORY_HAS_DEPENDENCIES = (
+        "No se puede eliminar la categoría porque tiene productos asociados."
+    )
+    PRODUCT_HAS_RESERVED_STOCK = (
+        "No se puede eliminar el producto porque actualmente tiene stock reservado."
+    )

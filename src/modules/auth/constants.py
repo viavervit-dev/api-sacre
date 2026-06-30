@@ -70,3 +70,22 @@ class JWTEntity(Enum):
 
     # Propiedades para los campos de la entidad
     TOKEN_MAX_LENGTH = 512
+
+
+class ExceptionErrorMessages(Enum):
+    """
+    Enumeración que define constantes relacionadas con los mensajes de error para excepciones
+    generales.
+    """
+
+    CREDENTIALS_INVALID = "Correo electrónico o contraseña incorrecta."
+    ACCESS_JWT_MISSING = "No se encontró el token de acceso en la petición."
+    REFRESH_JWT_MISSING = "No se encontró el token de actualización en la petición."
+    ACCESS_JWT_EXPIRED = "El token de acceso ha expirado."
+    ACCESS_JWT_NOT_EXPIRED = "El token de acceso no ha expirado."
+    REFRESH_JWT_EXPIRED = "El token de actualización ha expirado."
+    ACCESS_JWT_INVALID = "Token de acceso inválido."
+    REFRESH_JWT_INVALID = "Token de actualización inválido."
+    JWT_USER_NOT_FOUND = "El usuario asociado al token de acceso no existe."
+    PERMISSION_DENIED = "El usuario no tiene los permisos necesarios."
+    SESSION_CORRUPTED = "Sesión inválida o corrupta. Por favor, inicie sesión nuevamente."

@@ -2,6 +2,8 @@ from decimal import Decimal
 from enum import Enum
 
 TWO_DECIMAL_PLACES = Decimal("0.01")
+
+
 PAGINATION_OFFSET_DESCRIPTION = (
     "Define la cantidad de registros que se saltarán desde el inicio "
     "de la lista ordenada. Un valor de `0` significa que iniciará "
@@ -81,11 +83,4 @@ class ExceptionErrorMessages(Enum):
 
     DB_UNAVAILABLE = "El servicio de base de datos no está disponible."
     REQUEST_DATA_INVALID = "Los datos enviados en la petición no son válidos."
-    AUTHENTICATION_FAILED = "Correo electrónico o contraseña incorrecta."
-    JWT_MISSING = "No autenticado, faltan los tokens de sesión."
-    JWT_INVALID = "Token JWT inválido."
-    JWT_EXPIRED = "Token JWT expirado."
-    JWT_USER_NOT_FOUND = "Usuario asociado al JWT no encontrado."
-    RESOURCE_NOT_FOUND = "El recurso solicitado no fue encontrado."
-    PERMISSION_DENIED = "El usuario no tiene los permisos necesarios."
-    DOMAIN_RULE_VIOLATION = "La operación viola una regla de dominio."
+    RESOURCE_NOT_FOUND = "El recurso no existe en la base de datos."
