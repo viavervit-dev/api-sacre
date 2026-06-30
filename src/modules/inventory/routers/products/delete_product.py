@@ -37,6 +37,7 @@ require_admin = UserPermissionChecker(
             access_jwt_missing=True,
             access_jwt_invalid=True,
             jwt_user_not_found=True,
+            auth_session_expired=True,
             product_has_reserved_stock=True,
         ),
         403: response_scheme_403(),

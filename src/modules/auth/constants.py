@@ -91,3 +91,4 @@ class ExceptionErrorMessages(Enum):
     JWT_USER_NOT_FOUND = "El usuario asociado al token de acceso no existe."
     PERMISSION_DENIED = "El usuario no tiene los permisos necesarios."
     SESSION_CORRUPTED = "Sesión inválida o corrupta. Por favor, inicie sesión nuevamente."
+    AUTH_SESSION_EXPIRED = "Las credenciales de autenticación son inválidas o han expirado."

@@ -64,6 +64,7 @@ async def validations(
             access_jwt_missing=True,
             access_jwt_invalid=True,
             jwt_user_not_found=True,
+            auth_session_expired=True,
         ),
         403: response_scheme_403(),
         404: response_scheme_404(),

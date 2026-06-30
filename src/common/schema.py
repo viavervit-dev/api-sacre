@@ -55,7 +55,8 @@ def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
 
 
 def response_scheme_401(
-    jwt_auth_failed: bool = False,
+    credentials_invalid: bool = False,
+    auth_session_expired: bool = False,
     access_jwt_missing: bool = False,
     refresh_jwt_missing: bool = False,
     access_jwt_invalid: bool = False,
@@ -87,13 +88,23 @@ def response_scheme_401(
         },
     }
 
-    if jwt_auth_failed:
-        scheme["content"]["application/json"]["examples"]["jwt_auth"] = {
+    if credentials_invalid:
+        scheme["content"]["application/json"]["examples"]["credentials_invalid"] = {
             "summary": "JWT - Credenciales invalidas",
             "value": {
                 "success": False,
                 "pagination": False,
                 "message": AuthExceptionErrorMessages.CREDENTIALS_INVALID.value,
+                "data": {},
+            },
+        }
+    if auth_session_expired:
+        scheme["content"]["application/json"]["examples"]["auth_session_expired"] = {
+            "summary": "JWT - Sesión inválida o ha expirado",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": AuthExceptionErrorMessages.AUTH_SESSION_EXPIRED.value,
                 "data": {},
             },
         }

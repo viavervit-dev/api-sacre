@@ -124,6 +124,7 @@ schema_200_ok = {
             access_jwt_missing=True,
             access_jwt_invalid=True,
             jwt_user_not_found=True,
+            auth_session_expired=True,
         ),
         403: response_scheme_403(),
         503: response_scheme_503(db_unavailable=True),

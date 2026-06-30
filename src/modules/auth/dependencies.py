@@ -5,7 +5,13 @@ import jwt
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.exceptions import InvalidJWT, MissingJWT, PermissionDenied, UserNotFound
+from src.common.exceptions import (
+    AuthenticationFailed,
+    InvalidJWT,
+    MissingJWT,
+    PermissionDenied,
+    UserNotFound,
+)
 from src.config.database import get_db_session
 from src.config.parameters import settings
 from src.modules.auth.constants import ExceptionErrorMessages
@@ -78,11 +84,16 @@ async def get_user(
     if not exists:
         raise UserNotFound(message=ExceptionErrorMessages.JWT_USER_NOT_FOUND.value)
 
-    return await UserRepository.get_user(
+    user_account, user_profile = await UserRepository.get_user(
         role=payload["user_role"],
         filters={"id": user_id},
         db=db,
     )
+
+    if user_account.session_version != payload["session_version"]:
+        raise AuthenticationFailed(message=ExceptionErrorMessages.AUTH_SESSION_EXPIRED.value)
+
+    return user_account, user_profile
 
 
 async def get_user_optional(
@@ -122,11 +133,16 @@ async def get_user_optional(
     if not exists:
         raise UserNotFound(message=ExceptionErrorMessages.JWT_USER_NOT_FOUND.value)
 
-    return await UserRepository.get_user(
+    user_account, user_profile = await UserRepository.get_user(
         role=payload["user_role"],
         filters={"id": user_id},
         db=db,
     )
+
+    if user_account.session_version != payload["session_version"]:
+        raise AuthenticationFailed(message=ExceptionErrorMessages.AUTH_SESSION_EXPIRED.value)
+
+    return user_account, user_profile
 
 
 class UserPermissionChecker:
