@@ -37,10 +37,12 @@ class AuthAdminService:
 
         access_token = create_access_token(
             session_version=user_account.session_version,
+            user_role=UserRoles.ADMINISTRATOR.value,
             user_id=user_account.id,
         )
         refresh_token = create_refresh_token(
             session_version=user_account.session_version,
+            user_role=UserRoles.ADMINISTRATOR.value,
             user_id=user_account.id,
         )
 

@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from typing import Any, Literal, overload
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -81,5 +83,12 @@ class IUserRepository(ABC):
         role: str,
     ) -> tuple[User, Any]:
         """Crea un nuevo usuario y su perfil asociado en la base de datos."""
+
+        pass
+
+    @classmethod
+    @abstractmethod
+    async def increment_session_versions(cls, db: AsyncSession, user_ids: Sequence[UUID]) -> None:
+        """Incrementa en 1 la versión de la sesión de múltiples usuarios en una sola consulta."""
 
         pass

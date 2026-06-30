@@ -1,6 +1,8 @@
+from collections.abc import Sequence
 from typing import Any, cast
+from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -162,3 +164,15 @@ class UserRepository(IUserRepository):
         result = await db.execute(exists_query)
 
         return result.scalar_one()
+
+    @classmethod
+    async def increment_session_versions(cls, db: AsyncSession, user_ids: Sequence[UUID]) -> None:
+
+        stmt = (
+            update(User)
+            .where(User.id.in_(user_ids))
+            .values(session_version=User.session_version + 1)
+        )
+
+        await db.execute(stmt)
+        await db.commit()
