@@ -19,7 +19,7 @@ router = APIRouter(prefix="/authentication", tags=["Autenticación"])
 
 @router.post(
     path="/jwt/admin/",
-    response_description="Administrador autenticado exitosamente.",
+    response_description="**(NO_CONTENT)** Administrador autenticado exitosamente.",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         400: response_scheme_400(dto_class=AdminCredentialsDTO),

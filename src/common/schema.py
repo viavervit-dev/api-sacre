@@ -61,6 +61,9 @@ def response_scheme_401(
     refresh_jwt_missing: bool = False,
     access_jwt_invalid: bool = False,
     refresh_jwt_invalid: bool = False,
+    access_jwt_expired: bool = False,
+    access_jwt_not_expired: bool = False,
+    refresh_jwt_expired: bool = False,
     jwt_user_not_found: bool = False,
     category_has_dependencies: bool = False,
     product_has_reserved_stock: bool = False,
@@ -138,12 +141,23 @@ def response_scheme_401(
                 "data": {},
             },
         }
+    if access_jwt_expired:
         scheme["content"]["application/json"]["examples"]["access_jwt_expired"] = {
             "summary": "JWT - Token de acceso expirado",
             "value": {
                 "success": False,
                 "pagination": False,
                 "message": AuthExceptionErrorMessages.ACCESS_JWT_EXPIRED.value,
+                "data": {},
+            },
+        }
+    if access_jwt_not_expired:
+        scheme["content"]["application/json"]["examples"]["access_jwt_not_expired"] = {
+            "summary": "JWT - Token de acceso no ha expirado",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": AuthExceptionErrorMessages.ACCESS_JWT_NOT_EXPIRED.value,
                 "data": {},
             },
         }
@@ -157,6 +171,7 @@ def response_scheme_401(
                 "data": {},
             },
         }
+    if refresh_jwt_expired:
         scheme["content"]["application/json"]["examples"]["refresh_jwt_expired"] = {
             "summary": "JWT - Token de actualización expirado",
             "value": {

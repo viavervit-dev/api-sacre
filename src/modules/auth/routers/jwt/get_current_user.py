@@ -38,7 +38,9 @@ require_user = UserPermissionChecker(
     responses={
         401: response_scheme_401(
             access_jwt_missing=True,
+            refresh_jwt_missing=True,
             access_jwt_invalid=True,
+            access_jwt_expired=True,
             jwt_user_not_found=True,
             auth_session_expired=True,
         ),
