@@ -92,24 +92,3 @@ class IUserRepository(ABC):
         """Incrementa en 1 la versión de la sesión de múltiples usuarios en una sola consulta."""
 
         pass
-
-
-class IJWTBlacklistRepository(ABC):
-    """
-    Interfaz de `JWTBlacklistRepository`, define el contrato para un repositorio que administra la
-    tabla `auth.json_web_token_blacklist` en la base de datos.
-    """
-
-    @classmethod
-    @abstractmethod
-    async def exists_token(cls, db: AsyncSession, jti: str) -> bool:
-        """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
-
-        pass
-
-    @classmethod
-    @abstractmethod
-    async def add_to_list(cls, db: AsyncSession, data: dict[str, Any]) -> None:
-        """Agrega un token a la lista negra."""
-
-        pass
