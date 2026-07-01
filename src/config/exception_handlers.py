@@ -1,6 +1,5 @@
 from typing import Any
 
-import jwt
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import OperationalError
@@ -9,6 +8,7 @@ from src.common.constants import DTOValidationErrorMessages, ExceptionErrorMessa
 from src.common.exceptions import (
     AuthenticationFailed,
     DomainRuleViolation,
+    InvalidJWT,
     MissingJWT,
     PermissionDenied,
     ResourceNotFound,
@@ -138,54 +138,20 @@ def register_exception_handlers(app: FastAPI) -> None:
             ).model_dump(),
         )
 
-    @app.exception_handler(jwt.ExpiredSignatureError)
-    async def expired_token_jwt(  # pyright: ignore[reportUnusedFunction]
+    @app.exception_handler(InvalidJWT)
+    async def invalid_jwt(  # pyright: ignore[reportUnusedFunction]
         request: Request,
-        exc: jwt.ExpiredSignatureError,
+        exc: InvalidJWT,
     ) -> JSONResponse:
-        """Manejador de error para tokens JWT expirados."""
+        """Manejador de error para tokens JWT inválidos."""
 
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content=Response(
                 success=False,
                 pagination=False,
-                message=ExceptionErrorMessages.JWT_EXPIRED.value,
-                data=None,
-            ).model_dump(),
-        )
-
-    @app.exception_handler(jwt.InvalidTokenError)
-    async def invalid_token_jwt(  # pyright: ignore[reportUnusedFunction]
-        request: Request,
-        exc: jwt.InvalidTokenError,
-    ) -> JSONResponse:
-        """Manejador de error para tokens JWT inválidos o corruptos."""
-
-        return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            content=Response(
-                success=False,
-                pagination=False,
-                message=ExceptionErrorMessages.JWT_INVALID.value,
-                data=None,
-            ).model_dump(),
-        )
-
-    @app.exception_handler(AuthenticationFailed)
-    async def authentication_error(  # pyright: ignore[reportUnusedFunction]
-        request: Request,
-        exc: AuthenticationFailed,
-    ) -> JSONResponse:
-        """Manejador de error genérico para fallos en la autenticación."""
-
-        return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            content=Response(
-                success=False,
-                pagination=False,
-                message=ExceptionErrorMessages.AUTHENTICATION_FAILED.value,
-                data=None,
+                message=exc.message,
+                data=exc.data,
             ).model_dump(),
         )
 
@@ -194,15 +160,32 @@ def register_exception_handlers(app: FastAPI) -> None:
         request: Request,
         exc: MissingJWT,
     ) -> JSONResponse:
-        """Manejador de error para tokens JWT faltantes."""
+        """Manejador de error para JWT requeridos en un endpoint protegido."""
 
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content=Response(
                 success=False,
                 pagination=False,
-                message=ExceptionErrorMessages.JWT_MISSING.value,
-                data=None,
+                message=exc.message,
+                data=exc.data,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(AuthenticationFailed)
+    async def authentication_failed(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: AuthenticationFailed,
+    ) -> JSONResponse:
+        """Manejador de error"""
+
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=Response(
+                success=False,
+                pagination=False,
+                message=exc.message,
+                data=exc.data,
             ).model_dump(),
         )
 
@@ -218,8 +201,8 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=Response(
                 success=False,
                 pagination=False,
-                message=ExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
-                data=None,
+                message=exc.message,
+                data=exc.data,
             ).model_dump(),
         )
 
@@ -235,8 +218,8 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=Response(
                 success=False,
                 pagination=False,
-                message=ExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
-                data=None,
+                message=exc.message,
+                data=exc.data,
             ).model_dump(),
         )
 
@@ -252,8 +235,8 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=Response(
                 success=False,
                 pagination=False,
-                message=ExceptionErrorMessages.PERMISSION_DENIED.value,
-                data=None,
+                message=exc.message,
+                data=exc.data,
             ).model_dump(),
         )
 
@@ -269,7 +252,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=Response(
                 success=False,
                 pagination=False,
-                message=ExceptionErrorMessages.DOMAIN_RULE_VIOLATION.value,
-                data=None,
+                message=exc.message,
+                data=exc.data,
             ).model_dump(),
         )

@@ -21,6 +21,7 @@ class CreateCustomerService:
         profile_fields = ["first_names", "last_names", "document_type", "document_number", "phone"]
         user_data = {field: getattr(data, field) for field in user_fields}
         profile_data = {field: getattr(data, field) for field in profile_fields}
+        user_data["session_version"] = 1
 
         user_instance, profile_instance = await self.__user_repo.create_user(
             db=self.__db,

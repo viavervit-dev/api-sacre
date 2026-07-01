@@ -22,6 +22,7 @@ class Permission(MappedAsDataclass, Base):
         doc=PermissionEntity.NAME_DESCRIPTION.value,
         unique=True,
         index=True,
+        nullable=True,
     )
     id: Mapped[UUID] = mapped_column(
         doc=PermissionEntity.ID_DESCRIPTION.value,
@@ -56,6 +57,7 @@ class Group(MappedAsDataclass, Base):
         doc=GroupEntity.NAME_DESCRIPTION.value,
         unique=True,
         index=True,
+        nullable=True,
     )
     id: Mapped[UUID] = mapped_column(
         doc=GroupEntity.ID_DESCRIPTION.value,

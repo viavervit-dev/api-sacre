@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.exceptions import DomainRuleViolation
+from src.modules.inventory.constants import ExceptionErrorMessages
 from src.modules.inventory.models.product import Product
 from src.modules.inventory.repositories.interfaces import IProductRepository
 
@@ -16,6 +17,8 @@ class DeleteProductService:
         """Elimina un producto de la base de datos."""
 
         if instance.stock_hand > 0:
-            raise DomainRuleViolation()
+            raise DomainRuleViolation(
+                message=ExceptionErrorMessages.PRODUCT_HAS_RESERVED_STOCK.value
+            )
 
         await self.__product_repo.delete_product(instance=instance, db=self.__db)

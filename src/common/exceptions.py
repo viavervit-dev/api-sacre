@@ -1,39 +1,52 @@
-class AuthenticationFailed(Exception):
-    """Excepción para fallos de las opciones de autenticación de la aplicación."""
+from typing import Any
+
+
+class BaseAppException(Exception):
+    """Clase base para manejar datos dinámicos en las excepciones de la app."""
+
+    def __init__(self, message: str, data: dict[str, Any] = {}) -> None:  # noqa
+        self.message = message
+        self.data = data
+        super().__init__(self.message)
+
+
+class AuthenticationFailed(BaseAppException):
+    """Cuando no se logra autenticar un usuario."""
 
     pass
 
 
-class ResourceNotFound(Exception):
-    """Excepción para recursos no encontrados."""
+class ResourceNotFound(BaseAppException):
+    """El recurso solicitado en la petición no existe."""
 
     pass
 
 
-class UserNotFound(Exception):
-    """Excepción para cuando un usuario no es encontrado en la base de datos."""
+class UserNotFound(BaseAppException):
+    """Cuando un usuario no existe."""
 
     pass
 
 
-class MissingJWT(Exception):
-    """
-    Excepción para solicitudes que requieren autenticación JWT pero no incluyen los tokens
-    necesarios.
-    """
+class MissingJWT(BaseAppException):
+    """Cuando no se encuentran las cookies de JWT en la petición."""
 
     pass
 
 
-class PermissionDenied(Exception):
-    """
-    Excepción para solicitudes donde el usuario autenticado no tiene los permisos necesarios.
-    """
+class InvalidJWT(BaseAppException):
+    """Cuando se proporciona un token JWT inválido."""
 
     pass
 
 
-class DomainRuleViolation(Exception):
-    """Excepción para violaciones de reglas de dominio."""
+class PermissionDenied(BaseAppException):
+    """Cuando un usuario autenticado no tiene los permisos necesarios."""
+
+    pass
+
+
+class DomainRuleViolation(BaseAppException):
+    """Cuando se violan una regla de dominio."""
 
     pass

@@ -141,10 +141,12 @@ schema_200_ok = {
     responses={
         200: schema_200_ok,
         401: response_scheme_401(
-            jwt_missing=True,
-            jwt_invalid=True,
-            jwt_expired=True,
+            access_jwt_missing=True,
+            refresh_jwt_missing=True,
+            access_jwt_invalid=True,
+            access_jwt_expired=True,
             jwt_user_not_found=True,
+            auth_session_expired=True,
         ),
         403: response_scheme_403(),
         503: response_scheme_503(db_unavailable=True),

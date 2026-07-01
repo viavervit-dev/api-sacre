@@ -6,7 +6,7 @@ import jwt
 from src.config.parameters import settings
 
 
-def create_access_token(user_id: UUID) -> str:
+def create_access_token(user_id: UUID, user_role: str, session_version: int) -> str:
     """
     Genera un token JWT de acceso con la información del usuario y su rol, utilizando una clave
     privada para su firma.
@@ -18,6 +18,8 @@ def create_access_token(user_id: UUID) -> str:
         "exp": now + timedelta(minutes=settings.access_token_expire),
         "nbf": now,
         "jti": str(uuid4()),
+        "user_role": user_role,
+        "session_version": session_version,
         "token_type": "access",
     }
     encoded_jwt = jwt.encode(
@@ -29,7 +31,7 @@ def create_access_token(user_id: UUID) -> str:
     return encoded_jwt
 
 
-def create_refresh_token(user_id: UUID) -> str:
+def create_refresh_token(user_id: UUID, user_role: str, session_version: int) -> str:
     """
     Genera un token JWT de refresco con una vida útil más larga. Su único propósito es ser canjeado
     por un nuevo token de acceso cuando este expire.
@@ -41,6 +43,8 @@ def create_refresh_token(user_id: UUID) -> str:
         "exp": now + timedelta(minutes=settings.refresh_token_expire),
         "nbf": now,
         "jti": str(uuid4()),
+        "user_role": user_role,
+        "session_version": session_version,
         "token_type": "refresh",
     }
     encoded_jwt = jwt.encode(
