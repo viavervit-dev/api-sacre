@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from typing import Any, cast
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import exists, literal_column, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -126,7 +126,7 @@ class UserRepository(IUserRepository):
     @classmethod
     async def exists_user(cls, db: AsyncSession, filters: dict[str, Any], role: str) -> bool:
 
-        query = select(User.id)
+        query = select(literal_column("1"))
 
         # Determinar el modelo relacionado según el rol para construir la consulta con JOIN
         RelatedModel: type[Customer] | type[Admin] | None = None
@@ -160,10 +160,13 @@ class UserRepository(IUserRepository):
         if relation_filters:
             query = query.where(*relation_filters)
 
-        exists_query = select(query.exists())
-        result = await db.execute(exists_query)
+        # 2. Construimos la instrucción EXISTS final de forma más directa
+        exists_stmt = select(exists(query))
 
-        return result.scalar_one()
+        # 3. Usamos db.scalar() para ejecutar y extraer el booleano en una sola línea
+        result = await db.scalar(exists_stmt)
+
+        return bool(result)
 
     @classmethod
     async def increment_session_versions(cls, db: AsyncSession, user_ids: Sequence[UUID]) -> None:

@@ -22,6 +22,19 @@ class JWTBlacklist(MappedAsDataclass, Base):
         String(length=JWTEntity.TOKEN_MAX_LENGTH.value),
         doc=JWTEntity.TOKEN_DESCRIPTION.value,
         unique=True,
+        nullable=True,
+    )
+    jti: Mapped[str] = mapped_column(
+        String(length=JWTEntity.JTI_MAX_LENGTH.value),
+        doc=JWTEntity.JTI_DESCRIPTION.value,
+        unique=True,
+        index=True,
+        nullable=True,
+    )
+    token_type: Mapped[str] = mapped_column(
+        String(length=JWTEntity.TOKEN_TYPE_MAX_LENGTH.value),
+        doc=JWTEntity.TOKEN_TYPE_DESCRIPTION.value,
+        unique=True,
         index=True,
         nullable=True,
     )
@@ -30,18 +43,13 @@ class JWTBlacklist(MappedAsDataclass, Base):
         doc=JWTEntity.USER_ID_DESCRIPTION.value,
         nullable=True,
     )
-    expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        doc=JWTEntity.EXPIRES_AT_DESCRIPTION.value,
-        nullable=True,
-    )
     id: Mapped[UUID] = mapped_column(
         doc=JWTEntity.ID_DESCRIPTION.value,
         default_factory=uuid4,
         primary_key=True,
         nullable=False,
     )
-    created_at: Mapped[datetime] = mapped_column(
+    date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         doc=JWTEntity.DATE_JOINED_DESCRIPTION.value,
         default_factory=lambda: datetime.now(tz=UTC),

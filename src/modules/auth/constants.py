@@ -64,14 +64,17 @@ class JWTEntity(Enum):
 
     # Descripciones para los campos de la entidad
     ID_DESCRIPTION = "Identificador único (UUID v4)."
-    TOKEN_DESCRIPTION = "JWT de autenticación."
+    TOKEN_DESCRIPTION = "JWT almacenado en la lista negra para revocación de tokens."
+    JTI_DESCRIPTION = "Identificador único del token."
+    TOKEN_TYPE_DESCRIPTION = "Tipo de token."
     USER_ID_DESCRIPTION = "ID del usuario al que pertenece el token."
-    EXPIRES_AT_DESCRIPTION = "Fecha y hora de expiración del token."
     ACCESS_TOKEN_DESCRIPTION = "Token de acceso JWT para autenticación de un usuario."
     DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 
     # Propiedades para los campos de la entidad
+    TOKEN_TYPE_MAX_LENGTH = 20
     TOKEN_MAX_LENGTH = 512
+    JTI_MAX_LENGTH = 200
 
 
 class ExceptionErrorMessages(Enum):
