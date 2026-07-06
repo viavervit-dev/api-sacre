@@ -15,6 +15,7 @@ from src.config.parameters import settings
 from src.config.serialization import JSONResponse
 from src.modules.auth.routers.jwt.authenticate_admin import router as jwt_login_admin
 from src.modules.auth.routers.jwt.get_current_user import router as get_current_user
+from src.modules.auth.routers.jwt.logout import router as jwt_logout
 from src.modules.auth.routers.jwt.refresh import router as jwt_refresh
 from src.modules.customers.routers.create import router as create_customer
 from src.modules.inventory.routers.categories.create_category import router as get_category
@@ -98,6 +99,7 @@ v1_router.include_router(router=get_product)
 v1_router.include_router(router=create_prodcut)
 v1_router.include_router(router=update_product)
 v1_router.include_router(router=delete_product)
+v1_router.include_router(router=jwt_logout)
 v1_router.include_router(router=delete_category)
 app.include_router(router=v1_router)
 
