@@ -1,22 +1,36 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any
 
-from src.modules.inventory.constants import VatRatesProduct
+from fastapi.exceptions import RequestValidationError
+from pydantic import HttpUrl, TypeAdapter
+
+from src.modules.inventory.constants import ProductEntity, VatRatesProduct
 from src.modules.inventory.dto import CreateProductDTO, PrivateReadProductDTO
-from src.modules.inventory.repositories.interfaces import IProductRepository
-from src.modules.inventory.services.products.utils import ProductServiceBase
+from src.modules.inventory.repositories.interfaces import ICategoryRepository, IProductRepository
+from src.modules.inventory.services.products.utils import ProductPricingMixin
 
 
-class CreateProductService(ProductServiceBase):
-    """Servicio para la creación de productos en la base de datos."""
+class CreateProductService(ProductPricingMixin):
+    """Servicio para la validación de negocio, cálculo de precios y creación de productos."""
 
-    def __init__(self, product_repo: type[IProductRepository], db: AsyncSession) -> None:
+    def __init__(
+        self,
+        product_repo: IProductRepository,
+        category_repo: ICategoryRepository,
+    ) -> None:
         self.__product_repo = product_repo
-        self.__db = db
+        self.__category_repo = category_repo
 
     async def create_product(self, data: CreateProductDTO) -> PrivateReadProductDTO:
-        """Crea un nuevo producto en la base de datos."""
+        """
+        Crea un nuevo producto aplicando reglas de negocio, stock y cálculo de precios.
+
+        Raises:
+            RequestValidationError: Si las validaciones de negocio fallan (nombre en uso,
+                URLs de imagen inválidas o categorías inexistentes).
+        """
 
         product_data = data.model_dump()
+        await self.__run_business_validations(product_data=product_data)
         iva: VatRatesProduct = product_data["iva"]
         product_data["iva"] = iva.value
 
@@ -28,7 +42,7 @@ class CreateProductService(ProductServiceBase):
 
         # Incrementar el contador de productos asociados a cada categoría
         for category in product_data["categories"]:
-            await self.__product_repo.add_product_to_category(db=self.__db, name=category)
+            await self.__category_repo.add_product_to_category(name=category)
 
         # Calcular el precio de venta
         product_data["price_sale"] = self._calculate_sale_price(
@@ -41,10 +55,7 @@ class CreateProductService(ProductServiceBase):
         product_data["stock_hand"] = 0
         product_data["stock_sale"] = 0
 
-        instance = await self.__product_repo.create_product(
-            data=product_data,
-            db=self.__db,
-        )
+        instance = await self.__product_repo.create_product(data=product_data)
         product = PrivateReadProductDTO.model_construct(
             id=instance.id,
             name=instance.name,
@@ -63,3 +74,57 @@ class CreateProductService(ProductServiceBase):
         )
 
         return product
+
+    async def __run_business_validations(self, product_data: dict[str, Any]) -> None:
+        """
+        Ejecuta las validaciones de negocio previas a la creación del producto.
+
+        Raises:
+            RequestValidationError: Si el nombre ya existe, alguna URL de imagen es inválida
+                o alguna de las categorías no existe.
+        """
+
+        errors = []
+
+        # Validar que el nombre del producto no esté registrado en la base de datos
+        exists = await self.__product_repo.exists_product(filters={"name": product_data["name"]})
+
+        if exists:
+            errors.append(
+                {
+                    "loc": ("body", "name"),
+                    "msg": ProductEntity.NAME_IN_USE.value,
+                    "type": "domain_validation",
+                }
+            )
+
+        # Validar que cada elemento de la lista de imágenes sea una URL válida
+        adapter = TypeAdapter(HttpUrl)
+
+        for i, url in enumerate(product_data["images"]):
+            try:
+                adapter.validate_python(url)
+            except Exception:
+                errors.append(
+                    {
+                        "loc": ("body", "images", i),
+                        "msg": ProductEntity.URL_INVALID.value,
+                        "type": "domain_validation",
+                    }
+                )
+
+        # Validar que cada categoría exista en la base de datos
+        for i, category in enumerate(product_data["categories"]):
+            exists = await self.__category_repo.exists_category(filters={"name": category})
+
+            if not exists:
+                errors.append(
+                    {
+                        "loc": ("body", "categories", i),
+                        "msg": ProductEntity.CATEGORY_NOT_FOUND.value,
+                        "type": "domain_validation",
+                    }
+                )
+
+        if errors:
+            raise RequestValidationError(errors=errors)

@@ -1,10 +1,7 @@
-from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.constants import DTOValidationErrorMessages
-from src.modules.auth.constants import UserEntity, UserRoles
-from src.modules.auth.repositories.interfaces import IUserRepository
+from src.modules.auth.constants import UserEntity
 from src.modules.customers.constants import CustomerEntity, DocumentTypesCustomer
 
 
@@ -101,81 +98,6 @@ class CreateCustomerDTO(BaseModel):
             ]
         },
     )
-
-    async def check_email(
-        self,
-        db: AsyncSession,
-        user_repo: type[IUserRepository],
-    ) -> None:
-        """Ejecuta validaciones para el correo electrónico del cliente."""
-
-        # Validar que el correo electrónico no esté registrado en la base de datos
-        exists = await user_repo.exists_user(
-            filters={"email": self.email},
-            role=UserRoles.CUSTOMER.value,
-            db=db,
-        )
-
-        if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "email"),
-                        "msg": UserEntity.EMAIL_IN_USE.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
-
-    async def check_phone(
-        self,
-        db: AsyncSession,
-        user_repo: type[IUserRepository],
-    ) -> None:
-        """Ejecuta validaciones para el número de teléfono del cliente."""
-
-        # Validar que el número de teléfono no esté registrado en la base de datos
-        exists = await user_repo.exists_user(
-            filters={"phone": self.phone},
-            role=UserRoles.CUSTOMER.value,
-            db=db,
-        )
-
-        if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "phone"),
-                        "msg": CustomerEntity.PHONE_IN_USE.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
-
-    async def check_document_number(
-        self,
-        db: AsyncSession,
-        user_repo: type[IUserRepository],
-    ) -> None:
-        """Ejecuta validaciones para el número de documento del cliente."""
-
-        # Validar que el número de documento no esté registrado en la base de datos
-        exists = await user_repo.exists_user(
-            filters={"document_number": self.document_number},
-            role=UserRoles.CUSTOMER.value,
-            db=db,
-        )
-
-        if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "document_number"),
-                        "msg": CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
 
 
 class ReadCustomerDTO(BaseModel):

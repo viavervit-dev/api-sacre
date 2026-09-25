@@ -1,28 +1,9 @@
-from typing import TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
 from src.common.constants import DTOValidationErrorMessages
 from src.modules.auth.constants import UserEntity
-
-T = TypeVar("T")
-
-
-class ReadUserDTO[T](BaseModel):
-    """DTO para la lectura de datos de un usuario."""
-
-    id: UUID = Field(
-        description=UserEntity.ID_DESCRIPTION.value,
-        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
-    )
-    email: EmailStr = Field(
-        description=UserEntity.EMAIL_DESCRIPTION.value,
-        examples=["user@email.com"],
-    )
-    role_data: T = Field(
-        description=UserEntity.ROLE_DATA_DESCRIPTION.value,
-    )
 
 
 class AdminCredentialsDTO(BaseModel):
@@ -52,9 +33,13 @@ class AdminCredentialsDTO(BaseModel):
     )
 
 
-class CurrentUserDTO(BaseModel):
+class ReadUserDTO(BaseModel):
     """DTO para las credenciales de autenticación de un administrador."""
 
+    id: UUID = Field(
+        description=UserEntity.ID_DESCRIPTION.value,
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    )
     first_names: str = Field(
         description=UserEntity.FIRST_NAME_DESCRIPTION.value,
         examples=["John Doe"],

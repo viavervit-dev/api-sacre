@@ -1,13 +1,21 @@
-from src.modules.admins.models.admin import Admin
-from src.modules.auth.dto import CurrentUserDTO
-from src.modules.customers.models.customer import Customer
+from src.modules.auth.dto import ReadUserDTO
+from src.modules.auth.models.user import User
 
 
-class GetCurrentUserService:
-    """Servicio para obtener la información del usuario actual de la sesión."""
+class RetrieveCurrentUserService:
+    """Servicio encargado de formatear la información del usuario autenticado actual."""
 
     @classmethod
-    async def get_current_user(cls, instance: Admin | Customer) -> CurrentUserDTO:
-        """Obtiene la información del usuario actual de la sesión."""
+    async def get_current_user(cls, instance: User) -> ReadUserDTO:
+        """Construye el DTO con los datos del usuario autenticado en la sesión."""
 
-        return CurrentUserDTO.model_construct(**instance.__dict__)
+        role = instance.role
+        profile_instance = getattr(instance, role)
+
+        return ReadUserDTO.model_construct(
+            id=instance.id,
+            first_names=profile_instance.first_names,
+            last_names=profile_instance.last_names,
+            email=instance.email,
+            role=role,
+        )

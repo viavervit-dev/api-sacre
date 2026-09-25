@@ -2,20 +2,15 @@ from decimal import Decimal, InvalidOperation
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi.exceptions import RequestValidationError
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    HttpUrl,
-    TypeAdapter,
     field_validator,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.constants import DTOValidationErrorMessages
 from src.modules.inventory.constants import CategoryEntity, ProductEntity, VatRatesProduct
-from src.modules.inventory.repositories.interfaces import IProductRepository
 
 CATEGORY_NAME_MAX_LENGTH = CategoryEntity.NAME_MAX_LENGTH.value
 URL_IMAGES_MAX_LENGTH = ProductEntity.URL_IMAGES_MAX_LENGTH.value
@@ -55,30 +50,9 @@ class CreateCategoryDTO(BaseModel):
         },
     )
 
-    async def check_name(
-        self,
-        db: AsyncSession,
-        product_repo: type[IProductRepository],
-    ) -> None:
-        """Ejecuta validaciones para el nombre de la categoría."""
-
-        # Validar que el nombre de la categoría no esté registrado en la base de datos
-        exists = await product_repo.exists_category(db=db, filters={"name": self.name})
-
-        if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "name"),
-                        "msg": CategoryEntity.NAME_IN_USE.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
-
 
 class UpdateCategoryDTO(BaseModel):
-    """DTO para la creación de una categoria de producto."""
+    """DTO para la actualización de una categoria de producto."""
 
     name: str | None = Field(
         max_length=CategoryEntity.NAME_MAX_LENGTH.value,
@@ -112,30 +86,6 @@ class UpdateCategoryDTO(BaseModel):
             ]
         },
     )
-
-    async def check_name(
-        self,
-        db: AsyncSession,
-        product_repo: type[IProductRepository],
-    ) -> None:
-        """Ejecuta validaciones para el nombre de la categoría."""
-
-        if not self.name:
-            return None
-
-        # Validar que el nombre de la categoría no esté registrado en la base de datos
-        exists = await product_repo.exists_category(db=db, filters={"name": self.name})
-
-        if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "name"),
-                        "msg": CategoryEntity.NAME_IN_USE.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
 
 
 class PrivateReadCategoryDTO(BaseModel):
@@ -347,81 +297,8 @@ class CreateProductDTO(BaseModel):
 
         try:
             return Decimal(value=str(value))
-        except (InvalidOperation, TypeError, ValueError):
+        except InvalidOperation, TypeError, ValueError:
             return value
-
-    async def check_name(
-        self,
-        db: AsyncSession,
-        product_repo: type[IProductRepository],
-    ) -> None:
-        """Ejecuta validaciones para el nombre del producto."""
-
-        # Validar que el nombre del producto no esté registrado en la base de datos
-        exists = await product_repo.exists_product(db=db, filters={"name": self.name})
-
-        if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "name"),
-                        "msg": ProductEntity.NAME_IN_USE.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
-
-    async def check_images_urls(
-        self,
-        db: AsyncSession,
-        product_repo: type[IProductRepository],
-    ) -> None:
-        """Valida que cada elemento de la lista de imágenes sea una URL válida."""
-
-        adapter = TypeAdapter(HttpUrl)
-        errors = []
-
-        for i, url in enumerate(self.images):
-            try:
-                adapter.validate_python(url)
-            except Exception:
-                errors.append(
-                    {
-                        "loc": ("body", "images", i),
-                        "msg": ProductEntity.URL_INVALID.value,
-                        "type": "domain_validation",
-                    }
-                )
-
-        if errors:
-            raise RequestValidationError(errors=errors)
-
-    async def check_categories(
-        self,
-        db: AsyncSession,
-        product_repo: type[IProductRepository],
-    ) -> None:
-        """Ejecuta validaciones para el campo `categories` del producto."""
-
-        errors = []
-
-        for i, category in enumerate(self.categories):
-            exists = await product_repo.exists_category(
-                filters={"name": category},
-                db=db,
-            )
-
-            if not exists:
-                errors.append(
-                    {
-                        "loc": ("body", "categories", i),
-                        "msg": ProductEntity.CATEGORY_NOT_FOUND.value,
-                        "type": "domain_validation",
-                    }
-                )
-
-        if errors:
-            raise RequestValidationError(errors=errors)
 
 
 class UpdateProductDTO(BaseModel):
@@ -588,90 +465,8 @@ class UpdateProductDTO(BaseModel):
 
         try:
             return Decimal(value=str(value))
-        except (InvalidOperation, TypeError, ValueError):
+        except InvalidOperation, TypeError, ValueError:
             return value
-
-    async def check_name(
-        self,
-        db: AsyncSession,
-        product_repo: type[IProductRepository],
-    ) -> None:
-        """Ejecuta validaciones para el nombre del producto."""
-
-        if not self.name:
-            return None
-
-        # Validar que el nombre del producto no esté registrado en la base de datos
-        exists = await product_repo.exists_product(db=db, filters={"name": self.name})
-
-        if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "name"),
-                        "msg": ProductEntity.NAME_IN_USE.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
-
-    async def check_images_urls(
-        self,
-        db: AsyncSession,
-        product_repo: type[IProductRepository],
-    ) -> None:
-        """Valida que cada elemento de la lista de imágenes sea una URL válida."""
-
-        if not self.images:
-            return None
-
-        adapter = TypeAdapter(HttpUrl)
-        errors = []
-
-        for i, url in enumerate(self.images):
-            try:
-                adapter.validate_python(url)
-            except Exception:
-                errors.append(
-                    {
-                        "loc": ("body", "images", i),
-                        "msg": ProductEntity.URL_INVALID.value,
-                        "type": "domain_validation",
-                    }
-                )
-
-        if errors:
-            raise RequestValidationError(errors=errors)
-
-    async def check_categories(
-        self,
-        db: AsyncSession,
-        product_repo: type[IProductRepository],
-    ) -> None:
-        """Ejecuta validaciones para el campo `categories` del producto."""
-
-        if not self.categories:
-            return None
-
-        errors = []
-
-        for i, category in enumerate(self.categories):
-            exists = await product_repo.exists_category(
-                filters={"name": category},
-                db=db,
-            )
-
-            if not exists:
-                errors.append(
-                    {
-                        "loc": ("body", "categories", i),
-                        "msg": ProductEntity.CATEGORY_NOT_FOUND.value,
-                        "type": "domain_validation",
-                    }
-                )
-
-        if errors:
-            raise RequestValidationError(errors=errors)
 
 
 class PrivateReadProductDTO(BaseModel):
