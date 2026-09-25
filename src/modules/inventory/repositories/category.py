@@ -11,73 +11,65 @@ from src.modules.inventory.repositories.interfaces import ICategoryRepository
 
 class CategoryRepository(ICategoryRepository):
     """
-    Repositorio para categorías de productos. Esta clase proporciona métodos que realizan
-    operaciones en la tabla `product.categories` de la base de datos, resuelve dinámicamente las
-    consultas y relaciones.
+    Repositorio SQLAlchemy para la gestión de categorías en `product.categories`.
+
+    Implementa operaciones asíncronas de consulta paginada, inserción, actualización,
+    conteo incremental y eliminación de categorías.
     """
 
-    @classmethod
+    def __init__(self, db: AsyncSession) -> None:
+        self.__db = db
+
     async def get_list_categories(
-        cls,
+        self,
         offset: int,
         limit: int,
-        db: AsyncSession,
         status: bool | None = None,
     ) -> tuple[Sequence[Category], int]:
 
-        # Contamos el total de registros que coinciden con los filtros
         count_stmt = select(func.count()).select_from(Category)
 
         if status is not None:
             count_stmt = count_stmt.where(Category.status == status)
 
-        total_result = await db.execute(count_stmt)
-        total_items = total_result.scalar_one()
+        total_items = await self.__db.scalar(count_stmt) or 0
 
-        # Luego obtenemos la página de categorias solicitada con los mismos filtros
+        if total_items == 0:
+            return [], 0
+
         stmt = select(Category)
 
         if status is not None:
             stmt = stmt.where(Category.status == status)
 
-        stmt = stmt.order_by(Category.date_joined.desc())
-        stmt = stmt.offset(offset).limit(limit)
-        result = await db.execute(stmt)
-        items = result.scalars().all()
+        stmt = stmt.order_by(Category.date_joined.desc()).offset(offset).limit(limit)
+        result = await self.__db.scalars(stmt)
+        items = result.all()
 
         return items, total_items
 
-    @classmethod
-    async def get_category(cls, db: AsyncSession, id: UUID) -> Category:
+    async def get_category(self, id: UUID) -> Category | None:
 
-        return await db.get_one(Category, id)
+        return await self.__db.get(Category, id)
 
-    @classmethod
-    async def create_category(cls, db: AsyncSession, data: dict[str, Any]) -> Category:
+    async def create_category(self, data: dict[str, Any]) -> Category:
 
         instance = Category(**data)
-        db.add(instance)
-        await db.flush()
+        self.__db.add(instance)
+        await self.__db.flush()
 
         return instance
 
-    @classmethod
-    async def update_category(
-        cls,
-        db: AsyncSession,
-        update_data: dict[str, Any],
-        instance: Category,
-    ) -> Category:
+    async def update_category(self, update_data: dict[str, Any], instance: Category) -> Category:
 
         for key, value in update_data.items():
             setattr(instance, key, value)
 
-        await db.commit()
+        await self.__db.flush()
 
         return instance
 
-    @classmethod
-    async def add_product_to_category(cls, db: AsyncSession, name: str) -> None:
+    async def add_product_to_category(self, name: str) -> None:
         # fmt: off
         stmt = (
             update(Category).where(Category.name == name)
@@ -86,20 +78,17 @@ class CategoryRepository(ICategoryRepository):
         )
         # fmt: off
 
-        await db.execute(stmt)
-        await db.commit()
+        await self.__db.execute(stmt)
+        await self.__db.flush()
 
-    @classmethod
-    async def delete_category(cls, db: AsyncSession, instance: Category) -> None:
+    async def delete_category(self, instance: Category) -> None:
 
-        await db.delete(instance)
-        await db.commit()
+        await self.__db.delete(instance)
+        await self.__db.flush()
 
-    @classmethod
-    async def exists_category(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
+    async def exists_category(self, filters: dict[str, Any]) -> bool:
 
-        query = select(Category.id).filter_by(**filters)
-        exists_query = select(query.exists())
-        result = await db.execute(exists_query)
+        stmt = select(Category.id).filter_by(**filters)
+        result = await self.__db.scalar(select(stmt.exists()))
 
-        return result.scalar_one()
+        return bool(result)

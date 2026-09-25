@@ -6,89 +6,79 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.inventory.models.product import Product
-from src.modules.inventory.repositories.category import CategoryRepository
 from src.modules.inventory.repositories.interfaces import IProductRepository
 
 
-class ProductRepository(IProductRepository, CategoryRepository):
+class ProductRepository(IProductRepository):
     """
-    Repositorio para productos. Esta clase proporciona métodos que realizan operaciones en la tabla
-    `product.products` de la base de datos, resuelve dinámicamente las consultas y relaciones.
+    Repositorio SQLAlchemy para la gestión de productos en `product.products`.
+
+    Implementa operaciones asíncronas de consulta paginada, inserción, actualización,
+    verificación de existencia y eliminación de productos.
     """
 
-    @classmethod
+    def __init__(self, db: AsyncSession) -> None:
+        self.__db = db
+
     async def get_list_products(
-        cls,
+        self,
         offset: int,
         limit: int,
-        db: AsyncSession,
         status: bool | None = None,
     ) -> tuple[Sequence[Product], int]:
 
-        # Contamos el total de registros que coinciden con los filtros
-        count_stmt = select(func.count()).select_from(Product)
+        count_stmt = select(func.count(Product.id))
 
         if status is not None:
             count_stmt = count_stmt.where(Product.status == status)
 
-        total_result = await db.execute(count_stmt)
-        total_items = total_result.scalar_one()
+        total_items = await self.__db.scalar(count_stmt) or 0
 
-        # Luego obtenemos la página de productos solicitada con los mismos filtros
+        if total_items == 0:
+            return [], 0
+
         stmt = select(Product)
 
         if status is not None:
             stmt = stmt.where(Product.status == status)
 
-        stmt = stmt.order_by(Product.date_joined.desc())
-        stmt = stmt.offset(offset).limit(limit)
-        result = await db.execute(stmt)
-        items = result.scalars().all()
+        stmt = stmt.order_by(Product.date_joined.desc()).offset(offset).limit(limit)
+        result = await self.__db.scalars(stmt)
+        items = result.all()
 
         return items, total_items
 
-    @classmethod
-    async def get_product(cls, db: AsyncSession, id: UUID) -> Product:
+    async def get_product(self, id: UUID) -> Product | None:
 
-        product = await db.get_one(Product, id)
+        product = await self.__db.get(Product, id)
 
         return product
 
-    @classmethod
-    async def create_product(cls, db: AsyncSession, data: dict[str, Any]) -> Product:
+    async def create_product(self, data: dict[str, Any]) -> Product:
 
         instance = Product(**data)
-        db.add(instance)
-        await db.flush()
+        self.__db.add(instance)
+        await self.__db.flush()
 
         return instance
 
-    @classmethod
-    async def update_product(
-        cls,
-        db: AsyncSession,
-        update_data: dict[str, Any],
-        instance: Product,
-    ) -> Product:
+    async def update_product(self, update_data: dict[str, Any], instance: Product) -> Product:
 
         for key, value in update_data.items():
             setattr(instance, key, value)
 
-        await db.commit()
+        await self.__db.flush()
 
         return instance
 
-    @classmethod
-    async def delete_product(cls, db: AsyncSession, instance: Product) -> None:
+    async def delete_product(self, instance: Product) -> None:
 
-        await db.delete(instance)
-        await db.commit()
+        await self.__db.delete(instance)
+        await self.__db.flush()
 
-    @classmethod
-    async def exists_product(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
+    async def exists_product(self, filters: dict[str, Any]) -> bool:
 
-        query = select(Product.id).filter_by(**filters)
-        exists_query = select(query.exists())
-        result = await db.execute(exists_query)
+        stmt = select(Product.id).filter_by(**filters)
+        result = await self.__db.scalar(select(stmt.exists()))
 
-        return result.scalar_one()
+        return bool(result)
