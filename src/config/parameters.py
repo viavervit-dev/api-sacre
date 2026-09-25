@@ -49,8 +49,14 @@ class Settings(BaseSettings):
 
     # Base de Datos
     database_url: AnyUrl
-    db_pool_size: int = Field(ge=1, le=100)
-    db_pool_max_overflow: int = Field(ge=0, le=100)
+    db_pool_size: int
+    db_pool_max_overflow: int
+    db_pool_timeout: int
+    db_pool_recycle: int
+    db_echo: bool
+    db_command_timeout: int
+    db_jit: str
+    db_statement_timeout: str
 
     # Seguridad
     private_key: str

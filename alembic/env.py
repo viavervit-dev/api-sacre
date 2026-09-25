@@ -6,7 +6,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, text
 from sqlalchemy.engine import Connection
 
 import src.config.models
@@ -34,6 +34,16 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def get_all_model_schemas() -> set[str]:
+    """Extrae dinámicamente todos los esquemas únicos definidos en los modelos."""
+
+    return {
+        table.schema
+        for table in target_metadata.tables.values()
+        if table.schema is not None
+    }
+
+
 def run_migrations_offline() -> None:
     """Ejecuta las migraciones en modo **offline**."""
 
@@ -47,6 +57,9 @@ def run_migrations_offline() -> None:
     )
 
     with context.begin_transaction():
+        for schema in get_all_model_schemas():
+            context.execute(f"CREATE SCHEMA IF NOT EXISTS {schema};")
+
         context.run_migrations()
 
 
@@ -58,12 +71,18 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+
     with connectable.connect() as connection:
+        for schema in get_all_model_schemas():
+            connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
+
+        connection.commit()
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
         )
+
         with context.begin_transaction():
             context.run_migrations()
 

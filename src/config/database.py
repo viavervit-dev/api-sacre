@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import text
@@ -30,14 +31,29 @@ async def create_db_pool() -> None:
     """
 
     global _engine, _async_session_factory
-
     db_url = str(settings.database_url)
+
+    # Argumentos específicos para el driver asyncpg
+    connect_args = {
+        # Timeout para cualquier comando SQL individual
+        "command_timeout": settings.db_command_timeout,
+        "server_settings": {
+            # Timeout a nivel de Postgres para matar queries colgadas tras 10 segundos
+            "statement_timeout": settings.db_statement_timeout,
+            # Desactiva JIT para reducir latencia en transacciones cortas OLTP
+            "jit": settings.db_jit,
+        },
+    }
+
     _engine = create_async_engine(
-        db_url,
-        pool_size=settings.db_pool_size,
+        url=db_url,
         max_overflow=settings.db_pool_max_overflow,
+        pool_timeout=settings.db_pool_timeout,
+        pool_recycle=settings.db_pool_recycle,
+        pool_size=settings.db_pool_size,
+        connect_args=connect_args,
+        echo=settings.db_echo,
         pool_pre_ping=True,
-        echo=settings.debug,
     )
     _async_session_factory = async_sessionmaker(
         bind=_engine,
@@ -53,10 +69,11 @@ async def close_db_pool() -> None:
     la aplicación via el gestor de `lifespan`.
     """
 
-    global _engine
+    global _engine, _async_session_factory
 
     if _engine is not None:
         await _engine.dispose()
+        _async_session_factory = None
         _engine = None
 
 
@@ -67,7 +84,8 @@ async def check_db_connection() -> bool:
         return False
 
     try:
-        async with _engine.connect() as conn:
+        # Timeout estricto de 2 segundos para no colgar las sondas de Kubernetes / Balanceador
+        async with asyncio.timeout(2.0), _engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
 
         return True
@@ -75,7 +93,7 @@ async def check_db_connection() -> bool:
         return False
 
 
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_db_session() -> AsyncGenerator[AsyncSession]:
     """
     Dependencia para obtener una sesión de base de datos.
 

@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from sqlalchemy import ARRAY, Boolean, CheckConstraint, DateTime, Integer, Numeric, String
-from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.config.database import Base
 from src.modules.inventory.constants import CategoryEntity, ProductEntity
@@ -25,15 +25,23 @@ STOCK_SALE_MAX = ProductEntity.STOCK_SALE_MAX_VALUE.value
 STOCK_SALE_MIN = ProductEntity.STOCK_SALE_MIN_VALUE.value
 
 
-class Product(MappedAsDataclass, Base):
+class Product(Base):
     """
-    Entidad `Product` y modelo ORM de la tabla `products`. Actúa simultáneamente como entidad de
-    dominio y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
+    Modelo ORM para la gestión de productos y artículos del inventario.
+
+    Centraliza la información de catálogo, categorización, precios, cálculo de
+    márgenes e IVA, y el control de existencias en almacén y venta (`product.products`).
     """
 
     __tablename__ = "products"
     __table_args__ = {"schema": "product"}
 
+    id: Mapped[UUID] = mapped_column(
+        doc=ProductEntity.ID_DESCRIPTION.value,
+        default=uuid4,
+        primary_key=True,
+        nullable=False,
+    )
     name: Mapped[str] = mapped_column(
         String(length=ProductEntity.NAME_MAX_LENGTH.value),
         doc=ProductEntity.NAME_DESCRIPTION.value,
@@ -145,15 +153,9 @@ class Product(MappedAsDataclass, Base):
         nullable=True,
         index=True,
     )
-    id: Mapped[UUID] = mapped_column(
-        doc=ProductEntity.ID_DESCRIPTION.value,
-        default_factory=uuid4,
-        primary_key=True,
-        nullable=False,
-    )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         doc=ProductEntity.DATE_JOINED_DESCRIPTION.value,
-        default_factory=lambda: datetime.now(tz=UTC),
+        default=lambda: datetime.now(tz=UTC),
         nullable=True,
     )

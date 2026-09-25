@@ -2,21 +2,28 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.config.database import Base
 from src.modules.admins.constants import AdminEntity
 
 
-class Admin(MappedAsDataclass, Base):
+class Admin(Base):
     """
-    Entidad `Admin` y modelo ORM de la tabla `admins`. Actúa simultáneamente como entidad de
-    dominio y como modelo **SQLAlchemy** para persistencia y migraciones con **Alembic**.
+    Modelo ORM para el perfil de usuario administrador.
+
+    Almacena los datos personales del administrador en el esquema `admin` y se
+    vincula directamente mediante una relación uno a uno con la cuenta base `User`.
     """
 
     __tablename__ = "admins"
     __table_args__ = {"schema": "admin"}
 
+    id: Mapped[UUID] = mapped_column(
+        doc=AdminEntity.ID_DESCRIPTION.value,
+        default=uuid4,
+        primary_key=True,
+    )
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.users.id"),
         doc=AdminEntity.ID_USER_DESCRIPTION.value,
@@ -33,14 +40,9 @@ class Admin(MappedAsDataclass, Base):
         doc=AdminEntity.LAST_NAMES_DESCRIPTION.value,
         nullable=True,
     )
-    id: Mapped[UUID] = mapped_column(
-        doc=AdminEntity.ID_DESCRIPTION.value,
-        default_factory=uuid4,
-        primary_key=True,
-    )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         doc=AdminEntity.DATE_JOINED_DESCRIPTION.value,
-        default_factory=lambda: datetime.now(tz=UTC),
+        default=lambda: datetime.now(tz=UTC),
         nullable=True,
     )
