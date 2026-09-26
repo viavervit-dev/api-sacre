@@ -1,15 +1,12 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.modules.inventory.dto import PrivateReadProductDTO, PublicReadProductDTO
 from src.modules.inventory.repositories.interfaces import IProductRepository
 
 
-class GetProductService:
-    """Servicio para la obtención de productos en la base de datos."""
+class RetrieveProductService:
+    """Servicio encargado de la consulta y serialización de productos."""
 
-    def __init__(self, product_repo: type[IProductRepository], db: AsyncSession) -> None:
+    def __init__(self, product_repo: IProductRepository) -> None:
         self.__product_repo = product_repo
-        self.__db = db
 
     async def get_list_products(
         self,
@@ -18,10 +15,9 @@ class GetProductService:
         limit: int,
         status: bool | None = None,
     ) -> tuple[list[PrivateReadProductDTO | PublicReadProductDTO], int]:
-        """Obtiene una lista de productos según su estado."""
+        """Obtiene una lista paginada de productos según filtros y nivel de visibilidad."""
 
         products, total_items = await self.__product_repo.get_list_products(
-            db=self.__db,
             status=status,
             offset=offset,
             limit=limit,

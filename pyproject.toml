@@ -10,20 +10,20 @@ build-backend = "poetry.core.masonry.api"
 
 # === Dependencies ===
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.14"
 fastapi = "^0.128.6"
-uvicorn = {extras = ["standard"], version = "^0.40.0"}
+uvicorn = { extras = ["standard"], version = "^0.40.0" }
 gunicorn = "^25.0.3"
 pydantic-settings = "^2.12.0"
-sqlalchemy = {extras = ["asyncio"], version = "^2.0.46"}
+sqlalchemy = { extras = ["asyncio"], version = "^2.0.46" }
 asyncpg = "^0.31.0"
 alembic = "^1.18.3"
 orjson = "^3.11.7"
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+passlib = { extras = ["bcrypt"], version = "^1.7.4" }
 psycopg2-binary = "^2.9.11"
 python-dotenv = "^1.2.2"
-pydantic = {extras = ["email"], version = "^2.12.5"}
-pyjwt = {extras = ["crypto"], version = "^2.12.1"}
+pydantic = { extras = ["email"], version = "^2.12.5" }
+pyjwt = { extras = ["crypto"], version = "^2.12.1" }
 
 [dependency-groups]
 development = [
@@ -31,17 +31,18 @@ development = [
     "mypy (>=1.19.1,<2.0.0)",
     "commitizen (>=4.13.8,<5.0.0)",
     "pre-commit (>=4.5.1,<5.0.0)",
+    "aiosqlite (>=0.22.1,<0.23.0)",
 ]
 testing = [
     "pytest (>=9.0.2,<10.0.0)",
     "pytest-asyncio (>=1.3.0,<2.0.0)",
-    "httpx (>=0.28.1,<0.29.0)"
+    "httpx (>=0.28.1,<0.29.0)",
 ]
 
 # === Ruff Configuration ===
 [tool.ruff]
 line-length = 99
-target-version = "py312"
+target-version = "py314"
 src = ["src"]
 exclude = [
     ".venv",
@@ -53,19 +54,19 @@ exclude = [
     "*.egg-info",
     "dist",
     "build",
-    "alembic",
+    "alembic/*",
 ]
 
 [tool.ruff.lint]
 select = [
-    "E",      # pycodestyle errors
-    "W",      # pycodestyle warnings
-    "F",      # Pyflakes
-    "I",      # isort (import sorting)
-    "UP",     # pyupgrade (modern Python syntax)
-    "B",      # flake8-bugbear (common bugs)
-    "SIM",    # flake8-simplify
-    "ASYNC",  # flake8-async
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # Pyflakes
+    "I",     # isort (import sorting)
+    "UP",    # pyupgrade (modern Python syntax)
+    "B",     # flake8-bugbear (common bugs)
+    "SIM",   # flake8-simplify
+    "ASYNC", # flake8-async
 ]
 ignore = []
 
@@ -98,24 +99,36 @@ schema = "<type>(<scope>): <description>\n\n<body>\n\n<footer>"
 # - Optional body (can be done with line breaks).
 # - Optional footer, and if present, may contain BREAKING CHANGE.
 schema_pattern = "^(docs|style|refactor|perf|test|build|ci|chore|revert|wip|add)(\\([^\\)]+\\))?:\\s.+?(\\n\\n[\\s\\S]+?)?(\\n\\nBREAKING CHANGE: [\\s\\S]+)?$"
-change_type_order = ["wip", "add", "chore", "docs", "style", "refactor", "perf", "test", "build", "ci", "revert"]
+change_type_order = [
+    "wip",
+    "add",
+    "chore",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+    "build",
+    "ci",
+    "revert",
+]
 
 [[tool.commitizen.customize.questions]]
 type = "list"
 name = "change_type"
 message = "Seleccione el tipo de cambio que está implementando."
 choices = [
-  { value = "wip", name = "wip: Trabajo en progreso, marca un registro temporal de una funcionalidad incompleta." },
-  { value = "add", name = "add: Añadir una nuevo cambio o característica." },
-  { value = "chore", name = "chore: Tareas de mantenimiento que no modifica la lógica de una funcionalidad." },
-  { value = "docs", name = "docs: Cambios en la documentación, guías, README, comentarios de ódigo, etc." },
-  { value = "style", name = "style: Cambios que afectan la apariencia del código (formato) sin cambiar la lógica." },
-  { value = "refactor", name = "refactor: Cambios en el código que no alteran una funcionalidad pero mejora la estructura, legibilidad o mantenibilidad." },
-  { value = "perf", name = "perf: Cambios cuyo objetivo principal es mejorar rendimiento." },
-  { value = "test", name = "test: Añadir, modificar o arreglar pruebas automatizadas." },
-  { value = "build", name = "build: Cambios que afectan el sistema de compilación, empaquetado o dependencias." },
-  { value = "ci", name = "ci: Cambios en la configuración de integración continua (pipelines o workflows)." },
-  { value = "revert", name = "revert: Revertir un commit previo." }
+    { value = "wip", name = "wip: Trabajo en progreso, marca un registro temporal de una funcionalidad incompleta." },
+    { value = "add", name = "add: Añadir una nuevo cambio o característica." },
+    { value = "chore", name = "chore: Tareas de mantenimiento que no modifica la lógica de una funcionalidad." },
+    { value = "docs", name = "docs: Cambios en la documentación, guías, README, comentarios de ódigo, etc." },
+    { value = "style", name = "style: Cambios que afectan la apariencia del código (formato) sin cambiar la lógica." },
+    { value = "refactor", name = "refactor: Cambios en el código que no alteran una funcionalidad pero mejora la estructura, legibilidad o mantenibilidad." },
+    { value = "perf", name = "perf: Cambios cuyo objetivo principal es mejorar rendimiento." },
+    { value = "test", name = "test: Añadir, modificar o arreglar pruebas automatizadas." },
+    { value = "build", name = "build: Cambios que afectan el sistema de compilación, empaquetado o dependencias." },
+    { value = "ci", name = "ci: Cambios en la configuración de integración continua (pipelines o workflows)." },
+    { value = "revert", name = "revert: Revertir un commit previo." },
 ]
 
 [[tool.commitizen.customize.questions]]
@@ -149,7 +162,7 @@ default = ""
 
 # === Mypy Configuration ===
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 strict = false
 show_error_codes = true
 ignore_missing_imports = true
@@ -165,5 +178,5 @@ exclude = [
     "dist",
     "build",
     ".mypy_cache",
-    "alembic",
+    "alembic/*",
 ]

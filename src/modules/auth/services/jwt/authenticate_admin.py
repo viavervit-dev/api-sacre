@@ -1,5 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.common.exceptions import AuthenticationFailed
 from src.modules.auth.constants import ExceptionErrorMessages, UserRoles
 from src.modules.auth.dto import AdminCredentialsDTO
@@ -8,42 +6,40 @@ from src.modules.auth.repositories.interfaces import IUserRepository
 
 
 class AuthAdminService:
-    """Servicio para la autenticación de administradores."""
+    """Servicio encargado de la autenticación y emisión de tokens JWT para administradores."""
 
-    def __init__(self, user_repo: type[IUserRepository], db: AsyncSession) -> None:
+    def __init__(self, user_repo: IUserRepository) -> None:
         self.__user_repo = user_repo
-        self.__db = db
 
     async def authenticate_admin(self, credentials: AdminCredentialsDTO) -> tuple[str, str]:
         """
-        Autentica un administrador en la base de datos. Si las credenciales son válidas,
-        devuelve un par de tokens de acceso y actualización.
+        Autentica a un administrador y genera tokens de acceso y actualización.
+
+        Raises:
+            AuthenticationFailed: Si el usuario no existe, carece de permisos o la
+                contraseña es inválida.
         """
 
         password = credentials.password
         email = credentials.email
-        user_account, _ = await self.__user_repo.get_user(
-            db=self.__db,
-            filters={"email": email},
-            role=UserRoles.ADMINISTRATOR.value,
-        )
+        instance = await self.__user_repo.get_user(role=UserRoles.ADMINISTRATOR.value, email=email)
 
-        if not user_account:
+        if not instance:
             raise AuthenticationFailed(message=ExceptionErrorMessages.CREDENTIALS_INVALID.value)
-        if not user_account.has_permission(permission_name="authentication.jwt"):
+        if not instance.has_permission(permission_name="authentication.jwt"):
             raise AuthenticationFailed(message=ExceptionErrorMessages.CREDENTIALS_INVALID.value)
-        if not user_account.verify_password(password=password):
+        if not instance.verify_password(password=password):
             raise AuthenticationFailed(message=ExceptionErrorMessages.CREDENTIALS_INVALID.value)
 
         access_token = create_access_token(
-            session_version=user_account.session_version,
+            session_version=instance.session_version,
             user_role=UserRoles.ADMINISTRATOR.value,
-            user_id=user_account.id,
+            user_id=instance.id,
         )
         refresh_token = create_refresh_token(
-            session_version=user_account.session_version,
+            session_version=instance.session_version,
             user_role=UserRoles.ADMINISTRATOR.value,
-            user_id=user_account.id,
+            user_id=instance.id,
         )
 
         return access_token, refresh_token

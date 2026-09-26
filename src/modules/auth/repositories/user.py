@@ -1,175 +1,105 @@
 from collections.abc import Sequence
-from typing import Any, cast
+from typing import Any
 from uuid import UUID
 
-from sqlalchemy import exists, literal_column, select, update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
-from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
-from src.modules.auth.models.permission import Group, PermissionGroup
-from src.modules.auth.models.user import User, UserGroup
+from src.modules.auth.models.permission import Group
+from src.modules.auth.models.user import User
 from src.modules.auth.repositories.interfaces import IUserRepository
-from src.modules.customers.models.customer import Customer
 
 
 class UserRepository(IUserRepository):
     """
-    Repositorio para usuarios. Esta clase proporciona métodos que realizan operaciones en la tabla
-    `auth.users` de la base de datos, resuelve dinámicamente las consultas y relaciones dependiendo
-    del rol del usuario.
+    Repositorio SQLAlchemy para la gestión de usuarios y autenticación en `auth.users`.
+
+    Implementa operaciones asíncronas para la consulta con carga dinámica de perfiles,
+    registro de credenciales, verificación y control de sesiones.
     """
 
-    @classmethod
+    def __init__(self, db: AsyncSession) -> None:
+        self.__db = db
+
     async def get_user(
-        cls,
-        db: AsyncSession,
-        filters: dict[str, Any],
+        self,
         role: str,
-    ) -> tuple[User, Any]:
+        id: UUID | None = None,
+        email: str | None = None,
+        load_permissions: bool = True,
+    ) -> User | None:
 
-        # Construye la consulta base desempaquetando el diccionario de filtros
-        query = select(User).filter_by(**filters)
+        profile_map = {
+            UserRoles.CUSTOMER.value: User.customer,
+            UserRoles.ADMINISTRATOR.value: User.admin,
+        }
 
-        # Cargar proactivamente grupos
-        query = query.options(
-            selectinload(User.groups)
-            .selectinload(Group.permission_groups)
-            .selectinload(PermissionGroup.permission)
-        )
-
-        if role == UserRoles.CUSTOMER.value:
-            query = query.options(selectinload(User.customer))
-        elif role == UserRoles.ADMINISTRATOR.value:
-            query = query.options(selectinload(User.admin))
-        else:
+        if role not in profile_map:
             raise ValueError(f"El rol '{role}' no tiene una relación definida o no existe.")
 
-        result = await db.execute(query)
-        user_account = result.scalar_one()
-        user_profile: Customer | Admin
+        relation_field = profile_map[role]
 
-        # Valida que el usuario tenga la relación correspondiente a su rol y construye el DTO
-        if role == UserRoles.CUSTOMER.value:
-            if user_account and not user_account.customer:
-                raise ValueError(
-                    f"El usuario '{user_account.id}' no existe en la tabla de su rol."
-                )
+        # Consulta por ID con joinedload de la relación según el rol
+        filters = []
+        if id is not None:
+            filters.append(User.id == id)
+        if email is not None:
+            filters.append(User.email == email)
 
-            user_profile = user_account.customer
+        if not filters:
+            raise ValueError(
+                "Se debe proporcionar al menos 'id' o 'email' para buscar el usuario."
+            )
 
-            return user_account, user_profile
-        if role == UserRoles.ADMINISTRATOR.value:
-            if user_account and not user_account.admin:
-                raise ValueError(
-                    f"El usuario '{user_account.id}' no existe en la tabla de su rol."
-                )
+        stmt = select(User).where(*filters).options(joinedload(relation_field))
 
-            user_profile = user_account.admin
+        # Carga inteligente de permisos
+        if load_permissions:
+            stmt = stmt.options(selectinload(User.groups).selectinload(Group.permissions))
 
-            return user_account, user_profile
+        result = await self.__db.execute(stmt)
+        instance = result.scalar_one_or_none()
 
-        raise ValueError(f"El rol '{role}' no tiene una relación definida o no existe.")
+        return instance
 
-    @classmethod
     async def create_user(
-        cls,
-        db: AsyncSession,
-        user_data: dict[str, Any],
-        profile_data: dict[str, Any],
+        self,
+        email: str,
+        password: str,
         role: str,
-    ) -> tuple[User, Any]:
+    ) -> User:
 
-        # Obtenemos el grupo correspondiente al rol para asignarlo al usuario
-        result = await db.execute(select(Group).filter_by(name=role))
-        role_instance = result.scalar_one_or_none()
+        # Cargar el grupo y sus permisos
+        stmt_group = (
+            select(Group).where(Group.name == role).options(selectinload(Group.permissions))
+        )
+        result_group = await self.__db.execute(stmt_group)
+        role_group = result_group.scalar_one_or_none()
 
-        if not role_instance:
-            raise ValueError(f"El rol '{role}' no existe en la base de datos.")
+        if not role_group:
+            raise ValueError(f"El rol/grupo '{role}' no existe en la base de datos.")
 
-        # Determinamos el modelo relacionado según el rol
-        RelatedModel: type[Customer] | type[Admin]
+        # Crear usuario y encriptar contraseña
+        instance = User(email=email, role=role, session_version=1)
+        instance.set_password(password)
+        instance.groups.append(role_group)
 
-        if role == UserRoles.CUSTOMER.value:
-            RelatedModel = Customer
-        elif role == UserRoles.ADMINISTRATOR.value:
-            RelatedModel = Admin
-        else:
-            raise ValueError(f"El rol '{role}' no tiene una relación definida o no existe.")
+        # Guardar en base de datos
+        self.__db.add(instance)
+        await self.__db.flush()
 
-        # Creamos la instancia principal
-        user_data["role"] = role
-        password = user_data.pop("password")
-        user_instance = User(**user_data)
-        user_instance.set_password(password)
+        return instance
 
-        # Creamos la instancia del perfil
-        profile_instance = RelatedModel(user_id=user_instance.id, **profile_data)
+    async def exists_user(self, filters: dict[str, Any]) -> bool:
 
-        # Enlazamos las entidades según el rol
-        if role == UserRoles.CUSTOMER.value:
-            user_instance.customer = cast(Customer, profile_instance)
-        elif role == UserRoles.ADMINISTRATOR.value:
-            user_instance.admin = cast(Admin, profile_instance)
-
-        db.add(user_instance)
-        await db.flush()
-
-        # Asignar el rol al nuevo usuario
-        user_group = UserGroup(user_id=user_instance.id, group_id=role_instance.id)
-        db.add(user_group)
-        await db.flush()
-
-        return user_instance, profile_instance
-
-    @classmethod
-    async def exists_user(cls, db: AsyncSession, filters: dict[str, Any], role: str) -> bool:
-
-        query = select(literal_column("1"))
-
-        # Determinar el modelo relacionado según el rol para construir la consulta con JOIN
-        RelatedModel: type[Customer] | type[Admin] | None = None
-
-        if role == UserRoles.CUSTOMER.value:
-            RelatedModel = Customer
-            query = query.join(User.customer)
-        elif role == UserRoles.ADMINISTRATOR.value:
-            RelatedModel = Admin
-            query = query.join(User.admin)
-        else:
-            raise ValueError(f"El rol '{role}' no tiene una relación definida o no existe.")
-
-        # Clasificar los filtros asumiendo prioridad al modelo User para campos comunes
-        user_filters = []
-        relation_filters = []
-
-        for field, value in filters.items():
-            if hasattr(User, field):
-                user_filters.append(getattr(User, field) == value)
-            elif hasattr(RelatedModel, field):
-                relation_filters.append(getattr(RelatedModel, field) == value)
-            else:
-                raise ValueError(
-                    f"La columna '{field}' no existe en User ni en {RelatedModel.__name__}."
-                )
-
-        # Agregar los filtros a la consulta
-        if user_filters:
-            query = query.where(*user_filters)
-        if relation_filters:
-            query = query.where(*relation_filters)
-
-        # 2. Construimos la instrucción EXISTS final de forma más directa
-        exists_stmt = select(exists(query))
-
-        # 3. Usamos db.scalar() para ejecutar y extraer el booleano en una sola línea
-        result = await db.scalar(exists_stmt)
+        stmt = select(User.id).filter_by(**filters)
+        result = await self.__db.scalar(select(stmt.exists()))
 
         return bool(result)
 
-    @classmethod
-    async def increment_session_versions(cls, db: AsyncSession, user_ids: Sequence[UUID]) -> None:
+    async def increment_session_versions(self, user_ids: Sequence[UUID]) -> None:
 
         stmt = (
             update(User)
@@ -177,5 +107,5 @@ class UserRepository(IUserRepository):
             .values(session_version=User.session_version + 1)
         )
 
-        await db.execute(stmt)
-        await db.commit()
+        await self.__db.execute(stmt)
+        await self.__db.commit()

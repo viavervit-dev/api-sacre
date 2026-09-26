@@ -13,23 +13,13 @@ from src.config.database import check_db_connection, close_db_pool, create_db_po
 from src.config.exception_handlers import register_exception_handlers
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
-from src.modules.auth.routers.jwt.authenticate_admin import router as jwt_login_admin
-from src.modules.auth.routers.jwt.get_current_user import router as get_current_user
-from src.modules.auth.routers.jwt.logout import router as jwt_logout
-from src.modules.auth.routers.jwt.refresh import router as jwt_refresh
-from src.modules.customers.routers.create import router as create_customer
-from src.modules.inventory.routers.categories.create_category import router as get_category
-from src.modules.inventory.routers.categories.delete_category import router as delete_category
-from src.modules.inventory.routers.categories.get_category import router as create_category
-from src.modules.inventory.routers.categories.update_category import router as update_category
-from src.modules.inventory.routers.products.create_prodcut import router as create_prodcut
-from src.modules.inventory.routers.products.delete_product import router as delete_product
-from src.modules.inventory.routers.products.get_product import router as get_product
-from src.modules.inventory.routers.products.update_product import router as update_product
+from src.modules.auth.routers import router as auth_router
+from src.modules.customers.routers import router as customers_router
+from src.modules.inventory.routers import router as inventory_router
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     """
     Gestor del ciclo de vida de la aplicación, maneja los eventos de inicio y cierre:
     - **Inicio:** Inicializa la piscina de conexiones a la base de datos.
@@ -88,19 +78,9 @@ register_exception_handlers(app=app)
 
 # Configura el router principal para la API, con un prefijo para todas las rutas v1
 v1_router = APIRouter(prefix="/api/v1")
-v1_router.include_router(router=create_customer)
-v1_router.include_router(router=jwt_login_admin)
-v1_router.include_router(router=jwt_refresh)
-v1_router.include_router(router=get_current_user)
-v1_router.include_router(router=get_category)
-v1_router.include_router(router=create_category)
-v1_router.include_router(router=update_category)
-v1_router.include_router(router=get_product)
-v1_router.include_router(router=create_prodcut)
-v1_router.include_router(router=update_product)
-v1_router.include_router(router=delete_product)
-v1_router.include_router(router=jwt_logout)
-v1_router.include_router(router=delete_category)
+v1_router.include_router(router=customers_router)
+v1_router.include_router(router=auth_router)
+v1_router.include_router(router=inventory_router)
 app.include_router(router=v1_router)
 
 
@@ -145,7 +125,32 @@ class HealthCheck(BaseModel):
     },
 )
 async def health_check(response: FastAPIResponse) -> Response[HealthCheck]:
-    """Endpoint de verificación de salud para balanceadores de carga y monitoreo."""
+    """
+    Verifica el estado de salud y disponibilidad de los componentes de la API.
+
+    ### Descripción
+    Comprueba activamente la conectividad y operatividad de las dependencias críticas del
+    sistema (actualmente la base de datos PostgreSQL) mediante una sonda ligera con timeout
+    estricto. Permite a balanceadores de carga, sondas de Kubernetes (liveness/readiness)
+    y sistemas de monitoreo determinar la disponibilidad del servicio.
+
+    ### Requisitos de Acceso
+    - **Acceso Público:** Endpoint abierto. No requiere autenticación ni cookies de sesión.
+
+    ### Flujo de Ejecución
+    1. **Inicialización de Estado:**
+       - Establece inicialmente el código HTTP en 200 (OK) y la bandera `healthy = True`.
+    2. **Verificación de Base de Datos (`check_db_connection`):**
+       - Ejecuta una consulta simple (`SELECT 1`) con un timeout de 2 segundos.
+       - Si la conexión falla, se agota el tiempo o el pool no está inicializado, marca el
+         componente como `unhealthy`.
+    3. **Ajuste del Código de Respuesta:**
+       - Si la base de datos no está disponible, altera el código de estado a 503
+         (Service Unavailable) y define `success = False`.
+    4. **Construcción de Respuesta:**
+       - Retorna el modelo `Response` con el objeto `HealthCheck` detallando el estado
+         de cada dependencia evaluada.
+    """
 
     response.status_code = 200
     checks = {"database": "healthy"}

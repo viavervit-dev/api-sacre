@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.response import Response
 from src.common.schema import (
@@ -9,16 +8,15 @@ from src.common.schema import (
     response_scheme_403,
     response_scheme_503,
 )
-from src.config.database import get_db_session
 from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
-from src.modules.auth.dependencies import UserPermissionChecker
-from src.modules.auth.dto import CurrentUserDTO
+from src.modules.auth.dependencies import UserPermissionChecker, get_retrieve_user_service
+from src.modules.auth.dto import ReadUserDTO
 from src.modules.auth.models.user import User
-from src.modules.auth.services.jwt.get_current_user import GetCurrentUserService
+from src.modules.auth.services.jwt.get_current_user import RetrieveCurrentUserService
 from src.modules.customers.models.customer import Customer
 
-router = APIRouter(prefix="/authentication", tags=["Autenticación"])
+jwt_me_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
 require_user = UserPermissionChecker(
     allowed_roles=[
         UserRoles.ADMINISTRATOR.value,
@@ -31,7 +29,7 @@ require_user = UserPermissionChecker(
 )
 
 
-@router.get(
+@jwt_me_router.get(
     path="/jwt/me/",
     response_description="**(OK)** Se retorna la información del usuario de la sesión actual.",
     status_code=status.HTTP_200_OK,
@@ -49,18 +47,41 @@ require_user = UserPermissionChecker(
     },
 )
 async def get_current_user(
-    user: Annotated[tuple[User, Admin | Customer], Depends(require_user)],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Response[CurrentUserDTO]:
+    user: Annotated[User, Depends(require_user)],
+    service: Annotated[type[RetrieveCurrentUserService], Depends(get_retrieve_user_service)],
+) -> Response[ReadUserDTO]:
     """
-    Endpoint para obtener la información del usuario de la sesión actual, recibe una petición con
-    los datos necesarios y ejecuta validaciones adicionales. Si todo es correcto, devuelve la
-    información del usuario.
+    Obtiene la información del perfil del usuario autenticado en la sesión actual.
+
+    ### Descripción
+    Recupera los datos personales y de cuenta del usuario que inició la sesión activa
+    a partir del token JWT almacenado en las cookies. Soporta perfiles de administradores
+    y de clientes, resolviendo dinámicamente sus atributos de perfil según su rol.
+
+    ### Requisitos de Acceso
+    - **Roles permitidos:** Administrador (`admin`) o Cliente (`customer`).
+    - **Permisos requeridos:**
+      - Administradores: `admins.read`.
+      - Clientes: `customers.read`.
+    - **Autenticación:** Cookies obligatorias `access_token` y `refresh_token` (JWT).
+
+    ### Flujo de Ejecución
+    1. **Autenticación y Validación de Sesión:**
+       - Extrae los tokens JWT presentes en las cookies de la petición HTTP.
+       - Valida la firma criptográfica y vigencia del `access_token`.
+       - Comprueba la versión de sesión del usuario en la base de datos contra el token.
+    2. **Control de Acceso y Permisos:**
+       - Verifica que el usuario cuente con un rol válido (`admin` o `customer`).
+       - Comprueba que el usuario posea el permiso de lectura asociado a su rol.
+    3. **Resolución de Perfil:**
+       - Carga la entidad de perfil vinculada (`Admin` o `Customer`) según el rol del usuario.
+       - Extrae los nombres, apellidos, correo y rol asignado.
+    4. **Construcción de Respuesta:**
+       - Mapea la información consolidada al esquema `ReadUserDTO`.
+       - Retorna la estructura estandarizada `Response` con código 200 OK.
     """
 
-    _, user_profile = user
-    service = GetCurrentUserService
-    user_data = await service.get_current_user(instance=user_profile)
+    user_data = await service.get_current_user(instance=user)
 
     return Response(
         success=True,

@@ -3,134 +3,101 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.modules.inventory.models.category import Category
 from src.modules.inventory.models.product import Product
 
 
 class ICategoryRepository(ABC):
-    """
-    Interfaz de `CategoryRepository`, define el contrato para un repositorio que administra la
-    tabla `product.categories` en la base de datos.
-    """
+    """Contrato de persistencia para operaciones sobre categorías (`product.categories`)."""
 
-    @classmethod
     @abstractmethod
     async def get_list_categories(
-        cls,
+        self,
         offset: int,
         limit: int,
-        db: AsyncSession,
         status: bool | None = None,
     ) -> tuple[Sequence[Category], int]:
-        """Obtiene una secuencia paginada de categorias de productos filtradas por estado."""
+        """Obtiene una lista paginada de categorías y el total de registros encontrados."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def get_category(cls, db: AsyncSession, id: UUID) -> Category:
-        """Obtiene una categoría de producto por su ID."""
+    async def get_category(self, id: UUID) -> Category | None:
+        """Obtiene una categoría por su identificador único."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def create_category(cls, db: AsyncSession, data: dict[str, Any]) -> Category:
-        """Crea una nueva cateogria de prductos en la base de datos."""
+    async def create_category(self, data: dict[str, Any]) -> Category:
+        """Crea y registra una nueva categoría en la base de datos."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def update_category(
-        cls,
-        db: AsyncSession,
-        update_data: dict[str, Any],
-        instance: Category,
-    ) -> Category:
-        """Modifica los datos de una categoria de producto en la base de datos."""
+    async def update_category(self, update_data: dict[str, Any], instance: Category) -> Category:
+        """Actualiza los atributos de una categoría existente."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def add_product_to_category(cls, db: AsyncSession, name: str) -> None:
-        """Incrementa el contador de productos asociados a una categoría en la base de datos."""
+    async def add_product_to_category(self, name: str) -> None:
+        """Incrementa en uno el contador de productos asociados a la categoría."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def delete_category(cls, db: AsyncSession, instance: Category) -> None:
-        """Elimina una categoría de la base de datos."""
+    async def delete_category(self, instance: Category) -> None:
+        """Elimina una categoría existente de la base de datos."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def exists_category(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
-        """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
+    async def exists_category(self, filters: dict[str, Any]) -> bool:
+        """Verifica si existe al menos una categoría que coincida con los filtros especificados."""
 
         pass
 
 
-class IProductRepository(ICategoryRepository):
-    """
-    Interfaz de `ProductRepository`, define el contrato para un repositorio que administra la
-    tabla `product.products` en la base de datos.
-    """
+class IProductRepository(ABC):
+    """Contrato de persistencia para operaciones sobre productos (`product.products`)."""
 
-    @classmethod
     @abstractmethod
     async def get_list_products(
-        cls,
+        self,
         offset: int,
         limit: int,
-        db: AsyncSession,
         status: bool | None = None,
     ) -> tuple[Sequence[Product], int]:
-        """Obtiene una secuencia paginada de productos filtrados por estado."""
+        """Obtiene una lista paginada de productos y el total de registros encontrados."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def get_product(cls, db: AsyncSession, id: UUID) -> Product:
-        """Obtiene un producto por su ID."""
+    async def get_product(self, id: UUID) -> Product | None:
+        """Obtiene un producto por su identificador único."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def create_product(cls, db: AsyncSession, data: dict[str, Any]) -> Product:
-        """Crea un nuevo producto en la base de datos."""
+    async def create_product(self, data: dict[str, Any]) -> Product:
+        """Crea y registra un nuevo producto en la base de datos."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def update_product(
-        cls,
-        db: AsyncSession,
-        update_data: dict[str, Any],
-        instance: Product,
-    ) -> Product:
-        """Modifica los datos de un producto en la base de datos."""
+    async def update_product(self, update_data: dict[str, Any], instance: Product) -> Product:
+        """Actualiza los atributos de un producto existente."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def delete_product(cls, db: AsyncSession, instance: Product) -> None:
-        """Elimina un producto de la base de datos."""
+    async def delete_product(self, instance: Product) -> None:
+        """Elimina un producto existente de la base de datos."""
 
         pass
 
-    @classmethod
     @abstractmethod
-    async def exists_product(cls, db: AsyncSession, filters: dict[str, Any]) -> bool:
-        """Consulta si existe al menos un registro que coincida con los filtros proporcionados."""
+    async def exists_product(self, filters: dict[str, Any]) -> bool:
+        """Verifica si existe al menos un producto que coincida con los filtros especificados."""
 
         pass

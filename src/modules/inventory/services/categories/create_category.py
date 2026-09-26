@@ -1,26 +1,31 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any
 
+from fastapi.exceptions import RequestValidationError
+
+from src.modules.inventory.constants import CategoryEntity
 from src.modules.inventory.dto import CreateCategoryDTO, PrivateReadCategoryDTO
-from src.modules.inventory.repositories.interfaces import IProductRepository
+from src.modules.inventory.repositories.interfaces import ICategoryRepository
 
 
 class CreateCategoryService:
-    """Servicio para la creación de categorías de productos en la base de datos."""
+    """Servicio encargado de la validación de negocio y persistencia para nuevas categorías."""
 
-    def __init__(self, product_repo: type[IProductRepository], db: AsyncSession) -> None:
-        self.__product_repo = product_repo
-        self.__db = db
+    def __init__(self, category_repo: ICategoryRepository) -> None:
+        self.__category_repo = category_repo
 
     async def create_category(self, data: CreateCategoryDTO) -> PrivateReadCategoryDTO:
-        """Crea una nueva categoría de productos en la base de datos."""
+        """
+        Crea una nueva categoría aplicando valores iniciales y validaciones de negocio.
+
+        Raises:
+            RequestValidationError: Si el nombre de la categoría ya existe.
+        """
 
         category_data = data.model_dump()
         category_data["status"] = False  # Asignar estado activo por defecto
         category_data["product_count"] = 0  # Asignar contador de productos por defecto
-        category_instance = await self.__product_repo.create_category(
-            db=self.__db,
-            data=category_data,
-        )
+        await self.__run_business_validations(category_data=category_data)
+        category_instance = await self.__category_repo.create_category(data=category_data)
         category = PrivateReadCategoryDTO.model_construct(
             id=category_instance.id,
             name=category_instance.name,
@@ -30,3 +35,27 @@ class CreateCategoryService:
         )
 
         return category
+
+    async def __run_business_validations(self, category_data: dict[str, Any]) -> None:
+        """
+        Ejecuta las validaciones de reglas de negocio previas a la creación.
+
+        Raises:
+            RequestValidationError: Si el nombre de la categoría ya se encuentra registrado.
+        """
+
+        # Validar que el nombre de la categoría no esté registrado en la base de datos
+        exists = await self.__category_repo.exists_category(
+            filters={"name": category_data["name"]}
+        )
+
+        if exists:
+            raise RequestValidationError(
+                errors=[
+                    {
+                        "loc": ("body", "name"),
+                        "msg": CategoryEntity.NAME_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                ]
+            )

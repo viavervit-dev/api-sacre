@@ -1,11 +1,15 @@
 from typing import Any
 
+from src.common.constants import ExceptionErrorMessages
+
 
 class BaseAppException(Exception):
     """Clase base para manejar datos dinámicos en las excepciones de la app."""
 
-    def __init__(self, message: str, data: dict[str, Any] = {}) -> None:  # noqa
-        self.message = message
+    default_message = "Ha ocurrido un error inesperado en la aplicación."
+
+    def __init__(self, message: str | None = None, data: dict[str, Any] = {}) -> None:  # noqa
+        self.message = message or self.default_message
         self.data = data
         super().__init__(self.message)
 
@@ -19,7 +23,7 @@ class AuthenticationFailed(BaseAppException):
 class ResourceNotFound(BaseAppException):
     """El recurso solicitado en la petición no existe."""
 
-    pass
+    default_message = ExceptionErrorMessages.RESOURCE_NOT_FOUND.value
 
 
 class UserNotFound(BaseAppException):

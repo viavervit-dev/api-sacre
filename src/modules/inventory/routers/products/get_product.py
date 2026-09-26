@@ -1,7 +1,6 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.constants import PAGINATION_LIMIT_DESCRIPTION, PAGINATION_OFFSET_DESCRIPTION
 from src.common.response import PaginatedData, PaginationMeta, Response
@@ -10,17 +9,16 @@ from src.common.schema import (
     response_scheme_403,
     response_scheme_503,
 )
-from src.config.database import get_db_session
 from src.config.parameters import settings
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.modules.auth.models.user import User
+from src.modules.inventory.dependencies import get_retrieve_product_service
 from src.modules.inventory.dto import PrivateReadProductDTO, PublicReadProductDTO
 from src.modules.inventory.models.product import Product
-from src.modules.inventory.repositories.product import ProductRepository
-from src.modules.inventory.services.products.get_product import GetProductService
+from src.modules.inventory.services.products.get_product import RetrieveProductService
 
-router = APIRouter(prefix="/inventory", tags=["Inventario"])
+get_products_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserOptionalPermissionChecker(
     allowed_roles=[
         UserRoles.ADMINISTRATOR.value,
@@ -32,114 +30,112 @@ require_admin = UserOptionalPermissionChecker(
     },
 )
 
-schema_200_ok = {
-    "description": "**(OK)** Lista de productos obtenida exitosamente.",
-    "model": Response[list[PrivateReadProductDTO | PublicReadProductDTO]],
-    "content": {
-        "application/json": {
-            "examples": {
-                "private_data": {
-                    "summary": "Datos privados",
-                    "value": {
-                        "success": True,
-                        "pagination": True,
-                        "message": "Lista de productos obtenida exitosamente.",
-                        "data": {
-                            "items": [
-                                {
-                                    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                                    "name": "Rosario de madera",
-                                    "categories": ["Rosarios", "Madera"],
-                                    "description_short": "Rosario hecho a mano con cuentas"
-                                    " de madera.",
-                                    "description_long": "Este rosario está fabricado a "
-                                    "mano utilizando madera de alta calidad, ideal para "
-                                    "orar en el día a día. Cuenta con un diseño elegante y"
-                                    "tradicional.",
-                                    "images": [
-                                        "https://example.com/image1.jpg",
-                                        "https://example.com/image2.jpg",
-                                        "https://example.com/image3.jpg",
-                                    ],
-                                    "price_neto": "10.50",
-                                    "price_sale": "15.00",
-                                    "profit_margin": "0.16",
-                                    "iva": "0.16",
-                                    "stock_total": 100,
-                                    "stock_hand": 80,
-                                    "stock_sale": 20,
-                                    "status": True,
-                                },
-                            ],
-                            "meta": {
-                                "total": 1,
-                                "offset": 0,
-                                "limit": settings.pagination_limit,
-                            },
-                        },
-                    },
-                },
-                "public_data": {
-                    "summary": "Datos públicos",
-                    "value": {
-                        "success": True,
-                        "pagination": True,
-                        "message": "Lista de productos obtenida exitosamente.",
-                        "data": {
-                            "items": [
-                                {
-                                    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                                    "name": "Rosario de madera",
-                                    "categories": ["Rosarios", "Madera"],
-                                    "description_short": "Rosario hecho a mano con cuentas"
-                                    " de madera.",
-                                    "description_long": "Este rosario está fabricado a "
-                                    "mano utilizando madera de alta calidad, ideal para "
-                                    "orar en el día a día. Cuenta con un diseño elegante y"
-                                    " tradicional.",
-                                    "images": [
-                                        "https://example.com/image1.jpg",
-                                        "https://example.com/image2.jpg",
-                                        "https://example.com/image3.jpg",
-                                    ],
-                                    "price_sale": "15.00",
-                                    "stock_sale": 20,
-                                },
-                            ],
-                            "meta": {
-                                "total": 1,
-                                "offset": 0,
-                                "limit": settings.pagination_limit,
-                            },
-                        },
-                    },
-                },
-                "there_not_products": {
-                    "summary": "No hay productos",
-                    "value": {
-                        "success": True,
-                        "pagination": True,
-                        "message": "Lista de productos obtenida exitosamente.",
-                        "data": {
-                            "items": [],
-                            "meta": {
-                                "total": 0,
-                                "offset": 0,
-                                "limit": settings.pagination_limit,
-                            },
-                        },
-                    },
-                },
-            },
-        }
-    },
-}
 
-
-@router.get(
+@get_products_router.get(
     path="/product/",
     responses={
-        200: schema_200_ok,
+        200: {
+            "description": "**(OK)** Lista de productos obtenida exitosamente.",
+            "model": Response[list[PrivateReadProductDTO | PublicReadProductDTO]],
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "private_data": {
+                            "summary": "Datos privados",
+                            "value": {
+                                "success": True,
+                                "pagination": True,
+                                "message": "Lista de productos obtenida exitosamente.",
+                                "data": {
+                                    "items": [
+                                        {
+                                            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                            "name": "Rosario de madera",
+                                            "categories": ["Rosarios", "Madera"],
+                                            "description_short": "Rosario hecho a mano con cuentas"
+                                            " de madera.",
+                                            "description_long": "Este rosario está fabricado a "
+                                            "mano utilizando madera de alta calidad, ideal para "
+                                            "orar en el día a día. Cuenta con un diseño elegante y"
+                                            "tradicional.",
+                                            "images": [
+                                                "https://example.com/image1.jpg",
+                                                "https://example.com/image2.jpg",
+                                                "https://example.com/image3.jpg",
+                                            ],
+                                            "price_neto": "10.50",
+                                            "price_sale": "15.00",
+                                            "profit_margin": "0.16",
+                                            "iva": "0.16",
+                                            "stock_total": 100,
+                                            "stock_hand": 80,
+                                            "stock_sale": 20,
+                                            "status": True,
+                                        },
+                                    ],
+                                    "meta": {
+                                        "total": 1,
+                                        "offset": 0,
+                                        "limit": settings.pagination_limit,
+                                    },
+                                },
+                            },
+                        },
+                        "public_data": {
+                            "summary": "Datos públicos",
+                            "value": {
+                                "success": True,
+                                "pagination": True,
+                                "message": "Lista de productos obtenida exitosamente.",
+                                "data": {
+                                    "items": [
+                                        {
+                                            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                            "name": "Rosario de madera",
+                                            "categories": ["Rosarios", "Madera"],
+                                            "description_short": "Rosario hecho a mano con cuentas"
+                                            " de madera.",
+                                            "description_long": "Este rosario está fabricado a "
+                                            "mano utilizando madera de alta calidad, ideal para "
+                                            "orar en el día a día. Cuenta con un diseño elegante y"
+                                            " tradicional.",
+                                            "images": [
+                                                "https://example.com/image1.jpg",
+                                                "https://example.com/image2.jpg",
+                                                "https://example.com/image3.jpg",
+                                            ],
+                                            "price_sale": "15.00",
+                                            "stock_sale": 20,
+                                        },
+                                    ],
+                                    "meta": {
+                                        "total": 1,
+                                        "offset": 0,
+                                        "limit": settings.pagination_limit,
+                                    },
+                                },
+                            },
+                        },
+                        "there_not_products": {
+                            "summary": "No hay productos",
+                            "value": {
+                                "success": True,
+                                "pagination": True,
+                                "message": "Lista de productos obtenida exitosamente.",
+                                "data": {
+                                    "items": [],
+                                    "meta": {
+                                        "total": 0,
+                                        "offset": 0,
+                                        "limit": settings.pagination_limit,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }
+            },
+        },
         401: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
@@ -153,8 +149,8 @@ schema_200_ok = {
     },
 )
 async def get_list_products(
-    user: Annotated[tuple[User | None, Any | None], Depends(require_admin)],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    user: Annotated[User | None, Depends(require_admin)],
+    service: Annotated[RetrieveProductService, Depends(get_retrieve_product_service)],
     offset: int = Query(
         default=0,
         ge=0,
@@ -170,20 +166,52 @@ async def get_list_products(
     ),
 ) -> Response[PaginatedData[PrivateReadProductDTO | PublicReadProductDTO]]:
     """
-    Endpoint para la obtención de una lista de productos, recibe una petición con los datos
-    necesarios y ejecuta validaciones adicionales. Si todo es correcto, obtiene los productos en
-    la base de datos y devuelve su información.
+    Obtiene una lista paginada de productos con visibilidad adaptativa según el usuario.
+
+    ### Descripción
+    Consulta y retorna el catálogo de productos con soporte para paginación y ordenamiento
+    cronológico descendente (`date_joined`). La información y los filtros aplicados se adaptan
+    dinámicamente según el nivel de privilegios del usuario solicitante:
+    - **Público / Clientes:** Acceso libre o como cliente (`CUSTOMER`). Solo lista productos
+      activos (`status=True`) y expone datos comerciales (`PublicReadProductDTO`), omitiendo
+      costos, márgenes y existencias internas.
+    - **Administradores:** Usuarios con rol `ADMINISTRATOR`. Acceden a todos los productos
+      (activos e inactivos) y visualizan métricas completas de inventario y costos
+      (`PrivateReadProductDTO`).
+
+    ### Requisitos de Acceso
+    - **Acceso Anónimo:** Permitido sin autenticación (vista pública).
+    - **Clientes (`customer`):** Requiere permiso `products.read.public`.
+    - **Administradores (`admin`):** Requiere permiso `products.read.private`.
+    - **Autenticación:** Opcional vía cookies `access_token` y `refresh_token` (JWT).
+
+    ### Flujo de Ejecución
+    1. **Autenticación Opcional y Autorización:**
+       - Si se proporcionan cookies JWT, valida el token, la existencia del usuario y la sesión.
+       - Valida que el rol sea `admin` o `customer` y verifique sus permisos respectivos.
+       - Si no se envían tokens, permite el acceso con rol público / anónimo.
+    2. **Determinación de Visibilidad y Filtros:**
+       - Si el usuario es administrador (`admin`): `private=True` y `status=None` (sin filtro).
+       - Si es anónimo o cliente (`customer`): `private=False` y `status=True` (solo activos).
+    3. **Consulta en Base de Datos y Paginación:**
+       - Realiza el conteo total de registros coincidentes para los metadatos de paginación.
+       - Si existen registros, consulta los productos ordenados descendentemente por fecha de
+         creación (`date_joined.desc()`), aplicando `offset` y `limit`.
+    4. **Serialización Dinámica:**
+       - Mapea los resultados a `PrivateReadProductDTO` (visión administrativa completa) o
+         `PublicReadProductDTO` (visión pública segura sin datos sensibles de negocio).
+    5. **Construcción de Respuesta:**
+       - Retorna la estructura unificada `Response` con `pagination=True`, la lista de `items`
+         y los metadatos de paginación `meta` (`total`, `offset`, `limit`).
     """
 
-    user_account, _ = user
     private = False
     status = True
 
-    if user_account and user_account.role == UserRoles.ADMINISTRATOR.value:
+    if user and user.role == UserRoles.ADMINISTRATOR.value:
         private = True
         status = None
 
-    service = GetProductService(db=db, product_repo=ProductRepository)
     products, total_items = await service.get_list_products(
         private=private,
         status=status,

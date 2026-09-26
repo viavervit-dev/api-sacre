@@ -2,18 +2,13 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from src.common.constants import ExceptionErrorMessages as CommonExceptionErrorMessages
-from src.modules.auth.constants import ExceptionErrorMessages as AuthExceptionErrorMessages
-from src.modules.inventory.constants import (
-    ExceptionErrorMessages as InventoryExceptionErrorMessages,
-)
+from src.common.constants import ExceptionErrorMessages as CommonException
+from src.modules.auth.constants import ExceptionErrorMessages as AuthExceptionError
+from src.modules.inventory.constants import ExceptionErrorMessages as InventoryException
 
 
 def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
-    """
-    Genera un esquema de respuesta para errores **400** basado en las validaciones definidas
-    en el DTO de la solicitud.
-    """
+    """Genera el esquema OpenAPI de error 400 (Bad Request) según el DTO proporcionado."""
 
     errors_example = {}
     data_properties = {}
@@ -46,7 +41,7 @@ def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
                 "example": {
                     "success": False,
                     "pagination": False,
-                    "message": CommonExceptionErrorMessages.REQUEST_DATA_INVALID.value,
+                    "message": CommonException.REQUEST_DATA_INVALID.value,
                     "data": errors_example,
                 },
             }
@@ -65,12 +60,8 @@ def response_scheme_401(
     access_jwt_not_expired: bool = False,
     refresh_jwt_expired: bool = False,
     jwt_user_not_found: bool = False,
-    category_has_dependencies: bool = False,
-    product_has_reserved_stock: bool = False,
 ) -> dict[str, Any]:
-    """
-    Genera un esquema de respuesta para errores **401** cuando se hace una solicitud no autorizada.
-    """
+    """Genera el esquema OpenAPI de error 401 (Unauthorized) con ejemplos condicionales."""
 
     scheme: dict[str, Any] = {
         "description": "**(UNAUTHORIZED)** Solicitud no autorizada por algunos de los siguientes "
@@ -97,7 +88,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.CREDENTIALS_INVALID.value,
+                "message": AuthExceptionError.CREDENTIALS_INVALID.value,
                 "data": {},
             },
         }
@@ -107,7 +98,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.AUTH_SESSION_EXPIRED.value,
+                "message": AuthExceptionError.AUTH_SESSION_EXPIRED.value,
                 "data": {},
             },
         }
@@ -117,7 +108,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.ACCESS_JWT_MISSING.value,
+                "message": AuthExceptionError.ACCESS_JWT_MISSING.value,
                 "data": {},
             },
         }
@@ -127,7 +118,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.REFRESH_JWT_MISSING.value,
+                "message": AuthExceptionError.REFRESH_JWT_MISSING.value,
                 "data": {},
             },
         }
@@ -137,7 +128,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.ACCESS_JWT_INVALID.value,
+                "message": AuthExceptionError.ACCESS_JWT_INVALID.value,
                 "data": {},
             },
         }
@@ -147,7 +138,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.ACCESS_JWT_EXPIRED.value,
+                "message": AuthExceptionError.ACCESS_JWT_EXPIRED.value,
                 "data": {},
             },
         }
@@ -157,7 +148,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.ACCESS_JWT_NOT_EXPIRED.value,
+                "message": AuthExceptionError.ACCESS_JWT_NOT_EXPIRED.value,
                 "data": {},
             },
         }
@@ -167,7 +158,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.REFRESH_JWT_INVALID.value,
+                "message": AuthExceptionError.REFRESH_JWT_INVALID.value,
                 "data": {},
             },
         }
@@ -177,7 +168,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.REFRESH_JWT_EXPIRED.value,
+                "message": AuthExceptionError.REFRESH_JWT_EXPIRED.value,
                 "data": {},
             },
         }
@@ -187,27 +178,7 @@ def response_scheme_401(
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": AuthExceptionErrorMessages.JWT_USER_NOT_FOUND.value,
-                "data": {},
-            },
-        }
-    if category_has_dependencies:
-        scheme["content"]["application/json"]["examples"]["category_has_dependencies"] = {
-            "summary": "Violación de regla de dominio",
-            "value": {
-                "success": False,
-                "pagination": False,
-                "message": InventoryExceptionErrorMessages.CATEGORY_HAS_DEPENDENCIES.value,
-                "data": {},
-            },
-        }
-    if product_has_reserved_stock:
-        scheme["content"]["application/json"]["examples"]["product_has_reserved_stock"] = {
-            "summary": "Violación de regla de dominio",
-            "value": {
-                "success": False,
-                "pagination": False,
-                "message": InventoryExceptionErrorMessages.PRODUCT_HAS_RESERVED_STOCK.value,
+                "message": AuthExceptionError.JWT_USER_NOT_FOUND.value,
                 "data": {},
             },
         }
@@ -216,7 +187,7 @@ def response_scheme_401(
 
 
 def response_scheme_404() -> dict[str, Any]:
-    """Genera un esquema de respuesta para errores **404**."""
+    """Genera el esquema OpenAPI de error 404 (Not Found) cuando un recurso no existe."""
 
     return {
         "description": "**(NOT_FOUND)** Recurso no encontrado.",
@@ -234,7 +205,7 @@ def response_scheme_404() -> dict[str, Any]:
                 "example": {
                     "success": False,
                     "pagination": False,
-                    "message": CommonExceptionErrorMessages.RESOURCE_NOT_FOUND.value,
+                    "message": CommonException.RESOURCE_NOT_FOUND.value,
                     "data": {},
                 },
             }
@@ -243,7 +214,7 @@ def response_scheme_404() -> dict[str, Any]:
 
 
 def response_scheme_403() -> dict[str, Any]:
-    """Genera un esquema de respuesta para errores **403**."""
+    """Genera el esquema OpenAPI de error 403 (Forbidden) por permisos insuficientes."""
 
     return {
         "description": "**(FORBIDDEN)** Acceso denegado.",
@@ -261,7 +232,7 @@ def response_scheme_403() -> dict[str, Any]:
                 "example": {
                     "success": False,
                     "pagination": False,
-                    "message": AuthExceptionErrorMessages.PERMISSION_DENIED.value,
+                    "message": AuthExceptionError.PERMISSION_DENIED.value,
                     "data": {},
                 },
             }
@@ -269,11 +240,56 @@ def response_scheme_403() -> dict[str, Any]:
     }
 
 
+def response_scheme_409(
+    product_has_reserved_stock: bool = False,
+    category_has_dependencies: bool = False,
+) -> dict[str, Any]:
+    """Genera el esquema OpenAPI de error 409 (Conflict) por violaciones de reglas de dominio."""
+
+    scheme: dict[str, Any] = {
+        "description": "**(CONFLICT)** Conflicto con el estado actual del recurso.",
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean"},
+                        "pagination": {"type": "boolean"},
+                        "message": {"type": "string"},
+                        "data": {"type": "object"},
+                    },
+                },
+                "examples": {},
+            }
+        },
+    }
+
+    if category_has_dependencies:
+        scheme["content"]["application/json"]["examples"]["category_has_dependencies"] = {
+            "summary": "Violación de regla de dominio",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": InventoryException.CATEGORY_HAS_DEPENDENCIES.value,
+                "data": {},
+            },
+        }
+    if product_has_reserved_stock:
+        scheme["content"]["application/json"]["examples"]["product_has_reserved_stock"] = {
+            "summary": "Violación de regla de dominio",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": InventoryException.PRODUCT_HAS_RESERVED_STOCK.value,
+                "data": {},
+            },
+        }
+
+    return scheme
+
+
 def response_scheme_503(db_unavailable: bool = False) -> dict[str, Any]:
-    """
-    Genera un esquema de respuesta para errores **503** cuando algún componente de la API
-    no está disponible.
-    """
+    """Genera el esquema OpenAPI de error 503 (Service Unavailable) para fallos del servicio."""
 
     scheme: dict[str, Any] = {
         "description": "**(SERVICE_UNAVAILABLE)** Algún componente de la API no está disponible.",
@@ -299,7 +315,7 @@ def response_scheme_503(db_unavailable: bool = False) -> dict[str, Any]:
             "value": {
                 "success": False,
                 "pagination": False,
-                "message": CommonExceptionErrorMessages.DB_UNAVAILABLE.value,
+                "message": CommonException.DB_UNAVAILABLE.value,
                 "data": {},
             },
         }

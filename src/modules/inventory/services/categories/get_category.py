@@ -1,15 +1,12 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.modules.inventory.dto import PrivateReadCategoryDTO, PublicReadCategoryDTO
-from src.modules.inventory.repositories.interfaces import IProductRepository
+from src.modules.inventory.repositories.interfaces import ICategoryRepository
 
 
-class GetCategoryService:
-    """Servicio para la obtención de categorías de productos en la base de datos."""
+class RetrieveCategoryService:
+    """Servicio encargado de la consulta y serialización de categorías de productos."""
 
-    def __init__(self, product_repo: type[IProductRepository], db: AsyncSession) -> None:
-        self.__product_repo = product_repo
-        self.__db = db
+    def __init__(self, category_repo: ICategoryRepository) -> None:
+        self.__category_repo = category_repo
 
     async def get_list_categories(
         self,
@@ -18,10 +15,9 @@ class GetCategoryService:
         limit: int,
         status: bool | None = None,
     ) -> tuple[list[PrivateReadCategoryDTO | PublicReadCategoryDTO], int]:
-        """Obtiene una lista de categorías de productos según su estado."""
+        """Obtiene una lista paginada de categorías según filtros y nivel de visibilidad."""
 
-        categories, total_items = await self.__product_repo.get_list_categories(
-            db=self.__db,
+        categories, total_items = await self.__category_repo.get_list_categories(
             status=status,
             offset=offset,
             limit=limit,

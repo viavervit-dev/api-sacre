@@ -1,64 +1,105 @@
 from typing import Annotated
-from uuid import UUID
 
-from fastapi import Depends, Path
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.constants import ExceptionErrorMessages
-from src.common.exceptions import ResourceNotFound
 from src.config.database import get_db_session
-from src.modules.inventory.models.category import Category
-from src.modules.inventory.models.product import Product
+from src.modules.inventory.repositories.category import CategoryRepository
+from src.modules.inventory.repositories.interfaces import ICategoryRepository, IProductRepository
 from src.modules.inventory.repositories.product import ProductRepository
+from src.modules.inventory.services.categories.create_category import CreateCategoryService
+from src.modules.inventory.services.categories.delete_category import DeleteCategoryService
+from src.modules.inventory.services.categories.get_category import RetrieveCategoryService
+from src.modules.inventory.services.categories.update_category import UpdateCategoryService
+from src.modules.inventory.services.products.create_product import CreateProductService
+from src.modules.inventory.services.products.delete_product import DeleteProductService
+from src.modules.inventory.services.products.get_product import RetrieveProductService
+from src.modules.inventory.services.products.update_product import UpdateProductService
 
 
-async def get_product(
-    product_id: Annotated[
-        UUID,
-        Path(
-            title="ID del producto",
-            description="El identificador único del producto en formato UUID v4.",
-            example="123e4567-e89b-12d3-a456-426614174000",
-        ),
-    ],
+def get_category_repository(
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Product:
-    """
-    Intercepta el ID del producto de la URL, busca el producto en la base de datos y lo retorna.
-    Si el producto no existe, lanza un error 404.
-    """
+) -> ICategoryRepository:
+    """Provee una instancia del repositorio de categorías."""
 
-    exists = await ProductRepository.exists_product(filters={"id": product_id}, db=db)
-
-    if not exists:
-        raise ResourceNotFound(message=ExceptionErrorMessages.RESOURCE_NOT_FOUND.value)
-
-    product = await ProductRepository.get_product(id=product_id, db=db)
-
-    return product
+    return CategoryRepository(db=db)
 
 
-async def get_category(
-    category_id: Annotated[
-        UUID,
-        Path(
-            title="ID de la categoria del producto.",
-            description="El identificador único en formato UUID v4.",
-            example="123e4567-e89b-12d3-a456-426614174000",
-        ),
-    ],
+def get_product_repository(
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> Category:
-    """
-    Intercepta el ID de la categoría de la URL, busca la categoría en la base de datos y la
-    retorna. Si la categoría no existe, lanza un error 404.
-    """
+) -> IProductRepository:
+    """Provee una instancia del repositorio de productos."""
 
-    exists = await ProductRepository.exists_category(filters={"id": category_id}, db=db)
+    return ProductRepository(db=db)
 
-    if not exists:
-        raise ResourceNotFound(message=ExceptionErrorMessages.RESOURCE_NOT_FOUND.value)
 
-    category = await ProductRepository.get_category(id=category_id, db=db)
+def get_create_product_service(
+    product_repo: Annotated[IProductRepository, Depends(get_product_repository)],
+    category_repo: Annotated[ICategoryRepository, Depends(get_category_repository)],
+) -> CreateProductService:
+    """Provee una instancia del servicio de creación de productos."""
 
-    return category
+    return CreateProductService(
+        product_repo=product_repo,
+        category_repo=category_repo,
+    )
+
+
+def get_delete_product_service(
+    product_repo: Annotated[IProductRepository, Depends(get_product_repository)],
+) -> DeleteProductService:
+    """Provee una instancia del servicio de eliminación de productos."""
+
+    return DeleteProductService(product_repo=product_repo)
+
+
+def get_retrieve_product_service(
+    product_repo: Annotated[IProductRepository, Depends(get_product_repository)],
+) -> RetrieveProductService:
+    """Provee una instancia del servicio de consulta de productos."""
+
+    return RetrieveProductService(product_repo=product_repo)
+
+
+def get_update_product_service(
+    product_repo: Annotated[IProductRepository, Depends(get_product_repository)],
+    category_repo: Annotated[ICategoryRepository, Depends(get_category_repository)],
+) -> UpdateProductService:
+    """Provee una instancia del servicio de actualización de productos."""
+
+    return UpdateProductService(
+        product_repo=product_repo,
+        category_repo=category_repo,
+    )
+
+
+def get_create_category_service(
+    category_repo: Annotated[ICategoryRepository, Depends(get_category_repository)],
+) -> CreateCategoryService:
+    """Provee una instancia del servicio de creación de categorías."""
+
+    return CreateCategoryService(category_repo=category_repo)
+
+
+def get_delete_category_service(
+    category_repo: Annotated[ICategoryRepository, Depends(get_category_repository)],
+) -> DeleteCategoryService:
+    """Provee una instancia del servicio de eliminación de categorías."""
+
+    return DeleteCategoryService(category_repo=category_repo)
+
+
+def get_retrieve_category_service(
+    category_repo: Annotated[ICategoryRepository, Depends(get_category_repository)],
+) -> RetrieveCategoryService:
+    """Provee una instancia del servicio de consulta de categorías."""
+
+    return RetrieveCategoryService(category_repo=category_repo)
+
+
+def get_update_category_service(
+    category_repo: Annotated[ICategoryRepository, Depends(get_category_repository)],
+) -> UpdateCategoryService:
+    """Provee una instancia del servicio de actualización de categorías."""
+
+    return UpdateCategoryService(category_repo=category_repo)

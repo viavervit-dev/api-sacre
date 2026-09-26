@@ -248,7 +248,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         """Manejador de error para violaciones de reglas de dominio."""
 
         return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_409_CONFLICT,
             content=Response(
                 success=False,
                 pagination=False,

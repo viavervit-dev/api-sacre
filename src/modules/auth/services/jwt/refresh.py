@@ -1,9 +1,13 @@
 from uuid import UUID
 
 import jwt
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.common.exceptions import DomainRuleViolation, InvalidJWT
+from src.common.exceptions import (
+    AuthenticationFailed,
+    DomainRuleViolation,
+    InvalidJWT,
+    UserNotFound,
+)
 from src.config.parameters import settings
 from src.modules.auth.constants import ExceptionErrorMessages
 from src.modules.auth.jwt import create_access_token
@@ -11,14 +15,22 @@ from src.modules.auth.repositories.interfaces import IUserRepository
 
 
 class RefreshTokenService:
-    """Servicio encargado de gestionar la renovación de tokens de acceso (JWT)."""
+    """Servicio encargado de la validación y renovación de tokens de acceso JWT."""
 
-    def __init__(self, user_repo: type[IUserRepository], db: AsyncSession) -> None:
+    def __init__(self, user_repo: IUserRepository) -> None:
         self.__user_repo = user_repo
-        self.__db = db
 
     async def refresh_token(self, access_token: str, refresh_token: str) -> str:
-        """Genera un nuevo token de acceso a partir de un token de refresco válido."""
+        """
+        Renueva un token de acceso expirado utilizando un token de actualización válido.
+
+        Raises:
+            InvalidJWT: Si alguno de los tokens posee una estructura o firma inválida, o si el
+                token de actualización ha expirado.
+            DomainRuleViolation: Si el token de acceso aún no ha expirado o si los identificadores
+                de usuario en ambos tokens no coinciden.
+            U
+        """
 
         access_token_expired = False
 
@@ -58,7 +70,6 @@ class RefreshTokenService:
         # Validación del usuario del token de acceso
         if access_token_payload["sub"] != refresh_token_payload["sub"]:
             await self.__user_repo.increment_session_versions(
-                db=self.__db,
                 user_ids=[
                     UUID(access_token_payload["sub"]),
                     UUID(refresh_token_payload["sub"]),
@@ -67,14 +78,19 @@ class RefreshTokenService:
 
             raise DomainRuleViolation(message=ExceptionErrorMessages.SESSION_CORRUPTED.value)
 
-        user_account, _ = await self.__user_repo.get_user(
-            filters={"id": UUID(access_token_payload["sub"])},
+        instance = await self.__user_repo.get_user(
             role=access_token_payload["user_role"],
-            db=self.__db,
+            id=UUID(access_token_payload["sub"]),
         )
+
+        if not instance:
+            raise UserNotFound(message=ExceptionErrorMessages.JWT_USER_NOT_FOUND.value)
+
+        if instance.session_version != refresh_token_payload["session_version"]:
+            raise AuthenticationFailed(message=ExceptionErrorMessages.AUTH_SESSION_EXPIRED.value)
 
         return create_access_token(
             user_id=UUID(access_token_payload["sub"]),
-            session_version=user_account.session_version,
-            user_role=user_account.role,
+            session_version=instance.session_version,
+            user_role=instance.role,
         )

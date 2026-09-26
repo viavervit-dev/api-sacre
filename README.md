@@ -10,51 +10,102 @@ La API del sistema Sacré es un servicio REST desarrollado con **FastAPI**, dise
 
 ## 🔹 2. Arquitectura del Proyecto
 
-Este proyecto está organizado siguiendo una arquitectura modular y escalable, facilitando el mantenimiento y la reutilización de código.
+Este proyecto está organizado bajo los principios de una **Arquitectura Hexagonal Flexible**, combinada con una organización modular por dominios de negocio. El objetivo es mantener una clara separación de responsabilidades, alta cohesión y testeabilidad, sin incurrir en sobreingeniería innecesaria.
 
-### 📁 Estructura de Carpetas
+### 2.1. Filosofía: Arquitectura Hexagonal Flexible
+
+En una arquitectura hexagonal estricta o purista, el núcleo de dominio debe ser 100% agnóstico a cualquier biblioteca externa, base de datos o framework web. En este proyecto se adoptó un enfoque **flexible y pragmático** fundamentado en las siguientes decisiones deliberadas:
+
+1. **Acoplamiento intencional al framework (FastAPI & Pydantic)**:
+   - **No se aísla FastAPI**: No existe intención de cambiar de framework web. Por ende, los servicios y la lógica de aplicación pueden utilizar utilidades de FastAPI o lanzar excepciones como `RequestValidationError` cuando se detectan violaciones de unicidad o de reglas de negocio. Esto permite que el sistema centralizado de manejo de errores de FastAPI traduzca dichas validaciones directamente en respuestas estandarizadas HTTP 400 Bad Request.
+   - **Pydantic v2 en todas las capas**: Se utiliza como el estándar único de validación sintáctica, definición de contratos (DTOs) y generación de esquemas OpenAPI enriquecidos.
+2. **Modelos ORM como Entidades de Dominio (SQLAlchemy)**:
+   - Los modelos ubicados en `models/` son tanto los modelos de persistencia como las entidades de negocio.
+   - Incorporan métodos del dominio y restricciones a nivel de base de datos, eliminando la necesidad de duplicar clases POPO (Plain Old Python Objects) y crear conversores (*mappers*) bidireccionales adicionales.
+3. **Inversión de Dependencias estricta en Persistencia**:
+   - A pesar de la flexibilidad con el framework, la capa de persistencia sí respeta la regla de inversión de dependencias: los servicios interactúan exclusivamente con **interfaces abstractas** de repositorios (`interfaces.py`), desacoplándose de las consultas SQL concretas y facilitando pruebas unitarias mediante dobles de prueba (*mocks*).
+
+---
+
+### 2.2. Estructura del Proyecto (`src/`)
 
 ```txt
-api-sacre/
-├── alembic/                        # Configuración y scripts de migraciones (Alembic)
-│   ├── versions/                   # Archivos de migración generados automáticamente
-│   └── env.py                      # Entorno de ejecución de migraciones
-├── src/                            # Código fuente de la aplicación
-│   ├── common/                     # Utilidades y contratos compartidos
-│   │   ├── constants.py            # Constantes globales
-│   │   ├── response.py             # Modelo genérico de respuesta estándar
-│   │   └── schema.py               # Esquemas base de Pydantic
-│   ├── config/                     # Configuración central de la aplicación
-│   │   ├── database.py             # Conexión a base de datos y pool
-│   │   ├── exception_handlers.py   # Manejadores de excepciones globales
-│   │   ├── models.py               # Registro de modelos para Alembic
-│   │   ├── parameters.py           # Variables de entorno
-│   │   └── serialization.py        # Configuración de serialización JSON
-│   ├── modules/                    # Módulos de negocio (separados por dominio)
-│   │   └── <nombre_del_modulo>/    # Estructura genérica de un módulo
-│   │       ├── constants.py        # Constantes específicas del módulo
-│   │       ├── dto.py              # Esquemas de transferencia de datos (Pydantic)
-│   │       ├── models/             # Entidades ORM del dominio
-│   │       ├── repositories/       # Acceso a base de datos (Patrón Repository)
-│   │       ├── routers/            # Endpoints y rutas de FastAPI
-│   │       └── services/           # Lógica de negocio (Casos de uso)
-│   ├── scripts/                    # Scripts de configuración y mantenimiento
-│   │   └── configure_roles.py      # Inicialización de roles y permisos
-│   └── main.py                     # Punto de entrada: instancia FastAPI, lifespan y rutas base
-├── workflow/                       # Guías y convenciones del equipo
-│   ├── branching_strategy.md       # Estrategia de ramas Git
-│   ├── create_branch.md            # Proceso para crear nuevas ramas
-│   └── create_commit.md            # Convenciones de mensajes de commit
+src/
+├── common/                             # Componentes y contratos transversales
+│   ├── constants.py                    # Constantes y mensajes de error globales
+│   ├── exceptions.py                   # Excepciones base de dominio y aplicación
+│   ├── response.py                     # Modelo unificado de respuesta API (Response[T])
+│   └── schema.py                       # Generadores dinámicos de esquemas OpenAPI para errores
+│
+├── config/                             # Configuración central del sistema
+│   ├── database.py                     # Conexión asíncrona, pool asyncpg y gestión transaccional
+│   ├── exception_handlers.py           # Manejadores globales de excepciones (HTTP 400, 401, 403, 404, 409, 503)
+│   ├── models.py                       # Registro central de modelos ORM para migraciones Alembic
+│   ├── parameters.py                   # Variables de entorno tipadas con Pydantic Settings
+│   └── serialization.py                # Serializador JSON personalizado optimizado
+│
+├── modules/                            # Módulos de negocio delimitados por dominio
+│   └── <nombre_del_modulo>/            # Estructura uniforme de cada módulo
+│       ├── constants.py                # Constantes, enums y textos de validación del módulo
+│       ├── dependencies.py             # Proveedores FastAPI Depends (Inyección de dependencias)
+│       ├── dto.py                      # Contratos de entrada y salida (Pydantic DTOs)
+│       ├── models/                     # Entidades de dominio y modelos SQLAlchemy
+│       ├── repositories/               # Capa de persistencia (Patrón Repositorio)
+│       │   ├── interfaces.py           # Contratos/Puertos de salida (Clases abstractas ABC)
+│       │   └── <entidad>.py            # Implementación concreta con SQLAlchemy AsyncSession
+│       ├── routers/                    # Adaptadores primarios HTTP (Controladores FastAPI)
+│       └── services/                   # Casos de uso y lógica de negocio
+│
+├── scripts/                            # Utilidades CLI de mantenimiento y setup inicial
+│   ├── configure_roles.py              # Sincronización de roles y permisos en base de datos
+│   ├── create_admin.py                 # Creación de usuario administrador inicial
+│   └── create_asymmetric_keys.py       # Generación de claves criptográficas Ed25519 para JWT
+│
+└── main.py                             # Punto de entrada de la API (Instancia FastAPI, lifespan y rutas)
 ```
 
-### 🏛️ Patrones de Diseño Aplicados
+### 2.3. Anatomía Interna de un Módulo (`src/modules/<modulo>/`)
 
-Para mantener la estructura modular y el código altamente mantenible y escalable, en cada módulo hacemos uso de los siguientes patrones de diseño:
+Cada módulo funciona como un dominio autocontenido y sigue un patrón de diseño uniforme:
 
-- **Inyección de Dependencias (Dependency Injection)**: En lugar de instanciar dependencias directamente (como la conexión a la base de datos o los validadores), utilizamos el sistema `Depends` de FastAPI. Esto se observa en los `routers/`, donde inyectamos la sesión de BD (`AsyncSession`), datos del *request* validados y otras utilidades que son posteriormente transferidas hacia la capa de servicios. Esto desacopla las responsabilidades y facilita el testing.
-- **Patrón Repositorio (Repository)**: Toda la interacción directa con la base de datos (consultas con SQLAlchemy) está centralizada en los `repositories/`. La capa de negocio o los controladores no realizan llamadas SQL/ORM directas; utilizan los métodos abstraídos en el repositorio.
-- **DTO (Data Transfer Object)**: Empleamos modelos de Pydantic en `dto.py` para definir los contratos de entrada y salida. Estos garantizan que los datos que entran al sistema sean válidos estructuralmente antes de llegar a la lógica de negocio, y estandarizan lo que la API responde.
-- **Capa de Servicios (Service Layer)**: Los casos de uso y la lógica de negocio pura se manejan de forma centralizada en los `services/`. Los routers solo actúan como orquestadores: reciben la petición HTTP, inyectan las dependencias, delegan el procesamiento al servicio, y finalmente retornan la respuesta.
+#### Entidades de Dominio (`models/`)
+- Clases que heredan de `Base` de SQLAlchemy.
+- Cada módulo define sus tablas en un esquema de PostgreSQL específico.
+- Integran validaciones de integridad, claves primarias UUID autogeneradas, relaciones ORM y métodos de negocio propios de la entidad.
+
+#### Puertos de Persistencia (`repositories/interfaces.py`)
+- Interfaces abstractas definidas con `abc.ABC` y `@abstractmethod`.
+- Establecen el **contrato de persistencia** que requiere el dominio.
+- No dependen de detalles de implementación de base de datos ni de sintaxis SQL.
+
+#### Adaptadores de Persistencia (`repositories/<entidad>.py`)
+- Implementan las interfaces abstractas de persistencia utilizando SQLAlchemy asíncrono.
+- Los repositorios llaman a `self.__db.flush()` cuando necesitan sincronizar IDs generados u operaciones intermedias, pero nunca ejecutan `commit()` ni `rollback()` directamente. El ciclo de vida de la transacción está delegado a la sesión HTTP en `get_db_session()`.
+- Centralizan todas las consultas SQL.
+
+#### Casos de Uso y Negocio (`services/`)
+- Clases que encapsulan la lógica de negocio y las reglas del dominio.
+- Reciben los repositorios a través de sus interfaces abstractas en el método `__init__`, nunca instancian repositorios de forma interna.
+- Ejecutan validaciones de negocio previas y transforman los datos persistidos en DTOs de salida listos para enviar al cliente.
+
+#### Inyección de Dependencias (`dependencies.py`)
+- Define las funciones factoría para resolver dependencias a través del sistema `Depends` de FastAPI:
+  - **Factorías de Repositorios**: Inyectan la sesión `AsyncSession` (desde `get_db_session`) y retornan la implementación concreta tipada contra la interfaz correspondiente.
+  - **Factorías de Servicios**: Inyectan los repositorios requeridos a través de sus interfaces y proveen la instancia del servicio.
+  - **Seguridad y Permisos**: Incluye dependencias de autenticación JWT (`JWTAuthentication`) y validadores de roles y permisos granulares (`UserPermissionChecker`).
+
+#### Adaptadores Primarios HTTP (`routers/`)
+- Controladores organizados en endpoints específicos.
+- Su responsabilidad es estrictamente de orquestación y transporte HTTP:
+  - Definen rutas, métodos HTTP y documentación OpenAPI.
+  - Inyectan el servicio mediante `Annotated[Service, Depends(get_service)]`.
+  - Reciben el DTO de entrada validado automáticamente por FastAPI.
+  - Llaman al método del caso de uso y devuelven la respuesta encapsulada en la clase estándar `Response[T]`.
+
+#### Objetos de Transferencia de Datos (`dto.py`)
+- Modelos Pydantic v2 que establecen los contratos de datos que entran y salen de la API.
+- Separados en esquemas de creación (`Create...DTO`), actualización parcial (`Update...DTO`) y lectura (`Read...DTO`, `PrivateRead...DTO`).
+- Incluyen metadatos `json_schema_extra={"x-validation-errors": [...]}` para autodocumentar en OpenAPI los mensajes exactos de error que produce cada campo en caso de falla.
 
 ## 🔹 3. Tecnologías
 
@@ -65,7 +116,7 @@ Para mantener la estructura modular y el código altamente mantenible y escalabl
 ## 🔹 4. Instalación
 
 > [!IMPORTANT]
-> Necesitas tener instalado [Python 3.12](https://www.python.org/downloads/) y [Poetry](https://python-poetry.org/docs/#installation)
+> Necesitas tener instalado [Python 3.14](https://www.python.org/downloads/) y [Poetry](https://python-poetry.org/docs/#installation)
 
 ### Paso 1: Clonar el repositorio
 
@@ -79,44 +130,83 @@ cd api-sacre
 Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 
 ```txt
-# === Aplicación ===
+== Aplicación ===
 DEBUG=true
-ADMIN_EMAIL="value"
-ADMIN_PASSWORD="value"
-ADMIN_FIRST_NAMES="value"
-ADMIN_LAST_NAMES="value"
+ADMIN_EMAIL=<value>
+ADMIN_PASSWORD=<value>
+ADMIN_FIRST_NAMES=<value>
+ADMIN_LAST_NAMES=<value>
 
 
-# === Base de Datos ===
-DATABASE_URL="postgresql+asyncpg://user:password@localhost:5432/api_sacre"
-DB_POOL_MAX_OVERFLOW=10
+=== Base de Datos ===
+DATABASE_URL="postgresql+asyncpg://api_user:api_password@localhost:5432/fastapi_db"
+DB_STATEMENT_TIMEOUT=10000
+DB_POOL_MAX_OVERFLOW=5
+DB_COMMAND_TIMEOUT=15
+DB_POOL_RECYCLE=1800
+DB_POOL_TIMEOUT=5
 DB_POOL_SIZE=10
+DB_ECHO=false
+DB_JIT=off
 
 
-# Para Alembic (SYNC/migraciones)
-ALEMBIC_DATABASE_URL="postgresql+psycopg2://user:password@localhost:5432/api_sacre"
+Para Alembic (SYNC/migraciones)
+ALEMBIC_DATABASE_URL="postgresql+psycopg2://api_user:api_password@localhost:5432/fastapi_db"
 
 
-# === Seguridad ===
-PRIVATE_KEY="value"
-PUBLIC_KEY="value"
+=== Seguridad ===
+PRIVATE_KEY=<value>
+PUBLIC_KEY=<value>
 
 
-# === Servidor ===
+=== Servidor ===
 HOST="127.0.0.1"
 PORT=8080
 WORKERS=4
 ```
 
-### Paso 3: Instalar dependencias
+### Paso 3: Crear base de datos local
+> [!IMPORTANT]
+> Necesitas tener instalado [PostgreSQL](https://www.postgresql.org/download/) en tu sistema operativo
+
+Este proyecto utiliza **PostgreSQL** como motor de base de datos. Para la conexión se emplea SQLAlchemy de forma asíncrona (`asyncpg`) para el rendimiento de la API, y `psycopg2` como driver síncrono para la gestión de migraciones con Alembic. Asegúrate de tener el servicio de PostgreSQL corriendo. Si estás usando WSL o Linux, abre tu terminal y sigue estos pasos:
+
+1. Accede a la consola de PostgreSQL usando el usuario administrador:
+   ```bash
+   sudo -u postgres psql
+   ```
+
+2. Ejecuta los siguientes comandos SQL para crear el usuario, la base de datos y otorgar los permisos (puedes cambiar `api_user`, `api_password` y `fastapi_db` por los nombres que prefieras):
+   ```sql
+   -- 1. Crear el usuario con su contraseña
+   CREATE USER api_user WITH PASSWORD 'api_password';
+
+   -- 2. Crear la base de datos
+   CREATE DATABASE fastapi_db;
+
+   -- 3. Otorgar todos los privilegios sobre la base de datos al usuario
+   GRANT ALL PRIVILEGES ON DATABASE fastapi_db TO api_user;
+
+   -- 4. Otorgar permisos sobre el esquema public (Necesario en PostgreSQL 15+)
+   \c fastapi_db
+   GRANT ALL ON SCHEMA public TO api_user;
+
+   -- Salir de la consola
+   \q
+   ```
+
+Remplaza los valores `api_user`, `api_password` y `fastapi_db` en las variables de entorno.
+
+### Paso 4: Instalar dependencias
 
 Este comando instalará todas las dependencias del proyecto.
 
 ```txt
+poetry env use python3.14
 poetry install
 ```
 
-### Paso 4: Instalar hooks
+### Paso 5: Instalar hooks
 
 Estos comandos instalarán los hooks de [pre-commit](https://pre-commit.com/) configurados en el proyecto para validación de código y mensajes de commit.
 
@@ -125,12 +215,12 @@ pre-commit install
 pre-commit install --hook-type commit-msg
 ```
 
-### Paso 5: Iniciar servidor de desarrollo
+### Paso 6: Iniciar servidor de desarrollo
 
 Este comando iniciará el servidor utilizando el `HOST` y `PORT` definidos en el archivo `.env`. Si `DEBUG=true`, la recarga automática estará habilitada.
 
 ```txt
-python -m src.main
+python3.14 -m src.main
 ```
 
 ## 🔹 5. Base de Datos y Migraciones
@@ -189,7 +279,7 @@ El proyecto incluye scripts de mantenimiento y configuración inicial dentro del
 Para inicializar o actualizar los permisos y roles de los usuarios en la base de datos, ejecuta el siguiente comando en la raíz del proyecto:
 
 ```bash
-python -m src.scripts.configure_roles
+python3.14 -m src.scripts.configure_roles
 ```
 
 **¿Qué hace este script?**
@@ -205,7 +295,7 @@ python -m src.scripts.configure_roles
 Para crear un usuario administrador inicial en la base de datos, ejecuta el siguiente comando en la raíz del proyecto:
 
 ```bash
-python -m src.scripts.create_admin
+python3.14 -m src.scripts.create_admin
 ```
 
 **¿Qué hace este script?**
@@ -222,7 +312,7 @@ python -m src.scripts.create_admin
 Para generar las claves asimétricas (Ed25519) necesarias para la autenticación JWT, ejecuta el siguiente comando en la raíz del proyecto:
 
 ```bash
-python -m src.scripts.create_asymmetric_keys
+python3.14 -m src.scripts.create_asymmetric_keys
 ```
 
 **¿Qué hace este script?**

@@ -1,8 +1,6 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from fastapi.exceptions import RequestValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.response import Response
 from src.common.schema import (
@@ -11,47 +9,22 @@ from src.common.schema import (
     response_scheme_403,
     response_scheme_503,
 )
-from src.config.database import get_db_session
-from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserPermissionChecker
 from src.modules.auth.models.user import User
+from src.modules.inventory.dependencies import get_create_category_service
 from src.modules.inventory.dto import CreateCategoryDTO, PrivateReadCategoryDTO
 from src.modules.inventory.models.category import Category
-from src.modules.inventory.repositories.product import ProductRepository
 from src.modules.inventory.services.categories.create_category import CreateCategoryService
 
-router = APIRouter(prefix="/inventory", tags=["Inventario"])
+create_category_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
     permissions={UserRoles.ADMINISTRATOR.value: f"{Category.__tablename__}.create"},
 )
 
 
-async def validations(
-    data: CreateCategoryDTO,
-    db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> CreateCategoryDTO:
-    """Ejecuta validaciones adicionales para la creación de una categoría."""
-
-    all_errors: list[Any] = []
-
-    # Lista de todas las validaciones que queremos correr
-    checks = [data.check_name]
-
-    for check in checks:
-        try:
-            await check(db=db, product_repo=ProductRepository)
-        except RequestValidationError as e:
-            all_errors.extend(e.errors())
-
-    if all_errors:
-        raise RequestValidationError(all_errors)
-
-    return data
-
-
-@router.post(
+@create_category_router.post(
     path="/category/",
     response_description="**(CREATED)** Categoría creada exitosamente.",
     status_code=status.HTTP_201_CREATED,
@@ -70,17 +43,42 @@ async def validations(
     },
 )
 async def create_category(
-    user: Annotated[tuple[User, Admin], Depends(require_admin)],
-    data: Annotated[CreateCategoryDTO, Depends(validations)],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    user: Annotated[User, Depends(require_admin)],
+    data: CreateCategoryDTO,
+    service: Annotated[CreateCategoryService, Depends(get_create_category_service)],
 ) -> Response[PrivateReadCategoryDTO]:
     """
-    Endpoint para la creación de una categoría de productos, recibe una petición con los datos
-    necesarios y ejecuta validaciones adicionales. Si todo es correcto, crea la categoría en la
-    base de datos y devuelve su información.
+    Crea una nueva categoría de productos e inicializa sus métricas.
+
+    ### Descripción
+    Registra una nueva categoría en el sistema a partir del nombre y la descripción provistos.
+    Verifica la unicidad del nombre en el inventario e inicializa automáticamente los valores
+    por defecto de la entidad (contador de productos en cero y estado inactivo).
+
+    ### Requisitos de Acceso
+    - **Rol requerido:** Administrador (`admin`).
+    - **Permiso requerido:** `categories.create`.
+    - **Autenticación:** Cookies obligatorias `access_token` y `refresh_token` (JWT).
+
+    ### Flujo de Ejecución
+    1. **Autenticación y Autorización:**
+       - Extrae y valida los tokens JWT presentes en las cookies de la petición.
+       - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
+       - Comprueba que el usuario tenga rol de administrador y el permiso `categories.create`.
+    2. **Validación Sintáctica (DTO):**
+       - Valida que el nombre (máx 50 caracteres) y la descripción (máx 1000 caracteres) cumplan
+         con los esquemas definidos en `CreateCategoryDTO`.
+    3. **Validación de Reglas de Negocio:**
+       - **Unicidad de Nombre:** Consulta la base de datos para confirmar que no exista otra
+         categoría con el mismo nombre.
+    4. **Inicialización de Valores:**
+       - Asigna `product_count = 0` (sin artículos asociados inicialmente).
+       - Asigna `status = False` (inactiva por defecto hasta que disponga de productos).
+    5. **Persistencia y Transacción:**
+       - Inserta el registro de la categoría en el esquema `product.categories`.
+       - Confirma la transacción en la base de datos (`commit`) de forma atómica.
     """
 
-    service = CreateCategoryService(db=db, product_repo=ProductRepository)
     category = await service.create_category(data=data)
 
     return Response(
