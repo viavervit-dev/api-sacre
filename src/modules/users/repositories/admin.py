@@ -4,8 +4,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.admins.models.admin import Admin
-from src.modules.admins.repositories.interfaces import IAdminRepository
+from src.modules.users.models.admin import Admin
+from src.modules.users.repositories.interfaces import IAdminRepository
 
 
 class AdminRepository(IAdminRepository):

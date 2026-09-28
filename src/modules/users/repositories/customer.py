@@ -4,8 +4,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.customers.models.customer import Customer
-from src.modules.customers.repositories.interfaces import ICustomerRepository
+from src.modules.users.models.customer import Customer
+from src.modules.users.repositories.interfaces import ICustomerRepository
 
 
 class CustomerRepository(ICustomerRepository):

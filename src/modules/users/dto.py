@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from src.common.constants import DTOValidationErrorMessages
 from src.modules.auth.constants import UserEntity
-from src.modules.customers.constants import CustomerEntity, DocumentTypesCustomer
+from src.modules.users.constants import CustomerEntity, DocumentTypesCustomer
 
 
 class CreateCustomerDTO(BaseModel):

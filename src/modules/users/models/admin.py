@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.config.database import Base
-from src.modules.admins.constants import AdminEntity
+from src.modules.users.constants import AdminEntity
 
 
 class Admin(Base):

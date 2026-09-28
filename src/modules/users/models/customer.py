@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.config.database import Base
-from src.modules.customers.constants import CustomerEntity
+from src.modules.users.constants import CustomerEntity
 
 
 class Customer(Base):

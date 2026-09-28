@@ -14,8 +14,8 @@ from src.config.exception_handlers import register_exception_handlers
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
 from src.modules.auth.routers import router as auth_router
-from src.modules.customers.routers import router as customers_router
 from src.modules.inventory.routers import router as inventory_router
+from src.modules.users.routers import router as users_router
 
 
 @asynccontextmanager
@@ -78,7 +78,7 @@ register_exception_handlers(app=app)
 
 # Configura el router principal para la API, con un prefijo para todas las rutas v1
 v1_router = APIRouter(prefix="/api/v1")
-v1_router.include_router(router=customers_router)
+v1_router.include_router(router=users_router)
 v1_router.include_router(router=auth_router)
 v1_router.include_router(router=inventory_router)
 app.include_router(router=v1_router)

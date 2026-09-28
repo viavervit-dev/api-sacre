@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends
 from src.common.response import Response
 from src.common.schema import response_scheme_400, response_scheme_503
 from src.modules.auth.dto import ReadUserDTO
-from src.modules.customers.dependencies import get_create_customer_service
-from src.modules.customers.dto import CreateCustomerDTO
-from src.modules.customers.services.create import CreateCustomerService
+from src.modules.users.dependencies import get_create_customer_service
+from src.modules.users.dto import CreateCustomerDTO
+from src.modules.users.services.create_customer import CreateCustomerService
 
 create_customer_router = APIRouter(prefix="/customer", tags=["Clientes"])
 

@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config.database import get_db_session
 from src.modules.auth.dependencies import get_user_repository
 from src.modules.auth.repositories.interfaces import IUserRepository
-from src.modules.customers.repositories.customer import CustomerRepository
-from src.modules.customers.repositories.interfaces import ICustomerRepository
-from src.modules.customers.services.create import CreateCustomerService
+from src.modules.users.repositories.customer import CustomerRepository
+from src.modules.users.repositories.interfaces import ICustomerRepository
+from src.modules.users.services.create_customer import CreateCustomerService
 
 
 def get_customer_repository(

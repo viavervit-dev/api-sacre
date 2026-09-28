@@ -8,13 +8,13 @@ from src.common.schema import (
     response_scheme_403,
     response_scheme_503,
 )
-from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserPermissionChecker, get_retrieve_user_service
 from src.modules.auth.dto import ReadUserDTO
 from src.modules.auth.models.user import User
 from src.modules.auth.services.jwt.get_current_user import RetrieveCurrentUserService
-from src.modules.customers.models.customer import Customer
+from src.modules.users.models.admin import Admin
+from src.modules.users.models.customer import Customer
 
 jwt_me_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
 require_user = UserPermissionChecker(

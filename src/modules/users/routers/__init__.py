@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.modules.customers.routers.create import create_customer_router
+from src.modules.users.routers.create_customer import create_customer_router
 
 router = APIRouter()
 

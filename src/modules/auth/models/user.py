@@ -6,10 +6,10 @@ from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.config.database import Base
-from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserEntity
 from src.modules.auth.models.permission import Group
-from src.modules.customers.models.customer import Customer
+from src.modules.users.models.admin import Admin
+from src.modules.users.models.customer import Customer
 
 # Constantes para validaciones de campos numéricos
 SESSION_VERSION_MIN_VALUE = UserEntity.SESSION_VERSION_MIN_VALUE.value

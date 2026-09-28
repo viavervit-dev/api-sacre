@@ -5,9 +5,9 @@ from fastapi.exceptions import RequestValidationError
 from src.modules.auth.constants import UserEntity, UserRoles
 from src.modules.auth.dto import ReadUserDTO
 from src.modules.auth.repositories.interfaces import IUserRepository
-from src.modules.customers.constants import CustomerEntity
-from src.modules.customers.dto import CreateCustomerDTO
-from src.modules.customers.repositories.interfaces import ICustomerRepository
+from src.modules.users.constants import CustomerEntity
+from src.modules.users.dto import CreateCustomerDTO
+from src.modules.users.repositories.interfaces import ICustomerRepository
 
 
 class CreateCustomerService:

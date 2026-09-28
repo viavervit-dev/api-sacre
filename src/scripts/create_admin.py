@@ -6,10 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import close_db_pool, create_db_pool, get_db_session
-from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.models.permission import Group
 from src.modules.auth.models.user import User, UserGroup
+from src.modules.users.models.admin import Admin
 
 # Carga las variables de entorno
 load_dotenv()

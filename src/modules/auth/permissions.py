@@ -1,10 +1,10 @@
 from typing import TypedDict
 
-from src.modules.admins.models.admin import Admin
 from src.modules.auth.models.user import User
-from src.modules.customers.models.customer import Customer
 from src.modules.inventory.models.category import Category
 from src.modules.inventory.models.product import Product
+from src.modules.users.models.admin import Admin
+from src.modules.users.models.customer import Customer
 
 
 class RoleGroupConfig(TypedDict):
