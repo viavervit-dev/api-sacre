@@ -25,8 +25,7 @@ class CreateProductService(ProductPricingMixin):
         Crea un nuevo producto aplicando reglas de negocio, stock y cálculo de precios.
 
         Raises:
-            RequestValidationError: Si las validaciones de negocio fallan (nombre en uso,
-                URLs de imagen inválidas o categorías inexistentes).
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
 
         product_data = data.model_dump()
@@ -80,8 +79,7 @@ class CreateProductService(ProductPricingMixin):
         Ejecuta las validaciones de negocio previas a la creación del producto.
 
         Raises:
-            RequestValidationError: Si el nombre ya existe, alguna URL de imagen es inválida
-                o alguna de las categorías no existe.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
 
         errors = []

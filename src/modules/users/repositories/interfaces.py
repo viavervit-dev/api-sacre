@@ -4,7 +4,7 @@ from uuid import UUID
 
 from src.modules.users.models.admin import Admin
 from src.modules.users.models.customer import Customer
-from src.modules.users.models.wholesale import Wholesale
+from src.modules.users.models.wholesale import CustomerWholesale
 
 
 class ICustomerRepository(ABC):
@@ -23,11 +23,11 @@ class ICustomerRepository(ABC):
         pass
 
 
-class IWholesaleRepository(ABC):
-    """Contrato de persistencia para el perfil de mayorista `users.wholesale`."""
+class ICustomerWholesaleRepository(ABC):
+    """Contrato de persistencia para el perfil de cliente mayorista `users.customer_wholesale`."""
 
     @abstractmethod
-    async def create_wholesale(self, data: dict[str, Any]) -> Wholesale:
+    async def create_wholesale(self, data: dict[str, Any]) -> CustomerWholesale:
         """Crea y registra un nuevo perfil de mayorista."""
 
         pass

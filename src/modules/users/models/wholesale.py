@@ -10,7 +10,7 @@ from src.config.database import Base
 from src.modules.users.constants import WholesaleEntity
 
 
-class Wholesale(Base):
+class CustomerWholesale(Base):
     """
     Modelo ORM para el perfil de cliente mayorista.
 
@@ -18,7 +18,7 @@ class Wholesale(Base):
     contacto y ubicación geográfica en el esquema `users` (`users.wholesale`).
     """
 
-    __tablename__ = "wholesale"
+    __tablename__ = "customer_wholesale"
     __table_args__ = {"schema": "users"}
 
     id: Mapped[UUID] = mapped_column(

@@ -7,7 +7,6 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.config.database import Base
-from src.modules.countries.constants import CountryEntity
 
 
 class Country(Base):
@@ -29,14 +28,14 @@ class Country(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(
-        String(length=CountryEntity.NAME_MAX_LENGTH.value),
-        doc=CountryEntity.NAME_DESCRIPTION.value,
+        String(length=60),
+        doc="Nombre del país.",
         nullable=False,
         unique=True,
     )
     administrative_structure: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
-        doc=CountryEntity.ADMINISTRATIVE_STRUCTURE_DESCRIPTION.value,
+        doc="Estructura y organización territorial del país.",
         nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(

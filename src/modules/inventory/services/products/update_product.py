@@ -33,7 +33,7 @@ class UpdateProductService(ProductPricingMixin):
         Actualiza un producto aplicando validaciones de negocio y recálculo de precios.
 
         Raises:
-            RequestValidationError: Si alguna validación de negocio falla.
+            RequestValidationError: Si falla alguna validacion de negocio.
             ResourceNotFound: Si el producto no existe en la base de datos.
         """
 
@@ -92,8 +92,7 @@ class UpdateProductService(ProductPricingMixin):
         Ejecuta las validaciones de negocio previas a la actualización del producto.
 
         Raises:
-            RequestValidationError: Si las validaciones de stock, nombre, imágenes
-                o categorías fallan.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
 
         errors = []

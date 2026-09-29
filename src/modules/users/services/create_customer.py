@@ -22,8 +22,7 @@ class CreateCustomerService:
         Registra un nuevo cliente tras validar las reglas de negocio del dominio.
 
         Raises:
-            RequestValidationError: Si el correo electrónico, teléfono o número de documento
-                ya se encuentran registrados.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
 
         # Validaciones de negocio
@@ -63,8 +62,9 @@ class CreateCustomerService:
         Ejecuta las validaciones de negocio previas al registro del cliente.
 
         Raises:
-            RequestValidationError: Si el correo, teléfono o documento ya están en uso.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
+
         errors = []
 
         # Validar que el correo electrónico no esté registrado en la base de datos

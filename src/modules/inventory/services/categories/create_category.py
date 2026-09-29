@@ -18,7 +18,7 @@ class CreateCategoryService:
         Crea una nueva categoría aplicando valores iniciales y validaciones de negocio.
 
         Raises:
-            RequestValidationError: Si el nombre de la categoría ya existe.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
 
         category_data = data.model_dump()
@@ -41,7 +41,7 @@ class CreateCategoryService:
         Ejecuta las validaciones de reglas de negocio previas a la creación.
 
         Raises:
-            RequestValidationError: Si el nombre de la categoría ya se encuentra registrado.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos

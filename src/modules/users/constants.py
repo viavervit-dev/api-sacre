@@ -2,7 +2,7 @@ from enum import Enum, StrEnum
 
 
 class CustomerEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `Customer`."""
+    """Constantes y metadatos asociados a la entidad `Customer`."""
 
     # Descripciones para los campos de la entidad
     FIRST_NAMES_DESCRIPTION = "Primer y segundo nombre del cliente."
@@ -26,7 +26,7 @@ class CustomerEntity(Enum):
 
 
 class DocumentTypesCustomer(StrEnum):
-    """Enumeración que define los tipos de documentos para la entidad de un cliente."""
+    """Tipos de documentos de identificación admitidos para un cliente."""
 
     RUC = "RUC"
     PASSPORT = "Pasaporte"
@@ -40,7 +40,7 @@ class DocumentTypesCustomer(StrEnum):
 
 
 class AdminEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `Admin`."""
+    """Constantes y metadatos asociados a la entidad `Admin`."""
 
     # Descripciones para los campos de la entidad
     FIRST_NAMES_DESCRIPTION = "Primer y segundo nombre del administrador."
@@ -53,7 +53,7 @@ class AdminEntity(Enum):
 
 
 class WholesaleEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `Wholesale`."""
+    """Constantes y metadatos asociados a la entidad `Wholesale`."""
 
     # Descripciones para los campos de la entidad
     NAME_OR_COMPANY_NAME_DESCRIPTION = "Nombre o razón social del mayorista."
@@ -62,9 +62,30 @@ class WholesaleEntity(Enum):
     PHONE_DESCRIPTION = "Número de teléfono del mayorista."
     LOCATION_DESCRIPTION = "Datos de ubicación y dirección del mayorista."
     EXTRA_CONTACTS_DESCRIPTION = "Contactos adicionales del mayorista."
+    NAME_CONTACT_DESCRIPTION = "Nombre del contacto adicional."
+    POSITION_CONTACT_DESCRIPTION = "Cargo del contacto adicional."
+
+    # Mensajes de error
+    NAME_OR_COMPANY_NAME_IN_USE = "Nombre o razón social ya esta registrado."
+    PHONE_IN_USE = "Este número de teléfono ya está registrado."
+    RUC_IN_USE = "Nombre o razón social ya esta registrado."
 
     # Propiedades para los campos de la entidad
-    NAME_OR_COMPANY_NAME_MAX_LENGTH = 40
+    NAME_OR_COMPANY_NAME_MAX_LENGTH = 100
+    NAME_CONTACT_MAX_LENGTH = 100
+    POSITION_CONTACT_MAX_LENGTH = 100
     EMAIL_MAX_LENGTH = 60
     RUC_MAX_LENGTH = 13
     PHONE_MAX_LENGTH = 25
+
+
+class Ecuador(StrEnum):
+    """Enumeración del país Ecuador para normalización de direcciones."""
+
+    ECUADOR = "Ecuador"
+
+    @classmethod
+    def values(cls) -> list[str]:
+        """Devuelve una lista de los valores de la enumeración."""
+
+        return [item.value for item in cls]
