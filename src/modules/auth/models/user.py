@@ -27,7 +27,7 @@ class User(Base):
     __table_args__ = {"schema": "auth"}
 
     id: Mapped[UUID] = mapped_column(
-        doc=UserEntity.ID_DESCRIPTION.value,
+        doc="Identificador único (UUID v4).",
         default=uuid4,
         primary_key=True,
         nullable=False,
@@ -35,18 +35,18 @@ class User(Base):
     email: Mapped[str] = mapped_column(
         String(length=UserEntity.EMAIL_MAX_LENGTH.value),
         doc=UserEntity.EMAIL_DESCRIPTION.value,
+        nullable=False,
         unique=True,
-        nullable=True,
     )
     password_hash: Mapped[str] = mapped_column(
         String(length=UserEntity.PASSWORD_HASH_MAX_LENGTH.value),
         doc=UserEntity.PASSWORD_HASH_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     role: Mapped[str] = mapped_column(
         String(length=UserEntity.ROLE_MAX_LENGTH.value),
         doc=UserEntity.ROLE_NAME_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     session_version: Mapped[int] = mapped_column(
         Integer,
@@ -55,13 +55,13 @@ class User(Base):
             name="session_version_range",
         ),
         doc=UserEntity.SESSION_VERSION_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        doc=UserEntity.DATE_JOINED_DESCRIPTION.value,
+        doc="Fecha y hora de la creación del registro.",
         default=lambda: datetime.now(tz=UTC),
-        nullable=True,
+        nullable=False,
     )
 
     customer: Mapped[Customer] = relationship(

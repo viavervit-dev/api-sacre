@@ -20,7 +20,7 @@ class Permission(Base):
     __table_args__ = {"schema": "auth"}
 
     id: Mapped[UUID] = mapped_column(
-        doc=PermissionEntity.ID_DESCRIPTION.value,
+        doc="Identificador único (UUID v4).",
         default=uuid4,
         primary_key=True,
         nullable=False,
@@ -28,15 +28,15 @@ class Permission(Base):
     name: Mapped[str] = mapped_column(
         String(length=PermissionEntity.NAME_MAX_LENGTH.value),
         doc=PermissionEntity.NAME_DESCRIPTION.value,
+        nullable=False,
         unique=True,
         index=True,
-        nullable=True,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        doc=PermissionEntity.DATE_JOINED_DESCRIPTION.value,
+        doc="Fecha y hora de la creación del registro.",
         default=lambda: datetime.now(tz=UTC),
-        nullable=True,
+        nullable=False,
     )
 
     groups: Mapped[list[Group]] = relationship(
@@ -58,7 +58,7 @@ class Group(Base):
     __table_args__ = {"schema": "auth"}
 
     id: Mapped[UUID] = mapped_column(
-        doc=GroupEntity.ID_DESCRIPTION.value,
+        doc="Identificador único (UUID v4).",
         default=uuid4,
         primary_key=True,
         nullable=False,
@@ -66,15 +66,15 @@ class Group(Base):
     name: Mapped[str] = mapped_column(
         String(length=GroupEntity.NAME_MAX_LENGTH.value),
         doc=GroupEntity.NAME_DESCRIPTION.value,
+        nullable=False,
         unique=True,
         index=True,
-        nullable=True,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        doc=GroupEntity.DATE_JOINED_DESCRIPTION.value,
+        doc="Fecha y hora de la creación del registro.",
         default=lambda: datetime.now(tz=UTC),
-        nullable=True,
+        nullable=False,
     )
 
     permissions: Mapped[list[Permission]] = relationship(
@@ -104,16 +104,16 @@ class PermissionGroup(Base):
     permission_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.permissions.id", ondelete="CASCADE"),
         doc="ID del permiso referenciado",
-        nullable=True,
+        nullable=False,
     )
     group_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.groups.id", ondelete="CASCADE"),
         doc="ID del grupo referenciado",
-        nullable=True,
+        nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         doc="Fecha y hora de la creación del registro.",
         default=lambda: datetime.now(tz=UTC),
-        nullable=True,
+        nullable=False,
     )

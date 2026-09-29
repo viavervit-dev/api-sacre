@@ -12,7 +12,6 @@ class UserEntity(Enum):
     """Enumeración que define constantes relacionadas con la entidad `Users`."""
 
     # Descripciones para los campos de la entidad
-    ID_DESCRIPTION = "Identificador único (UUID v4)."
     EMAIL_DESCRIPTION = "Correo electrónico del usuario."
     PASSWORD_HASH_DESCRIPTION = "Hash encriptado de la contraseña del usuario."
     PASSWORD_DESCRIPTION = "Contraseña del usuario"
@@ -21,7 +20,6 @@ class UserEntity(Enum):
     ROLE_NAME_DESCRIPTION = "Rol del usuario."
     ROLE_DATA_DESCRIPTION = "Datos específicos del rol del usuario."
     SESSION_VERSION_DESCRIPTION = "Control para la revocación global de tokens de acceso."
-    DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 
     # Mensajes de error
     EMAIL_IN_USE = "Este correo electrónico ya está registrado."
@@ -39,9 +37,7 @@ class PermissionEntity(Enum):
     """Enumeración que define constantes relacionadas con la entidad `Permissions`."""
 
     # Descripciones para los campos de la entidad
-    ID_DESCRIPTION = "Identificador único (UUID v4)."
     NAME_DESCRIPTION = "Nombre del permiso."
-    DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 
     # Propiedades para los campos de la entidad
     NAME_MAX_LENGTH = 100
@@ -51,9 +47,7 @@ class GroupEntity(Enum):
     """Enumeración que define constantes relacionadas con la entidad `Groups`."""
 
     # Descripciones para los campos de la entidad
-    ID_DESCRIPTION = "Identificador único (UUID v4)."
     NAME_DESCRIPTION = "Nombre del grupo."
-    DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 
     # Propiedades para los campos de la entidad
     NAME_MAX_LENGTH = 100
@@ -63,13 +57,11 @@ class JWTEntity(Enum):
     """Enumeración que define constantes relacionadas con la entidad `JWT`."""
 
     # Descripciones para los campos de la entidad
-    ID_DESCRIPTION = "Identificador único (UUID v4)."
     TOKEN_DESCRIPTION = "JWT almacenado en la lista negra para revocación de tokens."
     JTI_DESCRIPTION = "Identificador único del token."
     TOKEN_TYPE_DESCRIPTION = "Tipo de token."
     USER_ID_DESCRIPTION = "ID del usuario al que pertenece el token."
     ACCESS_TOKEN_DESCRIPTION = "Token de acceso JWT para autenticación de un usuario."
-    DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 
     # Propiedades para los campos de la entidad
     TOKEN_TYPE_MAX_LENGTH = 20

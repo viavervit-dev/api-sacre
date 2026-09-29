@@ -37,11 +37,44 @@ target_metadata = Base.metadata
 def get_all_model_schemas() -> set[str]:
     """Extrae dinámicamente todos los esquemas únicos definidos en los modelos."""
 
-    return {
-        table.schema
-        for table in target_metadata.tables.values()
-        if table.schema is not None
-    }
+    return {table.schema for table in target_metadata.tables.values() if table.schema is not None}
+
+
+def include_name(name: str | None, type_: str, parent_names: dict) -> bool:
+    """
+    Filtra los objetos para que Alembic no compare ni intente alterar
+    esquemas internos propios de PostgreSQL (como pg_catalog, pg_toast, etc.).
+    """
+
+    if type_ == "schema":
+        if name is None:
+            return True
+
+        # Ignorar esquemas internos de PostgreSQL
+        if name.startswith("pg_") or name == "information_schema":
+            return False
+
+    return True
+
+
+def cleanup_empty_schemas(connection: Connection) -> None:
+    """Elimina automáticamente esquemas de la app que hayan quedado sin tablas ni objetos."""
+
+    query = text("""
+        SELECT n.nspname AS schema_name
+        FROM pg_catalog.pg_namespace n
+        WHERE n.nspname NOT LIKE 'pg_%'
+            AND n.nspname NOT IN ('information_schema', 'public')
+            AND NOT EXISTS (
+                SELECT 1 FROM pg_catalog.pg_class c
+                WHERE c.relnamespace = n.oid
+            );
+    """)
+
+    empty_schemas = [row[0] for row in connection.execute(query).fetchall()]
+
+    for schema in empty_schemas:
+        connection.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" RESTRICT;'))
 
 
 def run_migrations_offline() -> None:
@@ -73,18 +106,26 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        # Aseguramos la existencia previa de los esquemas de los modelos
         for schema in get_all_model_schemas():
             connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
 
         connection.commit()
+
+        # Configuramos el contexto con el filtro de esquemas del sistema
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
+            include_name=include_name,
         )
 
         with context.begin_transaction():
             context.run_migrations()
+
+        # Eliminamos esquemas que hayan quedado vacíos
+        cleanup_empty_schemas(connection=connection)
+        connection.commit()
 
 
 if context.is_offline_mode():

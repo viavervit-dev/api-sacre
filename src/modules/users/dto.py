@@ -94,32 +94,7 @@ class CreateCustomerDTO(BaseModel):
                 DTOValidationErrorMessages.STRING_TOO_LONG.value,
                 DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
-                CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
+                CustomerEntity.PHONE_IN_USE.value,
             ]
         },
-    )
-
-
-class ReadCustomerDTO(BaseModel):
-    """DTO para la lectura de datos de un cliente"""
-
-    first_names: str = Field(
-        description=CustomerEntity.FIRST_NAMES_DESCRIPTION.value,
-        examples=["Juan Pablo"],
-    )
-    last_names: str = Field(
-        description=CustomerEntity.LAST_NAMES_DESCRIPTION.value,
-        examples=["Pérez Gómez"],
-    )
-    document_type: str = Field(
-        description=CustomerEntity.DOCUMENT_TYPE_DESCRIPTION.value,
-        examples=DocumentTypesCustomer.values(),
-    )
-    document_number: str = Field(
-        description=CustomerEntity.DOCUMENT_NUMBER_DESCRIPTION.value,
-        examples=["12345678-9"],
-    )
-    phone: str = Field(
-        description=CustomerEntity.PHONE_DESCRIPTION.value,
-        examples=["+593 123456789"],
     )

@@ -2,7 +2,16 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from sqlalchemy import ARRAY, Boolean, CheckConstraint, DateTime, Integer, Numeric, String
+from sqlalchemy import (
+    ARRAY,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.config.database import Base
@@ -37,36 +46,41 @@ class Product(Base):
     __table_args__ = {"schema": "product"}
 
     id: Mapped[UUID] = mapped_column(
-        doc=ProductEntity.ID_DESCRIPTION.value,
+        doc="Identificador único (UUID v4).",
         default=uuid4,
         primary_key=True,
         nullable=False,
     )
+    exclusive_client_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey(column="users.wholesale.id", ondelete="CASCADE"),
+        doc="ID del cliente al que se le vende el producto.",
+        nullable=True,
+    )
     name: Mapped[str] = mapped_column(
         String(length=ProductEntity.NAME_MAX_LENGTH.value),
         doc=ProductEntity.NAME_DESCRIPTION.value,
+        nullable=False,
         unique=True,
-        nullable=True,
     )
     categories: Mapped[list[str]] = mapped_column(
         ARRAY(item_type=String(length=CategoryEntity.NAME_MAX_LENGTH.value)),
         doc=ProductEntity.CATEGORIES_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     description_short: Mapped[str] = mapped_column(
         String(length=ProductEntity.DESCRIPTION_SHORT_MAX_LENGTH.value),
         doc=ProductEntity.DESCRIPTION_SHORT_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     description_long: Mapped[str] = mapped_column(
         String(length=ProductEntity.DESCRIPTION_LONG_MAX_LENGTH.value),
         doc=ProductEntity.DESCRIPTION_LONG_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     images: Mapped[list[str]] = mapped_column(
         ARRAY(item_type=String(length=ProductEntity.URL_IMAGES_MAX_LENGTH.value)),
         doc=ProductEntity.IMAGES_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     price_neto: Mapped[Decimal] = mapped_column(
         Numeric(
@@ -79,7 +93,7 @@ class Product(Base):
             name="price_neto_range",
         ),
         doc=ProductEntity.PRICE_NETO_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     price_sale: Mapped[Decimal] = mapped_column(
         Numeric(
@@ -92,7 +106,7 @@ class Product(Base):
             name="price_sale_range",
         ),
         doc=ProductEntity.PRICE_SALE_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     profit_margin: Mapped[Decimal] = mapped_column(
         Numeric(
@@ -105,7 +119,7 @@ class Product(Base):
             name="profit_margin_range",
         ),
         doc=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     iva: Mapped[Decimal] = mapped_column(
         Numeric(
@@ -118,7 +132,7 @@ class Product(Base):
             name="iva_range",
         ),
         doc=ProductEntity.IVA_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     stock_total: Mapped[int] = mapped_column(
         Integer,
@@ -127,7 +141,7 @@ class Product(Base):
             name="stock_total_range",
         ),
         doc=ProductEntity.STOCK_TOTAL_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     stock_hand: Mapped[int] = mapped_column(
         Integer,
@@ -136,7 +150,7 @@ class Product(Base):
             name="stock_hand_range",
         ),
         doc=ProductEntity.STOCK_HAND_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     stock_sale: Mapped[int] = mapped_column(
         Integer,
@@ -145,17 +159,17 @@ class Product(Base):
             name="stock_sale_range",
         ),
         doc=ProductEntity.STOCK_SALE_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     status: Mapped[bool] = mapped_column(
         Boolean,
         doc=ProductEntity.STATUS_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
         index=True,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        doc=ProductEntity.DATE_JOINED_DESCRIPTION.value,
+        doc="Fecha y hora de la creación del registro.",
         default=lambda: datetime.now(tz=UTC),
-        nullable=True,
+        nullable=False,
     )

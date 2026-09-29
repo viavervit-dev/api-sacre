@@ -37,7 +37,7 @@ class ReadUserDTO(BaseModel):
     """DTO para las credenciales de autenticación de un administrador."""
 
     id: UUID = Field(
-        description=UserEntity.ID_DESCRIPTION.value,
+        description="Identificador único (UUID v4).",
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
     )
     first_names: str = Field(
