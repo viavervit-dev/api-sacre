@@ -328,9 +328,23 @@ class CreateCustomerWholesaleDTO(BaseModel):
             ]
         },
     )
-    location: LocationDTO = Field(description=WholesaleEntity.LOCATION_DESCRIPTION.value)
+    location: LocationDTO = Field(
+        description=WholesaleEntity.LOCATION_DESCRIPTION.value,
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+    )
     extra_contacts: list[ExtraContactsDTO] | None = Field(
         description=WholesaleEntity.EXTRA_CONTACTS_DESCRIPTION.value,
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
         default=None,
     )
 

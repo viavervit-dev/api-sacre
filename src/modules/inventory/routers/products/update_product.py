@@ -31,8 +31,8 @@ require_admin = UserPermissionChecker(
     response_description="**(OK)** Producto actualizado exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
-        400: response_scheme_400(dto_class=UpdateProductDTO),
-        401: response_scheme_401(
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=UpdateProductDTO),
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
             access_jwt_invalid=True,
@@ -40,9 +40,9 @@ require_admin = UserPermissionChecker(
             jwt_user_not_found=True,
             auth_session_expired=True,
         ),
-        403: response_scheme_403(),
-        404: response_scheme_404(),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_403_FORBIDDEN: response_scheme_403(),
+        status.HTTP_404_NOT_FOUND: response_scheme_404(),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def update_product(
@@ -74,28 +74,27 @@ async def update_product(
 
     ### Flujo de Ejecución
     1. **Autenticación y Autorización:**
-       - Extrae y valida los tokens JWT presentes en las cookies de la petición.
-       - Verifica la vigencia de la sesión y la existencia del usuario.
-       - Comprueba que el usuario tenga rol de administrador y el permiso `products.update`.
+        - Extrae y valida los tokens JWT presentes en las cookies de la petición.
+        - Verifica la vigencia de la sesión y la existencia del usuario.
+        - Comprueba que el usuario tenga rol de administrador y el permiso `products.update`.
     2. **Búsqueda del Recurso:**
-       - Consulta el producto en la base de datos por su `product_id`.
-       - Si no existe, interrumpe el flujo con un error 404 (Not Found).
+        - Consulta el producto en la base de datos por su `product_id`.
+        - Si no existe, interrumpe el flujo con un error 404 (Not Found).
     3. **Validación Sintáctica y de Reglas de Negocio:**
-       - Valida el esquema y formatos de los campos enviados (`UpdateProductDTO`).
-       - **Consistencia de Stock:** Si se envía `stock_total`, comprueba que no sea menor a las
+        - Valida el esquema y formatos de los campos enviados.
+        - **Consistencia de Stock:** Si se envía `stock_total`, comprueba que no sea menor a las
          unidades en reserva activa (`stock_hand`).
-       - **Unicidad:** Si se modifica el nombre, verifica que no esté registrado previamente.
-       - **URLs de Imágenes:** Si se envían imágenes, valida que cada URL sea válida (`HttpUrl`).
-       - **Categorías:** Si se envían categorías, comprueba que todas existan en la base de datos.
+        - **Unicidad:** Si se modifica el nombre, verifica que no esté registrado previamente.
+        - **URLs de Imágenes:** Si se envían imágenes, valida que cada URL sea válida.
+        - **Categorías:** Si se envían categorías, comprueba que todas existan en la base de datos.
     4. **Cálculos y Transformaciones:**
-       - **Estado (`status`):** Si `stock_total == 0` y no hay reservas (`stock_hand == 0`), se
+        - **Estado (`status`):** Si `stock_total == 0` y no hay reservas (`stock_hand == 0`), se
          establece `status = False` automáticamente.
-       - **Recálculo de Precio (`price_sale`):** Calcula el precio de venta final combinando los
+        - **Recálculo de Precio (`price_sale`):** Calcula el precio de venta final combinando los
          nuevos valores provistos con los existentes en la base de datos:
          `price_sale = round_half_up(price_neto * (1 + profit_margin) * (1 + iva), 2)`.
-    5. **Persistencia y Transacción:**
-       - Aplica las modificaciones en el esquema `product.products`.
-       - Confirma la transacción en la base de datos (`commit`) de forma atómica.
+    5. **Persistencia:**
+        - Aplica las modificaciones del registro en la base de datos.
     """
 
     updated_product = await service.update_product(product_id=product_id, data=data)

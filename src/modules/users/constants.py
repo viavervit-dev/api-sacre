@@ -60,7 +60,7 @@ class WholesaleEntity(Enum):
     EMAIL_DESCRIPTION = "Correo electrónico del mayorista."
     RUC_DESCRIPTION = "Registro Único de Contribuyentes del mayorista."
     PHONE_DESCRIPTION = "Número de teléfono del mayorista."
-    LOCATION_DESCRIPTION = "Datos de ubicación y dirección del mayorista."
+    LOCATION_DESCRIPTION = "Datos de ubicación y dirección de entrega."
     EXTRA_CONTACTS_DESCRIPTION = "Contactos adicionales del mayorista."
     NAME_CONTACT_DESCRIPTION = "Nombre del contacto adicional."
     POSITION_CONTACT_DESCRIPTION = "Cargo del contacto adicional."

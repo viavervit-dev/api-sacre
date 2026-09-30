@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 
 from src.common.constants import PAGINATION_LIMIT_DESCRIPTION, PAGINATION_OFFSET_DESCRIPTION
 from src.common.response import PaginatedData, PaginationMeta, Response
@@ -33,8 +33,9 @@ require_admin = UserOptionalPermissionChecker(
 
 @get_products_router.get(
     path="/product/",
+    status_code=status.HTTP_200_OK,
     responses={
-        200: {
+        status.HTTP_200_OK: {
             "description": "**(OK)** Lista de productos obtenida exitosamente.",
             "model": Response[list[PrivateReadProductDTO | PublicReadProductDTO]],
             "content": {
@@ -136,7 +137,7 @@ require_admin = UserOptionalPermissionChecker(
                 }
             },
         },
-        401: response_scheme_401(
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
             access_jwt_invalid=True,
@@ -144,8 +145,8 @@ require_admin = UserOptionalPermissionChecker(
             jwt_user_not_found=True,
             auth_session_expired=True,
         ),
-        403: response_scheme_403(),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_403_FORBIDDEN: response_scheme_403(),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def get_list_products(
@@ -170,14 +171,12 @@ async def get_list_products(
 
     ### Descripción
     Consulta y retorna el catálogo de productos con soporte para paginación y ordenamiento
-    cronológico descendente (`date_joined`). La información y los filtros aplicados se adaptan
-    dinámicamente según el nivel de privilegios del usuario solicitante:
-    - **Público / Clientes:** Acceso libre o como cliente (`CUSTOMER`). Solo lista productos
-      activos (`status=True`) y expone datos comerciales (`PublicReadProductDTO`), omitiendo
-      costos, márgenes y existencias internas.
-    - **Administradores:** Usuarios con rol `ADMINISTRATOR`. Acceden a todos los productos
-      (activos e inactivos) y visualizan métricas completas de inventario y costos
-      (`PrivateReadProductDTO`).
+    cronológico descendente. La información y los filtros aplicados se adaptan dinámicamente
+    según el nivel de privilegios del usuario solicitante:
+    - **Público / Clientes:** Acceso libre o como cliente. Solo lista productos
+     activos (`status=True`) y expone datos comerciales públicos.
+    - **privado / Administradores:** Usuarios con rol de administrador. Acceden a todos los
+     productos (activos e inactivos) y visualizan de datos comerciales públicos y privados.
 
     ### Requisitos de Acceso
     - **Acceso Anónimo:** Permitido sin autenticación (vista pública).
@@ -187,22 +186,19 @@ async def get_list_products(
 
     ### Flujo de Ejecución
     1. **Autenticación Opcional y Autorización:**
-       - Si se proporcionan cookies JWT, valida el token, la existencia del usuario y la sesión.
-       - Valida que el rol sea `admin` o `customer` y verifique sus permisos respectivos.
-       - Si no se envían tokens, permite el acceso con rol público / anónimo.
+        - Si se proporcionan cookies JWT, valida el token, la existencia del usuario y la sesión.
+        - Valida que el rol sea `admin` o `customer` y verifique sus permisos respectivos.
+        - Si no se envían tokens, permite el acceso con rol público / anónimo.
     2. **Determinación de Visibilidad y Filtros:**
-       - Si el usuario es administrador (`admin`): `private=True` y `status=None` (sin filtro).
-       - Si es anónimo o cliente (`customer`): `private=False` y `status=True` (solo activos).
+        - Si el usuario es administrador (`admin`): `private=True` y `status=None`.
+        - Si es anónimo o cliente (`customer`): `private=False` y `status=True`.
     3. **Consulta en Base de Datos y Paginación:**
-       - Realiza el conteo total de registros coincidentes para los metadatos de paginación.
-       - Si existen registros, consulta los productos ordenados descendentemente por fecha de
-         creación (`date_joined.desc()`), aplicando `offset` y `limit`.
+        - Realiza el conteo total de registros coincidentes para los metadatos de paginación.
+        - Si existen registros, consulta los productos ordenados descendentemente por fecha de
+         creación, aplicando `offset` y `limit`.
     4. **Serialización Dinámica:**
-       - Mapea los resultados a `PrivateReadProductDTO` (visión administrativa completa) o
-         `PublicReadProductDTO` (visión pública segura sin datos sensibles de negocio).
-    5. **Construcción de Respuesta:**
-       - Retorna la estructura unificada `Response` con `pagination=True`, la lista de `items`
-         y los metadatos de paginación `meta` (`total`, `offset`, `limit`).
+        - Mapea los resultados a visión administrativa completa o visión pública segura sin datos
+         sensibles de negocio.
     """
 
     private = False

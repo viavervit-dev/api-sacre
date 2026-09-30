@@ -29,8 +29,8 @@ require_admin = UserPermissionChecker(
     response_description="**(CREATED)** Producto creado exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
-        400: response_scheme_400(dto_class=CreateProductDTO),
-        401: response_scheme_401(
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateProductDTO),
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
             access_jwt_invalid=True,
@@ -38,8 +38,8 @@ require_admin = UserPermissionChecker(
             jwt_user_not_found=True,
             auth_session_expired=True,
         ),
-        403: response_scheme_403(),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_403_FORBIDDEN: response_scheme_403(),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def create_product(
@@ -63,26 +63,26 @@ async def create_product(
 
     ### Flujo de Ejecución
     1. **Autenticación y Autorización:**
-       - Extrae y valida los tokens JWT presentes en las cookies de la petición.
-       - Verifica la vigencia de la sesión y la existencia del usuario.
-       - Comprueba que el usuario tenga rol de administrador y el permiso `products.create`.
+        - Extrae y valida los tokens JWT presentes en las cookies de la petición.
+        - Verifica la vigencia de la sesión y la existencia del usuario.
+        - Comprueba que el usuario tenga rol de administrador y el permiso `products.create`.
     2. **Validación Sintáctica (DTO):**
-       - Valida tipos de datos, longitudes y rangos numéricos mediante `CreateProductDTO`.
+        - Valida tipos de datos, longitudes y rangos numéricos mediante.
     3. **Validaciones de Reglas de Negocio:**
-       - **Unicidad:** Verifica que el nombre del producto no esté previamente registrado.
-       - **URLs de Imágenes:** Comprueba que cada URL de la lista sea válida (`HttpUrl`).
-       - **Categorías:** Comprueba que cada una de las categorías indicadas exista
+        - **Unicidad:** Verifica que el nombre del producto no esté previamente registrado.
+        - **URLs de Imágenes:** Comprueba que cada URL de la lista sea válida.
+        - **Categorías:** Comprueba que cada una de las categorías indicadas exista
          previamente en la base de datos.
     4. **Cálculos y Transformaciones:**
-       - **Precio de Venta (`price_sale`):** Se calcula automáticamente mediante la fórmula:
+        - **Precio de Venta (`price_sale`):** Se calcula automáticamente mediante la fórmula:
          `price_sale = round_half_up(price_neto * (1 + profit_margin) * (1 + iva), 2)`.
-       - **Estado inicial (`status`):** Se establece en `True` si `stock_total > 0`;
+        - **Estado inicial (`status`):** Se establece en `True` si `stock_total > 0`;
          en caso contrario, se define en `False`.
-       - **Stocks auxiliares:** Inicializa `stock_hand` (reserva) y `stock_sale` (venta) en `0`.
-       - **Categorías:** Incrementa en `1` el contador de productos (`product_count`)
+        - **Stocks auxiliares:** Inicializa `stock_hand` y `stock_sale` en `0`.
+        - **Categorías:** Incrementa en `1` el contador de productos (`product_count`)
          de cada categoría asignada.
     5. **Persistencia:**
-       - Inserta el registro del producto en la base de datos.
+        - Guarda el registro en la base de datos.
     """
 
     product = await service.create_product(data=data)

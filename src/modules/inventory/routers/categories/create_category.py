@@ -29,8 +29,8 @@ require_admin = UserPermissionChecker(
     response_description="**(CREATED)** Categoría creada exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
-        400: response_scheme_400(dto_class=CreateCategoryDTO),
-        401: response_scheme_401(
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateCategoryDTO),
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
             access_jwt_invalid=True,
@@ -38,8 +38,8 @@ require_admin = UserPermissionChecker(
             jwt_user_not_found=True,
             auth_session_expired=True,
         ),
-        403: response_scheme_403(),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_403_FORBIDDEN: response_scheme_403(),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def create_category(
@@ -62,21 +62,19 @@ async def create_category(
 
     ### Flujo de Ejecución
     1. **Autenticación y Autorización:**
-       - Extrae y valida los tokens JWT presentes en las cookies de la petición.
-       - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
-       - Comprueba que el usuario tenga rol de administrador y el permiso `categories.create`.
+        - Extrae y valida los tokens JWT presentes en las cookies de la petición.
+        - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
+        - Comprueba que el usuario tenga rol de administrador y el permiso `categories.create`.
     2. **Validación Sintáctica (DTO):**
-       - Valida que el nombre (máx 50 caracteres) y la descripción (máx 1000 caracteres) cumplan
-         con los esquemas definidos en `CreateCategoryDTO`.
+        - Valida que el nombre y la descripción cumplan con los esquemas definidos.
     3. **Validación de Reglas de Negocio:**
-       - **Unicidad de Nombre:** Consulta la base de datos para confirmar que no exista otra
+        - **Unicidad de Nombre:** Consulta la base de datos para confirmar que no exista otra
          categoría con el mismo nombre.
     4. **Inicialización de Valores:**
-       - Asigna `product_count = 0` (sin artículos asociados inicialmente).
-       - Asigna `status = False` (inactiva por defecto hasta que disponga de productos).
-    5. **Persistencia y Transacción:**
-       - Inserta el registro de la categoría en el esquema `product.categories`.
-       - Confirma la transacción en la base de datos (`commit`) de forma atómica.
+        - Asigna `product_count = 0` (sin artículos asociados inicialmente).
+        - Asigna `status = False` (inactiva por defecto hasta que disponga de productos).
+    5. **Persistencia:**
+        - Guarda el registro en la base de datos.
     """
 
     category = await service.create_category(data=data)

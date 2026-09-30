@@ -30,17 +30,17 @@ require_admin = UserPermissionChecker(
     response_description="**(OK)** Categoría de producto eliminada exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
-        401: response_scheme_401(
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
             access_jwt_invalid=True,
             access_jwt_expired=True,
             jwt_user_not_found=True,
         ),
-        403: response_scheme_403(),
-        404: response_scheme_404(),
-        409: response_scheme_409(category_has_dependencies=True),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_403_FORBIDDEN: response_scheme_403(),
+        status.HTTP_404_NOT_FOUND: response_scheme_404(),
+        status.HTTP_409_CONFLICT: response_scheme_409(category_has_dependencies=True),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def delete_category(
@@ -71,19 +71,18 @@ async def delete_category(
 
     ### Flujo de Ejecución
     1. **Autenticación y Autorización:**
-       - Extrae y valida los tokens JWT presentes en las cookies de la petición.
-       - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
-       - Comprueba que el usuario tenga rol de administrador y el permiso `categories.delete`.
+        - Extrae y valida los tokens JWT presentes en las cookies de la petición.
+        - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
+        - Comprueba que el usuario tenga rol de administrador y el permiso `categories.delete`.
     2. **Búsqueda del Recurso:**
-       - Consulta la categoría en la base de datos por su `category_id`.
-       - Si no se encuentra ningún registro, interrumpe el flujo con un error 404 (Not Found).
+        - Consulta la categoría en la base de datos por su `category_id`.
+        - Si no se encuentra ningún registro, interrumpe el flujo con un error 404 (Not Found).
     3. **Validación de Reglas de Negocio:**
-       - Comprueba que la categoría no tenga productos vinculados (`product_count == 0`).
-       - Si posee artículos asociados (`product_count > 0`), deniega la eliminación para evitar
+        - Comprueba que la categoría no tenga productos vinculados (`product_count == 0`).
+        - Si posee artículos asociados (`product_count > 0`), deniega la eliminación para evitar
          inconsistencias en el catálogo.
-    4. **Persistencia y Transacción:**
-       - Elimina el registro de la categoría en el esquema `product.categories`.
-       - Confirma la transacción en la base de datos (`commit`) de forma atómica.
+    4. **Persistencia:**
+        - Elimina el registro de la categoría de la base de datos.
     """
 
     await service.delete_category(category_id=category_id)

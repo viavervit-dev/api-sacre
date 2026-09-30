@@ -31,8 +31,8 @@ require_admin = UserPermissionChecker(
     response_description="**(OK)** Categoría de producto actualizada exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
-        400: response_scheme_400(dto_class=UpdateCategoryDTO),
-        401: response_scheme_401(
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=UpdateCategoryDTO),
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
             access_jwt_invalid=True,
@@ -40,9 +40,9 @@ require_admin = UserPermissionChecker(
             jwt_user_not_found=True,
             auth_session_expired=True,
         ),
-        403: response_scheme_403(),
-        404: response_scheme_404(),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_403_FORBIDDEN: response_scheme_403(),
+        status.HTTP_404_NOT_FOUND: response_scheme_404(),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def update_category(
@@ -74,19 +74,18 @@ async def update_category(
 
     ### Flujo de Ejecución
     1. **Autenticación y Autorización:**
-       - Extrae y valida los tokens JWT presentes en las cookies de la petición.
-       - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
-       - Comprueba que el usuario tenga rol de administrador y el permiso `categories.update`.
+        - Extrae y valida los tokens JWT presentes en las cookies de la petición.
+        - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
+        - Comprueba que el usuario tenga rol de administrador y el permiso `categories.update`.
     2. **Búsqueda del Recurso:**
-       - Consulta la categoría en la base de datos por su `category_id`.
-       - Si no existe, interrumpe el flujo con un error 404 (Not Found).
+        - Consulta la categoría en la base de datos por su `category_id`.
+        - Si no existe, interrumpe el flujo con un error 404 (Not Found).
     3. **Validación Sintáctica y de Reglas de Negocio:**
-       - Valida el esquema y límites de los campos enviados (`UpdateCategoryDTO`).
-       - **Unicidad de Nombre:** Si se modifica el nombre, comprueba que no se encuentre
+        - Valida el esquema y límites de los campos enviados.
+        - **Unicidad de Nombre:** Si se modifica el nombre, comprueba que no se encuentre
          registrado previamente en otra categoría.
-    4. **Persistencia y Transacción:**
-       - Aplica las modificaciones en el esquema `product.categories`.
-       - Confirma la transacción en la base de datos (`commit`) de forma atómica.
+    4. **Persistencia:**
+        - Aplica las modificaciones del registro en la base de datos.
     """
 
     updated_category = await service.update_category(category_id=category_id, data=data)
