@@ -33,6 +33,12 @@ class Country(Base):
         nullable=False,
         unique=True,
     )
+    code: Mapped[str] = mapped_column(
+        String(length=5),
+        doc="Código del país.",
+        nullable=False,
+        unique=True,
+    )
     administrative_structure: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         doc="Estructura y organización territorial del país.",

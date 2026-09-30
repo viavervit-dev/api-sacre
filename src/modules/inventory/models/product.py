@@ -39,11 +39,11 @@ class Product(Base):
     Modelo ORM para la gestión de productos y artículos del inventario.
 
     Centraliza la información de catálogo, categorización, precios, cálculo de
-    márgenes e IVA, y el control de existencias en almacén y venta (`product.products`).
+    márgenes e IVA, y el control de existencias en almacén y venta (`inventory.products`).
     """
 
     __tablename__ = "products"
-    __table_args__ = {"schema": "product"}
+    __table_args__ = {"schema": "inventory"}
 
     id: Mapped[UUID] = mapped_column(
         doc="Identificador único (UUID v4).",

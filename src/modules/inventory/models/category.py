@@ -16,12 +16,12 @@ class Category(Base):
     """
     Modelo ORM para la clasificación y categorización de productos en el inventario.
 
-    Define la agrupación lógica de productos en el esquema `product`, gestionando su
+    Define la agrupación lógica de productos en el esquema `inventory`, gestionando su
     estado operativo, descripción y el conteo acumulado de artículos asociados.
     """
 
     __tablename__ = "categories"
-    __table_args__ = {"schema": "product"}
+    __table_args__ = {"schema": "inventory"}
 
     id: Mapped[UUID] = mapped_column(
         doc="Identificador único (UUID v4).",

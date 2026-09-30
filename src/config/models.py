@@ -13,12 +13,6 @@ from src.modules.auth.models.user import User, UserGroup
 
 # Modelos del módulo de países
 from src.modules.countries.models.country import Country
-from src.modules.countries.models.ecuador import (
-    CantonEcuador,
-    CityEcuador,
-    OrganizationEcuador,
-    ProvinceEcuador,
-)
 
 # Modelos del módulo de productos
 from src.modules.inventory.models.category import Category
