@@ -5,6 +5,12 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 
 
 async def run() -> None:
+    """
+    Genera un par de claves asimétricas Ed25519 en formato PEM.
+
+    Imprime las claves privada y pública por consola con el formato adecuado
+    para ser configuradas como variables de entorno en el archivo `.env`.
+    """
 
     # Generar clave privada
     private_key = ed25519.Ed25519PrivateKey.generate()

@@ -10,11 +10,10 @@ from src.modules.auth.permissions import GROUPS, PERMISSIONS
 
 async def run(db: AsyncSession) -> None:
     """
-    Script de configuración de roles y permisos. Este script se encarga de:
-    1. Crear los permisos definidos en la lista `PERMISSIONS` si no existen.
-    2. Crear los grupos definidos en la lista `GROUPS` si no existen.
-    3. Asociar los permisos correspondientes a cada grupo según lo definido en `GROUPS`.
-    4. Eliminar permisos de grupos que ya no estén definidos en la lista `GROUPS`.
+    Sincroniza y configura los roles y permisos del sistema en la base de datos.
+
+    Crea los permisos y grupos faltantes según `PERMISSIONS` y `GROUPS`, vincula
+    las asociaciones vigentes y revoca los permisos obsoletos de cada grupo.
     """
 
     # 1. Crear todos los permisos definidos en PERMISSIONS en la base de datos

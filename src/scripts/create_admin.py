@@ -22,7 +22,13 @@ async def run(
     first_names: str,
     last_names: str,
 ) -> None:
-    """Crea un usuario administrador en la base de datos."""
+    """
+    Crea y registra un nuevo usuario administrador en el sistema.
+
+    Valida la disponibilidad del correo y del grupo de rol, crea la cuenta
+    de usuario con contraseña cifrada, asigna el grupo de permisos y genera
+    el perfil de administrador asociado.
+    """
 
     # Verificar si el usuario ya existe
     result = await db.execute(select(User).filter_by(email=email))
@@ -72,6 +78,7 @@ async def run(
 
 
 async def main() -> None:
+
     await create_db_pool()
 
     try:

@@ -1,0 +1,55 @@
+{
+    "Provincia": {
+        "Pichincha": {
+            "Canton": {
+                "Quito": {
+                    "Ciudad": [
+                        "Quito",
+                        "Calacalí",
+                        "Calderón",
+                        "El Quinche",
+                        "La Merced",
+                        "Lloa",
+                        "Píntag",
+                        "Pomasqui",
+                        "Yaruquí",
+                        "Alangasí",
+                        "Amaguaña",
+                        "Atahualpa",
+                        "Conocoto",
+                        "Cumbayá",
+                        "Chavezpamba",
+                        "Checa",
+                        "Gualea",
+                        "Guangopolo",
+                        "Guayllabamba",
+                        "Llano Chico",
+                        "Nanegal",
+                        "Nanegalito",
+                        "Nayón",
+                        "Nono",
+                        "Pacto",
+                        "Perucho",
+                        "Pifo",
+                        "Puéllaro",
+                        "Puembo",
+                        "San Antonio de Pichincha",
+                        "San José de Minas",
+                        "Tababela",
+                        "Tumbaco",
+                        "Zámbiza."
+                    ]
+                },
+                "Rumiñahui": {
+                    "Ciudad": [
+                        "Sangolquí",
+                        "San Pedro de Taboada",
+                        "Cotogchoa",
+                        "San Rafael",
+                        "Rumipamba"
+                    ]
+                }
+            }
+        }
+    }
+}
