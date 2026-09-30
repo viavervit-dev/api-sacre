@@ -59,7 +59,8 @@ src/
 ├── scripts/                            # Utilidades CLI de mantenimiento y setup inicial
 │   ├── configure_roles.py              # Sincronización de roles y permisos en base de datos
 │   ├── create_admin.py                 # Creación de usuario administrador inicial
-│   └── create_asymmetric_keys.py       # Generación de claves criptográficas Ed25519 para JWT
+│   ├── create_asymmetric_keys.py       # Generación de claves criptográficas Ed25519 para JWT
+│   └── load_countries.py               # Carga del catálogo de países y estructuras administrativas
 │
 └── main.py                             # Punto de entrada de la API (Instancia FastAPI, lifespan y rutas)
 ```
@@ -127,18 +128,17 @@ cd api-sacre
 
 ### Paso 2: Configurar variables de entorno
 
-Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+Crea un archivo `.env` en la raíz del proyecto tomando como plantilla la siguiente estructura:
 
-```txt
-== Aplicación ===
+```env
+# === Aplicación ===
 DEBUG=true
 ADMIN_EMAIL=<value>
 ADMIN_PASSWORD=<value>
 ADMIN_FIRST_NAMES=<value>
 ADMIN_LAST_NAMES=<value>
 
-
-=== Base de Datos ===
+# === Base de Datos ===
 DATABASE_URL="postgresql+asyncpg://api_user:api_password@localhost:5432/fastapi_db"
 DB_STATEMENT_TIMEOUT=10000
 DB_POOL_MAX_OVERFLOW=5
@@ -149,21 +149,24 @@ DB_POOL_SIZE=10
 DB_ECHO=false
 DB_JIT=off
 
-
-Para Alembic (SYNC/migraciones)
+# Para Alembic (SYNC/migraciones)
 ALEMBIC_DATABASE_URL="postgresql+psycopg2://api_user:api_password@localhost:5432/fastapi_db"
 
+# === Seguridad ===
+PRIVATE_KEY="<value>"
+PUBLIC_KEY="<value>"
 
-=== Seguridad ===
-PRIVATE_KEY=<value>
-PUBLIC_KEY=<value>
-
-
-=== Servidor ===
+# === Servidor ===
 HOST="127.0.0.1"
 PORT=8080
 WORKERS=4
 ```
+
+> [!IMPORTANT]
+> **Valores que debes reemplazar:**
+> - **Datos del Administrador (`ADMIN_*`)**: Reemplaza los marcadores `<value>` por el correo electrónico, contraseña segura, nombres y apellidos del administrador inicial. Estos datos serán utilizados posteriormente por el script `create_admin` para registrar el usuario en la base de datos.
+> - **Credenciales de Base de Datos**: Asegúrate de que el usuario (`api_user`), la contraseña (`api_password`) y el nombre de la base de datos (`fastapi_db`) en `DATABASE_URL` y `ALEMBIC_DATABASE_URL` coincidan exactamente con los que configures en el **Paso 3**.
+> - **Claves Asimétricas (`PRIVATE_KEY` y `PUBLIC_KEY`)**: Requieren un par de claves criptográficas asimétricas Ed25519 en formato PEM. Se generarán ejecutando el script del proyecto tras instalar las dependencias (ver **Paso 5**).
 
 ### Paso 3: Crear base de datos local
 > [!IMPORTANT]
@@ -195,7 +198,8 @@ Este proyecto utiliza **PostgreSQL** como motor de base de datos. Para la conexi
    \q
    ```
 
-Remplaza los valores `api_user`, `api_password` y `fastapi_db` en las variables de entorno.
+> [!NOTE]
+> Si utilizas valores diferentes para `api_user`, `api_password` o `fastapi_db`, recuerda actualizarlos correspondientemente en las variables `DATABASE_URL` y `ALEMBIC_DATABASE_URL` de tu archivo `.env`.
 
 ### Paso 4: Instalar dependencias
 
@@ -206,7 +210,27 @@ poetry env use python3.14
 poetry install
 ```
 
-### Paso 5: Instalar hooks
+### Paso 5: Generar claves asimétricas para JWT
+
+El sistema utiliza firmas criptográficas asimétricas (algoritmo Ed25519) para la emisión y verificación de tokens JWT. Para generar el par de claves, ejecuta el siguiente comando:
+
+```bash
+python3.14 -m src.scripts.create_asymmetric_keys
+```
+
+El script imprimirá por consola la **clave privada** y la **clave pública** en formato PEM. Copia cada bloque de texto y pégalo entre comillas en tu archivo `.env` dentro de las variables `PRIVATE_KEY` y `PUBLIC_KEY` respectivamente:
+
+```env
+PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
+...
+-----END PRIVATE KEY-----"
+
+PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
+...
+-----END PUBLIC KEY-----"
+```
+
+### Paso 6: Instalar hooks
 
 Estos comandos instalarán los hooks de [pre-commit](https://pre-commit.com/) configurados en el proyecto para validación de código y mensajes de commit.
 
@@ -215,7 +239,33 @@ pre-commit install
 pre-commit install --hook-type commit-msg
 ```
 
-### Paso 6: Iniciar servidor de desarrollo
+### Paso 7: Aplicar migraciones
+
+Aplica las migraciones con Alembic para generar las tablas y esquemas en PostgreSQL:
+
+```bash
+alembic upgrade head
+```
+
+### Paso 8: Ejecutar scripts de inicialización
+
+Ejecuta los scripts necesarios para configurar roles y permisos, cargar el catálogo de países y registrar al usuario administrador inicial:
+
+```bash
+# 1. Configurar roles y permisos
+python3.14 -m src.scripts.configure_roles
+
+# 2. Cargar catálogo de países y organización territorial
+python3.14 -m src.scripts.load_countries
+
+# 3. Crear usuario administrador
+python3.14 -m src.scripts.create_admin
+```
+
+> [!NOTE]
+> Para más detalles sobre el funcionamiento y requerimientos de cada comando, consulta la sección [Scripts Disponibles](#-6-scripts-disponibles).
+
+### Paso 9: Iniciar servidor de desarrollo
 
 Este comando iniciará el servidor utilizando el `HOST` y `PORT` definidos en el archivo `.env`. Si `DEBUG=true`, la recarga automática estará habilitada.
 
@@ -289,6 +339,23 @@ python3.14 -m src.scripts.configure_roles
 - Limpia los permisos obsoletos de los grupos si estos fueron removidos de la configuración.
 
 *(Si necesitas agregar nuevos roles o ajustar los permisos de un grupo existente, debes modificar los diccionarios `GROUPS` y `PERMISSIONS` dentro de `src/scripts/configure_roles.py` antes de correr el comando).*
+
+### Carga de Países
+
+Para inicializar o actualizar el catálogo de países y sus estructuras territoriales en la base de datos, ejecuta el siguiente comando en la raíz del proyecto:
+
+```bash
+python3.14 -m src.scripts.load_countries
+```
+
+**¿Qué hace este script?**
+- Lee los archivos de fixtures en formato JSON ubicados en `src/modules/countries/fixtures/`.
+- Extrae el nombre y código del país a partir del nombre de cada archivo, validando que cumpla con el formato `<Nombre>_<CODIGO>.json` (por ejemplo, `Ecuador_EC.json`).
+- Consulta la tabla `countries.country` para verificar si el país ya existe por código o por nombre.
+- Si el país existe, actualiza su nombre, código y estructura administrativa (`administrative_structure`).
+- Si el país no existe, crea un nuevo registro con la información y la estructura territorial proporcionada.
+
+*(Si deseas registrar un nuevo país o modificar su organización territorial, añade o actualiza el archivo JSON correspondiente en `src/modules/countries/fixtures/` asegurándote de seguir el formato de nombre `<Nombre>_<CODIGO>.json` antes de ejecutar el comando).*
 
 ### Creación de Administrador
 
