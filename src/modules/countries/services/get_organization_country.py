@@ -3,7 +3,7 @@ from src.modules.countries.dto import ReadAdministrativeStructureDTO
 from src.modules.countries.repositories.interfaces import ICountryRepository
 
 
-class RetrieveAdministrativeStructureService:
+class RetrieveOrganizationCountryService:
     """Servicio encargado de consultar la estructura territorial de un país."""
 
     def __init__(self, country_repo: ICountryRepository) -> None:

@@ -198,7 +198,7 @@ async def get_list_products(
          creación, aplicando `offset` y `limit`.
     4. **Serialización Dinámica:**
         - Mapea los resultados a visión administrativa completa o visión pública segura sin datos
-         sensibles de negocio.
+         sensibles de negocio al DTO de lectura..
     """
 
     private = False
