@@ -13,12 +13,7 @@ from src.modules.auth.repositories.interfaces import IUserRepository
 
 
 class UserRepository(IUserRepository):
-    """
-    Repositorio SQLAlchemy para la gestión de usuarios y autenticación en `auth.users`.
-
-    Implementa operaciones asíncronas para la consulta con carga dinámica de perfiles,
-    registro de credenciales, verificación y control de sesiones.
-    """
+    """Repositorio SQLAlchemy para la gestión de usuarios y autenticación en `auth.users`."""
 
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db

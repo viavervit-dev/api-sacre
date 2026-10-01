@@ -12,9 +12,6 @@ class CustomerWholesaleRepository(ICustomerWholesaleRepository):
     """
     Repositorio SQLAlchemy para la gestión de perfiles de clientes mayorista
     `users.customer_wholesale`.
-
-    Implementa operaciones asíncronas para la creación y verificación de existencia
-    de mayoristas registrados.
     """
 
     def __init__(self, db: AsyncSession) -> None:

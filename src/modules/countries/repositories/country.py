@@ -9,12 +9,7 @@ from src.modules.countries.repositories.interfaces import ICountryRepository
 
 
 class CountryRepository(ICountryRepository):
-    """
-    Repositorio SQLAlchemy para la gestión de países en `countries.country`.
-
-    Implementa operaciones asíncronas para la consulta y obtención de información geográfica
-    y estructuras político-administrativas.
-    """
+    """Repositorio SQLAlchemy para la gestión de países en `countries.country`."""
 
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db

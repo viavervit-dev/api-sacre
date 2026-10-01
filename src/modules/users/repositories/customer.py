@@ -9,12 +9,7 @@ from src.modules.users.repositories.interfaces import ICustomerRepository
 
 
 class CustomerRepository(ICustomerRepository):
-    """
-    Repositorio SQLAlchemy para la gestión de perfiles de clientes en `users.customers`.
-
-    Implementa operaciones asíncronas para la creación y verificación de existencia
-    de clientes vinculados a una cuenta de usuario.
-    """
+    """Repositorio SQLAlchemy para la gestión de perfiles de clientes en `users.customers`."""
 
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db

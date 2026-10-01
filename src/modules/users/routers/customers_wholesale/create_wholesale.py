@@ -15,16 +15,18 @@ from src.modules.auth.models.user import User
 from src.modules.users.dependencies import get_create_customer_wholesale_service
 from src.modules.users.dto import CreateCustomerWholesaleDTO, ReadCustomerWholesaleDTO
 from src.modules.users.models.wholesale import CustomerWholesale
-from src.modules.users.services.create_wholesale import CreateCustomerWholesaleService
+from src.modules.users.services.customers_wholesale.create_wholesale import (
+    CreateCustomerWholesaleService,
+)
 
-create_customer_wholesale_router = APIRouter(prefix="/users", tags=["Usuarios"])
+create_wholesale_router = APIRouter(prefix="/users", tags=["Usuarios"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
     permissions={UserRoles.ADMINISTRATOR.value: f"{CustomerWholesale.__tablename__}.create"},
 )
 
 
-@create_customer_wholesale_router.post(
+@create_wholesale_router.post(
     path="/customer_wholesale/",
     response_description="**(CREATED)** Cliente mayorista creado exitosamente.",
     status_code=status.HTTP_201_CREATED,

@@ -38,12 +38,14 @@ class ProductEntity(Enum):
     STOCK_HAND_DESCRIPTION = "Unidades reservadas temporalmente en carritos de compra activos."
     STOCK_SALE_DESCRIPTION = "Unidades disponibles para la venta."
     STATUS_DESCRIPTION = "Estado del producto."
+    WHOLESALER_ID_DESCRIPTION = "ID del cliente mayorista al que se le vende el producto."
 
     # Mensajes de error
     NAME_IN_USE = "Este nombre ya está registrado."
     URL_INVALID = "La URL proporcionada no es válida."
     CATEGORY_NOT_FOUND = "Esta categoría no existe."
     STOCK_TOTAL_INVALID = "El stock total no puede ser menor al stock en reserva."
+    WHOLESALER_NOT_FOUND = "El cliente mayorista no existe."
 
     # Propiedades para los campos de la entidad
     NAME_MAX_LENGTH = 60

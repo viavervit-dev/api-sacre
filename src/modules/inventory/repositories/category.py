@@ -10,12 +10,7 @@ from src.modules.inventory.repositories.interfaces import ICategoryRepository
 
 
 class CategoryRepository(ICategoryRepository):
-    """
-    Repositorio SQLAlchemy para la gestión de categorías en `inventory.categories`.
-
-    Implementa operaciones asíncronas de consulta paginada, inserción, actualización,
-    conteo incremental y eliminación de categorías.
-    """
+    """Repositorio SQLAlchemy para la gestión de categorías en `inventory.categories`."""
 
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db

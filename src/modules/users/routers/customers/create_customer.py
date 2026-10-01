@@ -7,7 +7,7 @@ from src.common.schema import response_scheme_400, response_scheme_503
 from src.modules.auth.dto import ReadUserDTO
 from src.modules.users.dependencies import get_create_customer_service
 from src.modules.users.dto import CreateCustomerDTO
-from src.modules.users.services.create_customer import CreateCustomerService
+from src.modules.users.services.customers.create_customer import CreateCustomerService
 
 create_customer_router = APIRouter(prefix="/users", tags=["Usuarios"])
 

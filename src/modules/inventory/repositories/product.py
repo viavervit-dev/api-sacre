@@ -10,12 +10,7 @@ from src.modules.inventory.repositories.interfaces import IProductRepository
 
 
 class ProductRepository(IProductRepository):
-    """
-    Repositorio SQLAlchemy para la gestión de productos en `inventory.products`.
-
-    Implementa operaciones asíncronas de consulta paginada, inserción, actualización,
-    verificación de existencia y eliminación de productos.
-    """
+    """Repositorio SQLAlchemy para la gestión de productos en `inventory.products`."""
 
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db
@@ -24,10 +19,14 @@ class ProductRepository(IProductRepository):
         self,
         offset: int,
         limit: int,
+        private: bool,
         status: bool | None = None,
     ) -> tuple[Sequence[Product], int]:
 
         count_stmt = select(func.count(Product.id))
+
+        if not private:
+            count_stmt = count_stmt.where(Product.wholesaler_id.is_(None))
 
         if status is not None:
             count_stmt = count_stmt.where(Product.status == status)
@@ -38,6 +37,9 @@ class ProductRepository(IProductRepository):
             return [], 0
 
         stmt = select(Product)
+
+        if not private:
+            stmt = stmt.where(Product.wholesaler_id.is_(None))
 
         if status is not None:
             stmt = stmt.where(Product.status == status)

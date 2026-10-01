@@ -1,32 +1,48 @@
 from typing import Any
+from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
 from pydantic import HttpUrl, TypeAdapter
 
+from src.common.exceptions import ResourceNotFound
 from src.modules.inventory.constants import ProductEntity, VatRatesProduct
-from src.modules.inventory.dto import CreateProductDTO, PrivateReadProductDTO
+from src.modules.inventory.dto import CreateProductDTO, ReadProductWholesalerDTO
 from src.modules.inventory.repositories.interfaces import ICategoryRepository, IProductRepository
 from src.modules.inventory.services.products.utils import ProductPricingMixin
+from src.modules.users.repositories.interfaces import ICustomerWholesaleRepository
 
 
-class CreateProductService(ProductPricingMixin):
-    """Servicio para la validación de negocio, cálculo de precios y creación de productos."""
+class AddProductWholesaleService(ProductPricingMixin):
+    """Servicio para la validación y creación de productos exclusivos para mayoristas."""
 
     def __init__(
         self,
+        customer_wholesale_repo: ICustomerWholesaleRepository,
         product_repo: IProductRepository,
         category_repo: ICategoryRepository,
     ) -> None:
+        self.__customer_wholesale_repo = customer_wholesale_repo
         self.__product_repo = product_repo
         self.__category_repo = category_repo
 
-    async def create_product(self, data: CreateProductDTO) -> PrivateReadProductDTO:
+    async def add_product(
+        self,
+        data: CreateProductDTO,
+        wholesaler_id: UUID,
+    ) -> ReadProductWholesalerDTO:
         """
-        Crea un nuevo producto aplicando reglas de negocio, stock y cálculo de precios.
+        Crea un producto exclusivo asignado a un cliente mayorista.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
+            RequestValidationError: Si alguna regla de validación de negocio falla.
         """
+
+        # Validar que el cliente mayorista exista en la base de datos
+        wholesale_instance = await self.__customer_wholesale_repo.get_wholesale(id=wholesaler_id)
+
+        if not wholesale_instance:
+            raise ResourceNotFound()
 
         # Validaciones de negocio
         product_data = data.model_dump()
@@ -52,35 +68,39 @@ class CreateProductService(ProductPricingMixin):
             iva=product_data["iva"],
         )
 
-        # Inicializar el stock en mano y el stock de venta en 0
+        # Inicializar el stock en mano y el stock de venta
         product_data["stock_hand"] = 0
         product_data["stock_sale"] = product_data["stock_total"]
 
-        instance = await self.__product_repo.create_product(data=product_data)
+        # Asignar la llave foránea al diccionario
+        product_data["wholesaler_id"] = wholesaler_id
 
-        return PrivateReadProductDTO.model_construct(
-            id=instance.id,
-            name=instance.name,
-            categories=instance.categories,
-            description_short=instance.description_short,
-            description_long=instance.description_long,
-            images=instance.images,
-            price_neto=instance.price_neto,
-            price_sale=instance.price_sale,
-            profit_margin=instance.profit_margin,
-            iva=instance.iva,
-            stock_total=instance.stock_total,
-            stock_hand=instance.stock_hand,
-            stock_sale=instance.stock_sale,
-            status=instance.status,
+        product_instance = await self.__product_repo.create_product(data=product_data)
+
+        return ReadProductWholesalerDTO.model_construct(
+            id=product_instance.id,
+            name=product_instance.name,
+            categories=product_instance.categories,
+            description_short=product_instance.description_short,
+            description_long=product_instance.description_long,
+            images=product_instance.images,
+            price_neto=product_instance.price_neto,
+            price_sale=product_instance.price_sale,
+            profit_margin=product_instance.profit_margin,
+            iva=product_instance.iva,
+            stock_total=product_instance.stock_total,
+            stock_hand=product_instance.stock_hand,
+            stock_sale=product_instance.stock_sale,
+            status=product_instance.status,
+            wholesaler_id=product_instance.wholesaler_id,
         )
 
     async def __run_business_validations(self, product_data: dict[str, Any]) -> None:
         """
-        Ejecuta las validaciones de negocio previas a la creación del producto.
+        Ejecuta las validaciones de negocio previas al registro del producto.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna regla de validación de negocio.
         """
 
         errors = []

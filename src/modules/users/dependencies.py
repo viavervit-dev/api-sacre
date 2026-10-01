@@ -8,8 +8,10 @@ from src.modules.auth.dependencies import get_user_repository
 from src.modules.auth.repositories.user import UserRepository
 from src.modules.users.repositories.customer import CustomerRepository
 from src.modules.users.repositories.wholesale import CustomerWholesaleRepository
-from src.modules.users.services.create_customer import CreateCustomerService
-from src.modules.users.services.create_wholesale import CreateCustomerWholesaleService
+from src.modules.users.services.customers.create_customer import CreateCustomerService
+from src.modules.users.services.customers_wholesale.create_wholesale import (
+    CreateCustomerWholesaleService,
+)
 
 
 def get_customer_repository(
