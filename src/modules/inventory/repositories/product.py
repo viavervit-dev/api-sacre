@@ -50,9 +50,9 @@ class ProductRepository(IProductRepository):
 
     async def get_product(self, id: UUID) -> Product | None:
 
-        product = await self.__db.get(Product, id)
+        instance = await self.__db.get(Product, id)
 
-        return product
+        return instance
 
     async def create_product(self, data: dict[str, Any]) -> Product:
 

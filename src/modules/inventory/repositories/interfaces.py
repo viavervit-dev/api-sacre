@@ -80,7 +80,7 @@ class IProductRepository(ABC):
 
     @abstractmethod
     async def create_product(self, data: dict[str, Any]) -> Product:
-        """Crea y registra un nuevo producto en la base de datos."""
+        """Crea un nuevo producto en la base de datos."""
 
         pass
 

@@ -51,9 +51,9 @@ class Product(Base):
         primary_key=True,
         nullable=False,
     )
-    exclusive_client_id: Mapped[UUID | None] = mapped_column(
+    wholesaler_id: Mapped[UUID | None] = mapped_column(
         ForeignKey(column="users.customer_wholesale.id", ondelete="CASCADE"),
-        doc="ID del cliente al que se le vende el producto.",
+        doc="ID del cliente mayorista al que se le vende el producto.",
         nullable=True,
     )
     name: Mapped[str] = mapped_column(
