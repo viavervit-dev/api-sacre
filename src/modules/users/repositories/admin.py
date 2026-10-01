@@ -4,13 +4,13 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.admins.models.admin import Admin
-from src.modules.admins.repositories.interfaces import IAdminRepository
+from src.modules.users.models.admin import Admin
+from src.modules.users.repositories.interfaces import IAdminRepository
 
 
 class AdminRepository(IAdminRepository):
     """
-    Repositorio SQLAlchemy para la gestión de perfiles de administradores en `admin.admins`.
+    Repositorio SQLAlchemy para la gestión de perfiles de administradores en `users.admins`.
 
     Implementa operaciones asíncronas para la creación y verificación de existencia
     de administradores vinculados a una cuenta de usuario.

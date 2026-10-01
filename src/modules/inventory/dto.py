@@ -95,7 +95,7 @@ class PrivateReadCategoryDTO(BaseModel):
     """
 
     id: UUID = Field(
-        description=CategoryEntity.ID_DESCRIPTION.value,
+        description="Identificador único (UUID v4).",
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
     )
     name: str = Field(
@@ -125,7 +125,7 @@ class PublicReadCategoryDTO(BaseModel):
     """DTO para la lectura de una categoría de producto con información pública."""
 
     id: UUID = Field(
-        description=CategoryEntity.ID_DESCRIPTION.value,
+        description="Identificador único (UUID v4).",
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
     )
     name: str = Field(
@@ -476,7 +476,7 @@ class PrivateReadProductDTO(BaseModel):
     """
 
     id: UUID = Field(
-        description=ProductEntity.ID_DESCRIPTION.value,
+        description="Identificador único (UUID v4).",
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
     )
     name: str = Field(
@@ -546,7 +546,7 @@ class PublicReadProductDTO(BaseModel):
     """DTO para la lectura de un producto con información pública."""
 
     id: UUID = Field(
-        description=ProductEntity.ID_DESCRIPTION.value,
+        description="Identificador único (UUID v4).",
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
     )
     name: str = Field(

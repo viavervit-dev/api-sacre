@@ -6,12 +6,10 @@ class CategoryEntity(Enum):
     """Enumeración que define constantes relacionadas con la entidad `Customer`."""
 
     # Descripciones para los campos de la entidad
-    ID_DESCRIPTION = "Identificador único (UUID v4)."
     NAME_DESCRIPTION = "Nombre de la categoria."
     DESCRIPTION_DESCRIPTION = "Descripción de la categoria."
     PRODUCT_NUMBER_DESCRIPTION = "Número de productos de la categoria."
     STATUS_DESCRIPTION = "Estado de la categoria."
-    DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 
     # Mensajes de error
     NAME_IN_USE = "Este nombre ya está registrado."
@@ -27,7 +25,6 @@ class ProductEntity(Enum):
     """Enumeración que define constantes relacionadas con la entidad `Product`."""
 
     # Descripciones para los campos de la entidad
-    ID_DESCRIPTION = "Identificador único (UUID v4)."
     NAME_DESCRIPTION = "Nombre del producto."
     CATEGORIES_DESCRIPTION = "Lista de categorías a las que pertenece el producto."
     DESCRIPTION_SHORT_DESCRIPTION = "Descripción corta del producto."
@@ -41,7 +38,6 @@ class ProductEntity(Enum):
     STOCK_HAND_DESCRIPTION = "Unidades reservadas temporalmente en carritos de compra activos."
     STOCK_SALE_DESCRIPTION = "Unidades disponibles para la venta."
     STATUS_DESCRIPTION = "Estado del producto."
-    DATE_JOINED_DESCRIPTION = "Fecha y hora de la creación del registro."
 
     # Mensajes de error
     NAME_IN_USE = "Este nombre ya está registrado."

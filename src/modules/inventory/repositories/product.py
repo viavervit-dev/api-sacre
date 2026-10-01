@@ -11,7 +11,7 @@ from src.modules.inventory.repositories.interfaces import IProductRepository
 
 class ProductRepository(IProductRepository):
     """
-    Repositorio SQLAlchemy para la gestión de productos en `product.products`.
+    Repositorio SQLAlchemy para la gestión de productos en `inventory.products`.
 
     Implementa operaciones asíncronas de consulta paginada, inserción, actualización,
     verificación de existencia y eliminación de productos.

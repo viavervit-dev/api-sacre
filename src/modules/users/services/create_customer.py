@@ -5,9 +5,9 @@ from fastapi.exceptions import RequestValidationError
 from src.modules.auth.constants import UserEntity, UserRoles
 from src.modules.auth.dto import ReadUserDTO
 from src.modules.auth.repositories.interfaces import IUserRepository
-from src.modules.customers.constants import CustomerEntity
-from src.modules.customers.dto import CreateCustomerDTO
-from src.modules.customers.repositories.interfaces import ICustomerRepository
+from src.modules.users.constants import CustomerEntity
+from src.modules.users.dto import CreateCustomerDTO
+from src.modules.users.repositories.interfaces import ICustomerRepository
 
 
 class CreateCustomerService:
@@ -22,8 +22,7 @@ class CreateCustomerService:
         Registra un nuevo cliente tras validar las reglas de negocio del dominio.
 
         Raises:
-            RequestValidationError: Si el correo electrónico, teléfono o número de documento
-                ya se encuentran registrados.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
 
         # Validaciones de negocio
@@ -63,8 +62,9 @@ class CreateCustomerService:
         Ejecuta las validaciones de negocio previas al registro del cliente.
 
         Raises:
-            RequestValidationError: Si el correo, teléfono o documento ya están en uso.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
+
         errors = []
 
         # Validar que el correo electrónico no esté registrado en la base de datos

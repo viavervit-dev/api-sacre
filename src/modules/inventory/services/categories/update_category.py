@@ -24,7 +24,7 @@ class UpdateCategoryService:
         Actualiza una categoría tras validar las reglas de negocio del dominio.
 
         Raises:
-            RequestValidationError: Si el nuevo nombre ya se encuentra registrado.
+            RequestValidationError: Si falla alguna validacion de negocio.
             ResourceNotFound: Si la categoría no existe en la base de datos.
         """
 
@@ -56,7 +56,7 @@ class UpdateCategoryService:
         Ejecuta las validaciones de reglas de negocio previas a la actualización.
 
         Raises:
-            RequestValidationError: Si el nombre proporcionado ya está en uso.
+            RequestValidationError: Si falla alguna validacion de negocio.
         """
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos

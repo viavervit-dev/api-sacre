@@ -31,7 +31,6 @@ development = [
     "mypy (>=1.19.1,<2.0.0)",
     "commitizen (>=4.13.8,<5.0.0)",
     "pre-commit (>=4.5.1,<5.0.0)",
-    "aiosqlite (>=0.22.1,<0.23.0)",
 ]
 testing = [
     "pytest (>=9.0.2,<10.0.0)",
@@ -54,7 +53,6 @@ exclude = [
     "*.egg-info",
     "dist",
     "build",
-    "alembic/*",
 ]
 
 [tool.ruff.lint]

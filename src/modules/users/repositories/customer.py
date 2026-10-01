@@ -4,13 +4,13 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.customers.models.customer import Customer
-from src.modules.customers.repositories.interfaces import ICustomerRepository
+from src.modules.users.models.customer import Customer
+from src.modules.users.repositories.interfaces import ICustomerRepository
 
 
 class CustomerRepository(ICustomerRepository):
     """
-    Repositorio SQLAlchemy para la gestión de perfiles de clientes en `customer.customers`.
+    Repositorio SQLAlchemy para la gestión de perfiles de clientes en `users.customers`.
 
     Implementa operaciones asíncronas para la creación y verificación de existencia
     de clientes vinculados a una cuenta de usuario.

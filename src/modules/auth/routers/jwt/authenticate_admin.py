@@ -20,9 +20,12 @@ jwt_admin_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
     response_description="**(NO_CONTENT)** Administrador autenticado exitosamente.",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
-        400: response_scheme_400(dto_class=AdminCredentialsDTO),
-        401: response_scheme_401(credentials_invalid=True, access_jwt_invalid=True),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=AdminCredentialsDTO),
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
+            credentials_invalid=True,
+            access_jwt_invalid=True,
+        ),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def authenticate_admin(
@@ -37,26 +40,26 @@ async def authenticate_admin(
     Valida las credenciales de un administrador (correo y contraseña), comprueba que la cuenta
     posea los privilegios necesarios para autenticarse (`authentication.jwt`) y genera un par de
     tokens criptográficos (acceso y actualización). Los tokens se configuran directamente en
-    cookies seguras (`HttpOnly`), devolviendo una respuesta sin contenido.
+    cookies seguras, devolviendo una respuesta sin contenido.
 
     ### Requisitos de Acceso
     - **Acceso Público:** Endpoint abierto para inicio de sesión de administradores.
-    - **Condiciones de Cuenta:** Requiere rol `ADMINISTRATOR` y permiso `authentication.jwt`.
+    - **Condiciones de Cuenta:** Requiere rol `admin` y permiso `authentication.jwt`.
 
     ### Flujo de Ejecución
     1. **Validación Sintáctica (DTO):**
-       - Valida el formato del correo electrónico (`EmailStr`) y la presencia de la contraseña.
+        - Valida el formato del correo electrónico y la presencia de la contraseña.
     2. **Autenticación y Control de Permisos:**
-       - Consulta al usuario en la base de datos verificando que posea rol de administrador.
-       - Valida que el administrador cuente con el permiso específico `authentication.jwt`.
-       - Compara la contraseña provista contra el hash almacenado (bcrypt).
-       - Si cualquiera de estas comprobaciones falla, deniega el acceso con error 401.
+        - Consulta al usuario en la base de datos verificando que posea rol de administrador.
+        - Valida que el administrador cuente con el permiso específico `authentication.jwt`.
+        - Compara la contraseña provista contra el hash almacenado (bcrypt).
+        - Si cualquiera de estas comprobaciones falla, deniega el acceso con error 401.
     3. **Emisión de Tokens JWT:**
-       - Genera un `access_token` firmado criptográficamente con la clave privada, conteniendo
+        - Genera un `access_token` firmado criptográficamente con la clave privada, conteniendo
          el identificador del usuario, rol, versión de sesión y tiempo de expiración.
-       - Genera un `refresh_token` de mayor duración para renovación de sesiones.
+        - Genera un `refresh_token` de mayor duración para renovación de sesiones.
     4. **Inyección de Cookies HTTP:**
-       - Configura `access_token` y `refresh_token` como cookies `HttpOnly`, `SameSite=Lax` y
+        - Configura `access_token` y `refresh_token` como cookies `HttpOnly`, `SameSite=Lax` y
          con flag `Secure` habilitado en entornos no-debug.
     """
 

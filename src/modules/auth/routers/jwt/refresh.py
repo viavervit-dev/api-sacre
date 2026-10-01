@@ -18,7 +18,7 @@ jwt_refresh_router = APIRouter(prefix="/authentication", tags=["Autenticación"]
     response_description="**(NO_CONTENT)** Se crea un nuevo token de acceso.",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
-        401: response_scheme_401(
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
             access_jwt_invalid=True,
@@ -27,7 +27,7 @@ jwt_refresh_router = APIRouter(prefix="/authentication", tags=["Autenticación"]
             refresh_jwt_expired=True,
             auth_session_expired=True,
         ),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def refresh_token(
@@ -51,21 +51,21 @@ async def refresh_token(
 
     ### Flujo de Ejecución
     1. **Extracción y Validación de Cookies:**
-       - Intercepta los tokens `access_token` y `refresh_token` presentes en las cookies HTTP.
-       - Si falta alguno de los tokens, interrumpe el flujo con error 401 (MissingJWT).
+        - Intercepta los tokens `access_token` y `refresh_token` presentes en las cookies HTTP.
+        - Si falta alguno de los tokens, interrumpe el flujo con error 401 (MissingJWT).
     2. **Validación del Token de Acceso:**
-       - Verifica la firma criptográfica del `access_token`.
-       - Comprueba que el `access_token` efectivamente haya expirado. Si aún es vigente,
+        - Verifica la firma criptográfica del `access_token`.
+        - Comprueba que el `access_token` efectivamente haya expirado. Si aún es vigente,
          deniega la renovación.
     3. **Validación del Token de Actualización:**
-       - Verifica la firma y comprueba que el `refresh_token` se encuentre vigente (no expirado).
+        - Verifica la firma y comprueba que el `refresh_token` se encuentre vigente (no expirado).
     4. **Comprobación de Integridad y Sesión:**
-       - Comprueba que ambos tokens pertenezcan al mismo usuario (`sub`).
-       - Verifica que el usuario exista en la base de datos y que la versión de sesión
+        - Comprueba que ambos tokens pertenezcan al mismo usuario (`sub`).
+        - Verifica que el usuario exista en la base de datos y que la versión de sesión
          (`session_version`) coincida con la registrada en el token.
     5. **Emisión del Nuevo Token y Actualización de Cookie:**
-       - Genera un nuevo `access_token` con una nueva fecha de expiración.
-       - Configura la cookie `access_token` (`HttpOnly`, `SameSite=Lax`, `Secure`).
+        - Genera un nuevo `access_token` con una nueva fecha de expiración.
+        - Configura la cookie `access_token` (`HttpOnly`, `SameSite=Lax`, `Secure`).
     """
 
     access_token, refresh_token = tokens

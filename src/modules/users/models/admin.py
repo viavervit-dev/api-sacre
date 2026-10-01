@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.config.database import Base
-from src.modules.admins.constants import AdminEntity
+from src.modules.users.constants import AdminEntity
 
 
 class Admin(Base):
@@ -17,32 +17,33 @@ class Admin(Base):
     """
 
     __tablename__ = "admins"
-    __table_args__ = {"schema": "admin"}
+    __table_args__ = {"schema": "users"}
 
     id: Mapped[UUID] = mapped_column(
-        doc=AdminEntity.ID_DESCRIPTION.value,
+        doc="Identificador único (UUID v4).",
         default=uuid4,
         primary_key=True,
+        nullable=False,
     )
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.users.id"),
         doc=AdminEntity.ID_USER_DESCRIPTION.value,
         unique=True,
-        nullable=True,
+        nullable=False,
     )
     first_names: Mapped[str] = mapped_column(
         String(length=AdminEntity.FIRST_NAMES_MAX_LENGTH.value),
         doc=AdminEntity.FIRST_NAMES_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     last_names: Mapped[str] = mapped_column(
         String(length=AdminEntity.LAST_NAMES_MAX_LENGTH.value),
         doc=AdminEntity.LAST_NAMES_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        doc=AdminEntity.DATE_JOINED_DESCRIPTION.value,
+        doc="Fecha y hora de la creación del registro.",
         default=lambda: datetime.now(tz=UTC),
-        nullable=True,
+        nullable=False,
     )

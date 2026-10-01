@@ -16,15 +16,15 @@ class Category(Base):
     """
     Modelo ORM para la clasificación y categorización de productos en el inventario.
 
-    Define la agrupación lógica de productos en el esquema `product`, gestionando su
+    Define la agrupación lógica de productos en el esquema `inventory`, gestionando su
     estado operativo, descripción y el conteo acumulado de artículos asociados.
     """
 
     __tablename__ = "categories"
-    __table_args__ = {"schema": "product"}
+    __table_args__ = {"schema": "inventory"}
 
     id: Mapped[UUID] = mapped_column(
-        doc=CategoryEntity.ID_DESCRIPTION.value,
+        doc="Identificador único (UUID v4).",
         default=uuid4,
         primary_key=True,
         nullable=False,
@@ -32,13 +32,13 @@ class Category(Base):
     name: Mapped[str] = mapped_column(
         String(length=CategoryEntity.NAME_MAX_LENGTH.value),
         doc=CategoryEntity.NAME_DESCRIPTION.value,
+        nullable=False,
         unique=True,
-        nullable=True,
     )
     description: Mapped[str] = mapped_column(
         String(length=CategoryEntity.DESCRIPTION_MAX_LENGTH.value),
         doc=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     product_count: Mapped[int] = mapped_column(
         Integer,
@@ -47,16 +47,16 @@ class Category(Base):
             name="product_count_range",
         ),
         doc=CategoryEntity.PRODUCT_NUMBER_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     status: Mapped[bool] = mapped_column(
         Boolean,
         doc=CategoryEntity.STATUS_DESCRIPTION.value,
-        nullable=True,
+        nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        doc=CategoryEntity.DATE_JOINED_DESCRIPTION.value,
+        doc="Fecha y hora de la creación del registro.",
         default=lambda: datetime.now(tz=UTC),
-        nullable=True,
+        nullable=False,
     )

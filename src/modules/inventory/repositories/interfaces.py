@@ -8,7 +8,7 @@ from src.modules.inventory.models.product import Product
 
 
 class ICategoryRepository(ABC):
-    """Contrato de persistencia para operaciones sobre categorías (`product.categories`)."""
+    """Contrato de persistencia para operaciones sobre categorías (`inventory.categories`)."""
 
     @abstractmethod
     async def get_list_categories(
@@ -59,7 +59,7 @@ class ICategoryRepository(ABC):
 
 
 class IProductRepository(ABC):
-    """Contrato de persistencia para operaciones sobre productos (`product.products`)."""
+    """Contrato de persistencia para operaciones sobre productos (`inventory.products`)."""
 
     @abstractmethod
     async def get_list_products(

@@ -6,10 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import close_db_pool, create_db_pool, get_db_session
-from src.modules.admins.models.admin import Admin
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.models.permission import Group
 from src.modules.auth.models.user import User, UserGroup
+from src.modules.users.models.admin import Admin
 
 # Carga las variables de entorno
 load_dotenv()
@@ -22,7 +22,13 @@ async def run(
     first_names: str,
     last_names: str,
 ) -> None:
-    """Crea un usuario administrador en la base de datos."""
+    """
+    Crea y registra un nuevo usuario administrador en el sistema.
+
+    Valida la disponibilidad del correo y del grupo de rol, crea la cuenta
+    de usuario con contraseña cifrada, asigna el grupo de permisos y genera
+    el perfil de administrador asociado.
+    """
 
     # Verificar si el usuario ya existe
     result = await db.execute(select(User).filter_by(email=email))
@@ -72,6 +78,7 @@ async def run(
 
 
 async def main() -> None:
+
     await create_db_pool()
 
     try:

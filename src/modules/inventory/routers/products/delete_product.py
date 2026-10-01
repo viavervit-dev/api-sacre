@@ -30,17 +30,17 @@ require_admin = UserPermissionChecker(
     response_description="**(OK)** Producto eliminado exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
-        401: response_scheme_401(
+        status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
             access_jwt_invalid=True,
             access_jwt_expired=True,
             jwt_user_not_found=True,
         ),
-        403: response_scheme_403(),
-        404: response_scheme_404(),
-        409: response_scheme_409(product_has_reserved_stock=True),
-        503: response_scheme_503(db_unavailable=True),
+        status.HTTP_403_FORBIDDEN: response_scheme_403(),
+        status.HTTP_404_NOT_FOUND: response_scheme_404(),
+        status.HTTP_409_CONFLICT: response_scheme_409(product_has_reserved_stock=True),
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
 async def delete_product(
@@ -70,19 +70,18 @@ async def delete_product(
 
     ### Flujo de Ejecución
     1. **Autenticación y Autorización:**
-       - Extrae y valida los tokens JWT presentes en las cookies de la petición.
-       - Verifica la vigencia de la sesión y la existencia del usuario.
-       - Comprueba que el usuario tenga rol de administrador y el permiso `products.delete`.
+        - Extrae y valida los tokens JWT presentes en las cookies de la petición.
+        - Verifica la vigencia de la sesión y la existencia del usuario.
+        - Comprueba que el usuario tenga rol de administrador y el permiso `products.delete`.
     2. **Búsqueda del Recurso:**
-       - Consulta el producto en la base de datos por su `product_id`.
-       - Si no se encuentra ningún registro, interrumpe el flujo con un error 404 (Not Found).
+        - Consulta el producto en la base de datos por su `product_id`.
+        - Si no se encuentra ningún registro, interrumpe el flujo con un error 404 (Not Found).
     3. **Validación de Reglas de Negocio:**
-       - Comprueba que el producto no posea stock en reserva (`stock_hand == 0`).
-       - Si existen unidades reservadas en carritos activos (`stock_hand > 0`), deniega la
+        - Comprueba que el producto no posea stock en reserva (`stock_hand == 0`).
+        - Si existen unidades reservadas en carritos activos (`stock_hand > 0`), deniega la
          eliminación para preservar la integridad del proceso de compra.
-    4. **Persistencia y Transacción:**
-       - Elimina el registro del producto en el esquema `product.products`.
-       - Confirma la transacción en la base de datos (`commit`) de forma atómica.
+    4. **Persistencia:**
+        - Elimina el registro del producto de la base de datos.
     """
 
     await service.delete_product(product_id=product_id)
