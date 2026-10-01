@@ -9,12 +9,7 @@ from src.modules.users.repositories.interfaces import IAdminRepository
 
 
 class AdminRepository(IAdminRepository):
-    """
-    Repositorio SQLAlchemy para la gestión de perfiles de administradores en `users.admins`.
-
-    Implementa operaciones asíncronas para la creación y verificación de existencia
-    de administradores vinculados a una cuenta de usuario.
-    """
+    """Repositorio SQLAlchemy para la gestión de perfiles de administradores en `users.admins`."""
 
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db

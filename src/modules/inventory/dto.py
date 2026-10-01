@@ -469,79 +469,6 @@ class UpdateProductDTO(BaseModel):
             return value
 
 
-class PrivateReadProductDTO(BaseModel):
-    """
-    DTO para la lectura de un producto con información completa, incluyendo campos que solo
-    deberían ser visibles para administradores.
-    """
-
-    id: UUID = Field(
-        description="Identificador único (UUID v4).",
-        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
-    )
-    name: str = Field(
-        description=ProductEntity.NAME_DESCRIPTION.value,
-        examples=["Rosario de madera"],
-    )
-    categories: list[str] = Field(
-        description=ProductEntity.CATEGORIES_DESCRIPTION.value,
-        examples=[["Rosarios", "Madera"]],
-    )
-    description_short: str = Field(
-        description=ProductEntity.DESCRIPTION_SHORT_DESCRIPTION.value,
-        examples=["Rosario hecho a mano con cuentas de madera."],
-    )
-    description_long: str = Field(
-        description=ProductEntity.DESCRIPTION_LONG_DESCRIPTION.value,
-        examples=[
-            "Este rosario está fabricado a mano utilizando madera de alta calidad, ideal para "
-            "orar en el día a día. Cuenta con un diseño elegante y tradicional."
-        ],
-    )
-    images: list[str] = Field(
-        description=ProductEntity.IMAGES_DESCRIPTION.value,
-        examples=[
-            [
-                "https://example.com/image1.jpg",
-                "https://example.com/image2.jpg",
-                "https://example.com/image3.jpg",
-            ]
-        ],
-    )
-    price_neto: Decimal = Field(
-        description=ProductEntity.PRICE_NETO_DESCRIPTION.value,
-        examples=[Decimal("10.50")],
-    )
-    price_sale: Decimal = Field(
-        description=ProductEntity.PRICE_SALE_DESCRIPTION.value,
-        examples=[Decimal("15.00")],
-    )
-    profit_margin: Decimal = Field(
-        description=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
-        examples=[Decimal("0.16")],
-    )
-    iva: Decimal = Field(
-        description=ProductEntity.IVA_DESCRIPTION.value,
-        examples=[Decimal("0.16")],
-    )
-    stock_total: int = Field(
-        description=ProductEntity.STOCK_TOTAL_DESCRIPTION.value,
-        examples=[100],
-    )
-    stock_hand: int = Field(
-        description=ProductEntity.STOCK_HAND_DESCRIPTION.value,
-        examples=[80],
-    )
-    stock_sale: int = Field(
-        description=ProductEntity.STOCK_SALE_DESCRIPTION.value,
-        examples=[20],
-    )
-    status: bool = Field(
-        description=ProductEntity.STATUS_DESCRIPTION.value,
-        examples=[True, False],
-    )
-
-
 class PublicReadProductDTO(BaseModel):
     """DTO para la lectura de un producto con información pública."""
 
@@ -585,4 +512,52 @@ class PublicReadProductDTO(BaseModel):
     stock_sale: int = Field(
         description=ProductEntity.STOCK_SALE_DESCRIPTION.value,
         examples=[20],
+    )
+
+
+class PrivateReadProductDTO(PublicReadProductDTO):
+    """
+    DTO para la lectura de un producto con información completa, incluyendo campos que solo
+    deberían ser visibles para administradores.
+    """
+
+    price_neto: Decimal = Field(
+        description=ProductEntity.PRICE_NETO_DESCRIPTION.value,
+        examples=[Decimal("10.50")],
+    )
+    profit_margin: Decimal = Field(
+        description=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
+        examples=[Decimal("0.16")],
+    )
+    iva: Decimal = Field(
+        description=ProductEntity.IVA_DESCRIPTION.value,
+        examples=[Decimal("0.16")],
+    )
+    stock_total: int = Field(
+        description=ProductEntity.STOCK_TOTAL_DESCRIPTION.value,
+        examples=[100],
+    )
+    stock_hand: int = Field(
+        description=ProductEntity.STOCK_HAND_DESCRIPTION.value,
+        examples=[80],
+    )
+    status: bool = Field(
+        description=ProductEntity.STATUS_DESCRIPTION.value,
+        examples=[True, False],
+    )
+
+
+class ReadProductWholesalerDTO(PrivateReadProductDTO):
+    """DTO para la creación de un producto exclusivo para un cliente mayorista."""
+
+    wholesaler_id: UUID = Field(
+        description=ProductEntity.WHOLESALER_ID_DESCRIPTION.value,
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                ProductEntity.WHOLESALER_NOT_FOUND.value,
+            ]
+        },
     )
