@@ -11,6 +11,11 @@ from pydantic import BaseModel, Field
 from src.common.response import Response
 from src.config.database import check_db_connection, close_db_pool, create_db_pool
 from src.config.exception_handlers import register_exception_handlers
+from src.config.openapi import (
+    API_DESCRIPTION,
+    OPENAPI_TAGS,
+    SWAGGER_UI_PARAMETERS,
+)
 from src.config.parameters import settings
 from src.config.serialization import JSONResponse
 from src.modules.auth.routers import router as auth_router
@@ -39,6 +44,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
+    description=API_DESCRIPTION,
+    openapi_tags=OPENAPI_TAGS,
+    swagger_ui_parameters=SWAGGER_UI_PARAMETERS,
     debug=settings.debug,
     lifespan=lifespan,
     default_response_class=JSONResponse,
@@ -57,7 +65,15 @@ def openapi() -> dict[str, Any]:
     schema = get_openapi(
         title=app.title,
         version=app.version,
+        openapi_version=app.openapi_version,
+        summary=app.summary,
+        description=app.description,
         routes=app.routes,
+        tags=app.openapi_tags,
+        servers=app.servers,
+        terms_of_service=app.terms_of_service,
+        contact=app.contact,
+        license_info=app.license_info,
     )
 
     # Eliminar el 422 de todos los endpoints
