@@ -62,7 +62,7 @@ class IProductRepository(ABC):
     """Contrato de persistencia para operaciones sobre productos (`inventory.products`)."""
 
     @abstractmethod
-    async def get_list_products(
+    async def get_products(
         self,
         offset: int,
         limit: int,
@@ -76,6 +76,21 @@ class IProductRepository(ABC):
     @abstractmethod
     async def get_product(self, id: UUID) -> Product | None:
         """Obtiene un producto por su identificador único."""
+
+        pass
+
+    @abstractmethod
+    async def get_products_by_wholesaler(
+        self,
+        wholesaler_id: UUID,
+        offset: int,
+        limit: int,
+        status: bool | None = None,
+    ) -> tuple[Sequence[Product], int]:
+        """
+        Obtiene una lista paginada de productos asociados a un cliente mayorista y el total
+        de registros encontrados.
+        """
 
         pass
 

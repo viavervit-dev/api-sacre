@@ -17,7 +17,7 @@ class RetrieveProductService:
     ) -> tuple[list[PrivateReadProductDTO | PublicReadProductDTO], int]:
         """Obtiene una lista paginada de productos según filtros y nivel de visibilidad."""
 
-        products, total_items = await self.__product_repo.get_list_products(
+        products, total_items = await self.__product_repo.get_products(
             status=status,
             offset=offset,
             limit=limit,
