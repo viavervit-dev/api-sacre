@@ -2,7 +2,7 @@ from src.modules.inventory.dto import PrivateReadProductDTO, PublicReadProductDT
 from src.modules.inventory.repositories.interfaces import IProductRepository
 
 
-class RetrieveProductService:
+class RetrieveListProductsService:
     """Servicio encargado de la consulta y serialización de productos."""
 
     def __init__(self, product_repo: IProductRepository) -> None:
@@ -17,11 +17,10 @@ class RetrieveProductService:
     ) -> tuple[list[PrivateReadProductDTO | PublicReadProductDTO], int]:
         """Obtiene una lista paginada de productos según filtros y nivel de visibilidad."""
 
-        products, total_items = await self.__product_repo.get_list_products(
+        products, total_items = await self.__product_repo.get_products(
             status=status,
             offset=offset,
             limit=limit,
-            private=private,
         )
 
         if not products:

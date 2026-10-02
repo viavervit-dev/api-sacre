@@ -55,6 +55,7 @@ class Product(Base):
         ForeignKey(column="users.customer_wholesale.id", ondelete="CASCADE"),
         doc="ID del cliente mayorista al que se le vende el producto.",
         nullable=True,
+        index=True,
     )
     name: Mapped[str] = mapped_column(
         String(length=ProductEntity.NAME_MAX_LENGTH.value),

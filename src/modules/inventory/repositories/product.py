@@ -15,18 +15,15 @@ class ProductRepository(IProductRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db
 
-    async def get_list_products(
+    async def get_products(
         self,
         offset: int,
         limit: int,
-        private: bool,
         status: bool | None = None,
     ) -> tuple[Sequence[Product], int]:
 
-        count_stmt = select(func.count(Product.id))
-
-        if not private:
-            count_stmt = count_stmt.where(Product.wholesaler_id.is_(None))
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Product.id)).where(Product.wholesaler_id.is_(None))
 
         if status is not None:
             count_stmt = count_stmt.where(Product.status == status)
@@ -36,25 +33,43 @@ class ProductRepository(IProductRepository):
         if total_items == 0:
             return [], 0
 
-        stmt = select(Product)
-
-        if not private:
-            stmt = stmt.where(Product.wholesaler_id.is_(None))
+        # Registros paginados
+        stmt = select(Product).where(Product.wholesaler_id.is_(None))
 
         if status is not None:
             stmt = stmt.where(Product.status == status)
 
         stmt = stmt.order_by(Product.date_joined.desc()).offset(offset).limit(limit)
         result = await self.__db.scalars(stmt)
-        items = result.all()
 
-        return items, total_items
+        return result.all(), total_items
 
     async def get_product(self, id: UUID) -> Product | None:
 
         instance = await self.__db.get(Product, id)
 
         return instance
+
+    async def get_products_by_wholesaler(
+        self,
+        wholesaler_id: UUID,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[Product], int]:
+
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Product.id)).where(Product.wholesaler_id == wholesaler_id)
+        total_items = await self.__db.scalar(count_stmt) or 0
+
+        if total_items == 0:
+            return [], 0
+
+        # Registros paginados
+        stmt = select(Product).where(Product.wholesaler_id == wholesaler_id)
+        stmt = stmt.order_by(Product.date_joined.desc()).offset(offset).limit(limit)
+        result = await self.__db.scalars(stmt)
+
+        return result.all(), total_items
 
     async def create_product(self, data: dict[str, Any]) -> Product:
 

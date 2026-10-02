@@ -15,7 +15,10 @@ from src.modules.inventory.services.products.add_product_wholesaler import (
 )
 from src.modules.inventory.services.products.create_product import CreateProductService
 from src.modules.inventory.services.products.delete_product import DeleteProductService
-from src.modules.inventory.services.products.get_product import RetrieveProductService
+from src.modules.inventory.services.products.get_list_products import RetrieveListProductsService
+from src.modules.inventory.services.products.get_products_wholesaler import (
+    RetrieveProductsWholesalerService,
+)
 from src.modules.inventory.services.products.update_product import UpdateProductService
 from src.modules.users.dependencies import get_customer_wholesale_repository
 from src.modules.users.repositories.wholesale import CustomerWholesaleRepository
@@ -37,6 +40,22 @@ def get_product_repository(
     return ProductRepository(db=db)
 
 
+def get_retrieve_list_products_service(
+    product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
+) -> RetrieveListProductsService:
+    """Provee una instancia del servicio de consulta de productos."""
+
+    return RetrieveListProductsService(product_repo=product_repo)
+
+
+def get_products_by_wholesaler_service(
+    product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
+) -> RetrieveProductsWholesalerService:
+    """Provee una instancia del servicio de consulta de productos de un cliente mayorista."""
+
+    return RetrieveProductsWholesalerService(product_repo=product_repo)
+
+
 def get_create_product_service(
     product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
     category_repo: Annotated[CategoryRepository, Depends(get_category_repository)],
@@ -49,20 +68,28 @@ def get_create_product_service(
     )
 
 
+def get_add_product_wholesale_service(
+    category_repo: Annotated[CategoryRepository, Depends(get_category_repository)],
+    product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
+    customer_wholesale_repo: Annotated[
+        CustomerWholesaleRepository, Depends(get_customer_wholesale_repository)
+    ],
+) -> AddProductWholesaleService:
+    """Provee una instancia del servicio de creación de productos exclusivos para mayoristas."""
+
+    return AddProductWholesaleService(
+        customer_wholesale_repo=customer_wholesale_repo,
+        category_repo=category_repo,
+        product_repo=product_repo,
+    )
+
+
 def get_delete_product_service(
     product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
 ) -> DeleteProductService:
     """Provee una instancia del servicio de eliminación de productos."""
 
     return DeleteProductService(product_repo=product_repo)
-
-
-def get_retrieve_product_service(
-    product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
-) -> RetrieveProductService:
-    """Provee una instancia del servicio de consulta de productos."""
-
-    return RetrieveProductService(product_repo=product_repo)
 
 
 def get_update_product_service(
@@ -83,22 +110,6 @@ def get_create_category_service(
     """Provee una instancia del servicio de creación de categorías."""
 
     return CreateCategoryService(category_repo=category_repo)
-
-
-def get_add_product_wholesale_service(
-    category_repo: Annotated[CategoryRepository, Depends(get_category_repository)],
-    product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
-    customer_wholesale_repo: Annotated[
-        CustomerWholesaleRepository, Depends(get_customer_wholesale_repository)
-    ],
-) -> AddProductWholesaleService:
-    """Provee una instancia del servicio de creación de productos exclusivos para mayoristas."""
-
-    return AddProductWholesaleService(
-        customer_wholesale_repo=customer_wholesale_repo,
-        category_repo=category_repo,
-        product_repo=product_repo,
-    )
 
 
 def get_delete_category_service(

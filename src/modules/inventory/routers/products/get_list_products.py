@@ -13,12 +13,12 @@ from src.config.parameters import settings
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.modules.auth.models.user import User
-from src.modules.inventory.dependencies import get_retrieve_product_service
+from src.modules.inventory.dependencies import get_retrieve_list_products_service
 from src.modules.inventory.dto import PrivateReadProductDTO, PublicReadProductDTO
 from src.modules.inventory.models.product import Product
-from src.modules.inventory.services.products.get_product import RetrieveProductService
+from src.modules.inventory.services.products.get_list_products import RetrieveListProductsService
 
-get_products_router = APIRouter(prefix="/inventory", tags=["Inventario"])
+get_list_products_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserOptionalPermissionChecker(
     allowed_roles=[
         UserRoles.ADMINISTRATOR.value,
@@ -31,18 +31,18 @@ require_admin = UserOptionalPermissionChecker(
 )
 
 
-@get_products_router.get(
+@get_list_products_router.get(
     path="/product/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de productos obtenida exitosamente.",
-            "model": Response[list[PrivateReadProductDTO | PublicReadProductDTO]],
+            "model": Response[PaginatedData[PrivateReadProductDTO | PublicReadProductDTO]],
             "content": {
                 "application/json": {
                     "examples": {
-                        "private_data": {
-                            "summary": "Datos privados",
+                        "response_1": {
+                            "summary": "Existen productos asignados - Datos privados",
                             "value": {
                                 "success": True,
                                 "pagination": True,
@@ -82,8 +82,8 @@ require_admin = UserOptionalPermissionChecker(
                                 },
                             },
                         },
-                        "public_data": {
-                            "summary": "Datos públicos",
+                        "response_2": {
+                            "summary": "Existen productos asignados - Datos públicos",
                             "value": {
                                 "success": True,
                                 "pagination": True,
@@ -117,8 +117,8 @@ require_admin = UserOptionalPermissionChecker(
                                 },
                             },
                         },
-                        "there_not_products": {
-                            "summary": "No hay productos",
+                        "response_3": {
+                            "summary": "No existen productos asignados",
                             "value": {
                                 "success": True,
                                 "pagination": True,
@@ -151,19 +151,17 @@ require_admin = UserOptionalPermissionChecker(
 )
 async def get_list_products(
     user: Annotated[User | None, Depends(require_admin)],
-    service: Annotated[RetrieveProductService, Depends(get_retrieve_product_service)],
+    service: Annotated[RetrieveListProductsService, Depends(get_retrieve_list_products_service)],
     offset: int = Query(
-        default=0,
-        ge=0,
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,
+        ge=0,
     ),
     limit: int = Query(
-        default=settings.pagination_limit,
-        ge=1,
-        le=settings.pagination_limit,
         title="Límite de registros",
         description=PAGINATION_LIMIT_DESCRIPTION,
+        le=settings.pagination_limit,
+        ge=1,
     ),
 ) -> Response[PaginatedData[PrivateReadProductDTO | PublicReadProductDTO]]:
     """
@@ -198,7 +196,7 @@ async def get_list_products(
          creación, aplicando `offset` y `limit`.
     4. **Serialización Dinámica:**
         - Mapea los resultados a visión administrativa completa o visión pública segura sin datos
-         sensibles de negocio al DTO de lectura..
+         sensibles de negocio al DTO de lectura.
     """
 
     private = False
