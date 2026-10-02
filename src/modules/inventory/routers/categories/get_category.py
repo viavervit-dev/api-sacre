@@ -37,12 +37,12 @@ require_admin = UserOptionalPermissionChecker(
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de categorías de productos obtenida exitosamente.",
-            "model": Response[list[PrivateReadCategoryDTO | PublicReadCategoryDTO]],
+            "model": Response[PaginatedData[PrivateReadCategoryDTO | PublicReadCategoryDTO]],
             "content": {
                 "application/json": {
                     "examples": {
-                        "private_data": {
-                            "summary": "Datos privados",
+                        "response_1": {
+                            "summary": "Existen categorías - Datos privados",
                             "value": {
                                 "success": True,
                                 "pagination": True,
@@ -72,8 +72,8 @@ require_admin = UserOptionalPermissionChecker(
                                 },
                             },
                         },
-                        "public_data": {
-                            "summary": "Datos públicos",
+                        "response_2": {
+                            "summary": "Existen categorías - Datos públicos",
                             "value": {
                                 "success": True,
                                 "pagination": True,
@@ -95,8 +95,8 @@ require_admin = UserOptionalPermissionChecker(
                                 },
                             },
                         },
-                        "there_not_products": {
-                            "summary": "No hay categorías",
+                        "response_3": {
+                            "summary": "No existen categorías",
                             "value": {
                                 "success": True,
                                 "pagination": True,
@@ -131,17 +131,15 @@ async def get_list_categories(
     user: Annotated[User | None, Depends(require_admin)],
     service: Annotated[RetrieveCategoryService, Depends(get_retrieve_category_service)],
     offset: int = Query(
-        default=0,
-        ge=0,
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,
+        ge=0,
     ),
     limit: int = Query(
-        default=settings.pagination_limit,
-        ge=1,
-        le=settings.pagination_limit,
         title="Límite de registros",
         description=PAGINATION_LIMIT_DESCRIPTION,
+        le=settings.pagination_limit,
+        ge=1,
     ),
 ) -> Response[PaginatedData[PrivateReadCategoryDTO | PublicReadCategoryDTO]]:
     """

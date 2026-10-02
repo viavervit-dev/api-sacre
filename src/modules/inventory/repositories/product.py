@@ -19,15 +19,11 @@ class ProductRepository(IProductRepository):
         self,
         offset: int,
         limit: int,
-        private: bool,
         status: bool | None = None,
     ) -> tuple[Sequence[Product], int]:
 
         # Total para metadatos de paginación
-        count_stmt = select(func.count(Product.id))
-
-        if not private:
-            count_stmt = count_stmt.where(Product.wholesaler_id.is_(None))
+        count_stmt = select(func.count(Product.id)).where(Product.wholesaler_id.is_(None))
 
         if status is not None:
             count_stmt = count_stmt.where(Product.status == status)
@@ -38,10 +34,7 @@ class ProductRepository(IProductRepository):
             return [], 0
 
         # Registros paginados
-        stmt = select(Product)
-
-        if not private:
-            stmt = stmt.where(Product.wholesaler_id.is_(None))
+        stmt = select(Product).where(Product.wholesaler_id.is_(None))
 
         if status is not None:
             stmt = stmt.where(Product.status == status)

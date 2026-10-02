@@ -55,7 +55,6 @@ async def add_product_wholesaler(
         Path(
             title="ID del cliente mayorista",
             description="El ID del cliente mayorista al que se le asignará el producto.",
-            examples=["123e4567-e89b-12d3-a456-426614174000"],
         ),
     ],
     service: Annotated[AddProductWholesaleService, Depends(get_add_product_wholesale_service)],

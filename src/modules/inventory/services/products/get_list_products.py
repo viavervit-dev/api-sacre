@@ -21,7 +21,6 @@ class RetrieveListProductsService:
             status=status,
             offset=offset,
             limit=limit,
-            private=private,
         )
 
         if not products:

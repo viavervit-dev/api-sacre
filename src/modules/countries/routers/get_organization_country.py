@@ -28,7 +28,6 @@ async def get_organization_country(
         Path(
             title="Nombre del país.",
             description="Nombre oficial del país cuya organización territorial se consulta.",
-            examples=["Ecuador"],
         ),
     ],
     service: Annotated[

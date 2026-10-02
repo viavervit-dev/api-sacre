@@ -66,7 +66,6 @@ class IProductRepository(ABC):
         self,
         offset: int,
         limit: int,
-        private: bool,
         status: bool | None = None,
     ) -> tuple[Sequence[Product], int]:
         """Obtiene una lista paginada de productos y el total de registros encontrados."""

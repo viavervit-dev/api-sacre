@@ -20,7 +20,7 @@ from src.modules.users.routers import router as users_router
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     """
     Gestor del ciclo de vida de la aplicación, maneja los eventos de inicio y cierre:
     - **Inicio:** Inicializa la piscina de conexiones a la base de datos.
