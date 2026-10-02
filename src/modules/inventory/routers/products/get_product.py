@@ -13,10 +13,10 @@ from src.config.parameters import settings
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.modules.auth.models.user import User
-from src.modules.inventory.dependencies import get_retrieve_product_service
+from src.modules.inventory.dependencies import get_retrieve_list_products_service
 from src.modules.inventory.dto import PrivateReadProductDTO, PublicReadProductDTO
 from src.modules.inventory.models.product import Product
-from src.modules.inventory.services.products.get_product import RetrieveProductService
+from src.modules.inventory.services.products.get_list_products import RetrieveListProductsService
 
 get_products_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserOptionalPermissionChecker(
@@ -151,7 +151,7 @@ require_admin = UserOptionalPermissionChecker(
 )
 async def get_list_products(
     user: Annotated[User | None, Depends(require_admin)],
-    service: Annotated[RetrieveProductService, Depends(get_retrieve_product_service)],
+    service: Annotated[RetrieveListProductsService, Depends(get_retrieve_list_products_service)],
     offset: int = Query(
         default=0,
         ge=0,

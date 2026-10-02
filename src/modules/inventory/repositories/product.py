@@ -62,15 +62,10 @@ class ProductRepository(IProductRepository):
         wholesaler_id: UUID,
         offset: int,
         limit: int,
-        status: bool | None = None,
     ) -> tuple[Sequence[Product], int]:
 
         # Total para metadatos de paginación
         count_stmt = select(func.count(Product.id)).where(Product.wholesaler_id == wholesaler_id)
-
-        if status is not None:
-            count_stmt = count_stmt.where(Product.status == status)
-
         total_items = await self.__db.scalar(count_stmt) or 0
 
         if total_items == 0:
@@ -78,10 +73,6 @@ class ProductRepository(IProductRepository):
 
         # Registros paginados
         stmt = select(Product).where(Product.wholesaler_id == wholesaler_id)
-
-        if status is not None:
-            stmt = stmt.where(Product.status == status)
-
         stmt = stmt.order_by(Product.date_joined.desc()).offset(offset).limit(limit)
         result = await self.__db.scalars(stmt)
 

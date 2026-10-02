@@ -85,7 +85,6 @@ class IProductRepository(ABC):
         wholesaler_id: UUID,
         offset: int,
         limit: int,
-        status: bool | None = None,
     ) -> tuple[Sequence[Product], int]:
         """
         Obtiene una lista paginada de productos asociados a un cliente mayorista y el total

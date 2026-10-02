@@ -88,39 +88,6 @@ class UpdateCategoryDTO(BaseModel):
     )
 
 
-class PrivateReadCategoryDTO(BaseModel):
-    """
-    DTO para la lectura de una categoría de producto con información completa, incluyendo campos
-    que solo deberían ser visibles para administradores.
-    """
-
-    id: UUID = Field(
-        description="Identificador único (UUID v4).",
-        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
-    )
-    name: str = Field(
-        description=CategoryEntity.NAME_DESCRIPTION.value,
-        examples=["Rosarios"],
-    )
-    description: str = Field(
-        description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
-        examples=[
-            "Descubre nuestra colección de rosarios, elaborados con dedicación y pensados para "
-            "acompañarte en cada momento de oración y reflexión. Contamos con una amplia variedad "
-            "de diseños que combinan tradición, elegancia y calidad, ideales tanto para uso "
-            "personal como para regalo."
-        ],
-    )
-    product_count: int = Field(
-        description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
-        examples=[10, 15],
-    )
-    status: bool = Field(
-        description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
-        examples=[True, False],
-    )
-
-
 class PublicReadCategoryDTO(BaseModel):
     """DTO para la lectura de una categoría de producto con información pública."""
 
@@ -142,8 +109,20 @@ class PublicReadCategoryDTO(BaseModel):
         ],
     )
     product_count: int = Field(
-        description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
+        description=CategoryEntity.PRODUCT_NUMBER_DESCRIPTION.value,
         examples=[10, 15],
+    )
+
+
+class PrivateReadCategoryDTO(PublicReadCategoryDTO):
+    """
+    DTO para la lectura de una categoría de producto con información completa, incluyendo campos
+    que solo deberían ser visibles para administradores.
+    """
+
+    status: bool = Field(
+        description=CategoryEntity.STATUS_DESCRIPTION.value,
+        examples=[True, False],
     )
 
 

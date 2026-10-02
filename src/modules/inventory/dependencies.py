@@ -15,7 +15,7 @@ from src.modules.inventory.services.products.add_product_wholesaler import (
 )
 from src.modules.inventory.services.products.create_product import CreateProductService
 from src.modules.inventory.services.products.delete_product import DeleteProductService
-from src.modules.inventory.services.products.get_product import RetrieveProductService
+from src.modules.inventory.services.products.get_list_products import RetrieveListProductsService
 from src.modules.inventory.services.products.update_product import UpdateProductService
 from src.modules.users.dependencies import get_customer_wholesale_repository
 from src.modules.users.repositories.wholesale import CustomerWholesaleRepository
@@ -57,12 +57,12 @@ def get_delete_product_service(
     return DeleteProductService(product_repo=product_repo)
 
 
-def get_retrieve_product_service(
+def get_retrieve_list_products_service(
     product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
-) -> RetrieveProductService:
+) -> RetrieveListProductsService:
     """Provee una instancia del servicio de consulta de productos."""
 
-    return RetrieveProductService(product_repo=product_repo)
+    return RetrieveListProductsService(product_repo=product_repo)
 
 
 def get_update_product_service(

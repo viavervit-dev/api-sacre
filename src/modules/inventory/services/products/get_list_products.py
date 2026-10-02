@@ -2,7 +2,7 @@ from src.modules.inventory.dto import PrivateReadProductDTO, PublicReadProductDT
 from src.modules.inventory.repositories.interfaces import IProductRepository
 
 
-class RetrieveProductService:
+class RetrieveListProductsService:
     """Servicio encargado de la consulta y serialización de productos."""
 
     def __init__(self, product_repo: IProductRepository) -> None:
