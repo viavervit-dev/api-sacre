@@ -8,7 +8,7 @@ from src.modules.inventory.repositories.category import CategoryRepository
 from src.modules.inventory.repositories.product import ProductRepository
 from src.modules.inventory.services.categories.create_category import CreateCategoryService
 from src.modules.inventory.services.categories.delete_category import DeleteCategoryService
-from src.modules.inventory.services.categories.get_category import RetrieveCategoryService
+from src.modules.inventory.services.categories.get_list_category import RetrieveListCategoryService
 from src.modules.inventory.services.categories.update_category import UpdateCategoryService
 from src.modules.inventory.services.products.add_product_wholesaler import (
     AddProductWholesaleService,
@@ -43,7 +43,7 @@ def get_product_repository(
 def get_retrieve_list_products_service(
     product_repo: Annotated[ProductRepository, Depends(get_product_repository)],
 ) -> RetrieveListProductsService:
-    """Provee una instancia del servicio de consulta de productos."""
+    """Provee una instancia del servicio de consulta de una lista de productos."""
 
     return RetrieveListProductsService(product_repo=product_repo)
 
@@ -120,12 +120,12 @@ def get_delete_category_service(
     return DeleteCategoryService(category_repo=category_repo)
 
 
-def get_retrieve_category_service(
+def get_retrieve_list_category_service(
     category_repo: Annotated[CategoryRepository, Depends(get_category_repository)],
-) -> RetrieveCategoryService:
-    """Provee una instancia del servicio de consulta de categorías."""
+) -> RetrieveListCategoryService:
+    """Provee una instancia del servicio de consulta de una lista de categorías."""
 
-    return RetrieveCategoryService(category_repo=category_repo)
+    return RetrieveListCategoryService(category_repo=category_repo)
 
 
 def get_update_category_service(

@@ -13,10 +13,10 @@ from src.config.parameters import settings
 from src.modules.auth.constants import UserRoles
 from src.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.modules.auth.models.user import User
-from src.modules.inventory.dependencies import get_retrieve_category_service
+from src.modules.inventory.dependencies import get_retrieve_list_category_service
 from src.modules.inventory.dto import PrivateReadCategoryDTO, PublicReadCategoryDTO
 from src.modules.inventory.models.category import Category
-from src.modules.inventory.services.categories.get_category import RetrieveCategoryService
+from src.modules.inventory.services.categories.get_list_category import RetrieveListCategoryService
 
 get_categories_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserOptionalPermissionChecker(
@@ -129,7 +129,7 @@ require_admin = UserOptionalPermissionChecker(
 )
 async def get_list_categories(
     user: Annotated[User | None, Depends(require_admin)],
-    service: Annotated[RetrieveCategoryService, Depends(get_retrieve_category_service)],
+    service: Annotated[RetrieveListCategoryService, Depends(get_retrieve_list_category_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,
