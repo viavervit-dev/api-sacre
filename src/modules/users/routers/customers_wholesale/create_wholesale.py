@@ -15,7 +15,7 @@ from src.modules.auth.models.user import User
 from src.modules.users.dependencies import get_create_customer_wholesale_service
 from src.modules.users.dto import CreateCustomerWholesaleDTO, ReadCustomerWholesaleDTO
 from src.modules.users.models.customer_wholesale import CustomerWholesale
-from src.modules.users.services.customers_wholesale.create_wholesale import (
+from src.modules.users.services.customers_wholesale.create_customer_wholesale import (
     CreateCustomerWholesaleService,
 )
 

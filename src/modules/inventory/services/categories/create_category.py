@@ -24,7 +24,7 @@ class CreateCategoryService:
         category_data = data.model_dump()
         category_data["status"] = False  # Asignar estado activo por defecto
         category_data["product_count"] = 0  # Asignar contador de productos por defecto
-        await self.__run_business_validations(category_data=category_data)
+        await self.__run_business_validations(data=category_data)
         category_instance = await self.__category_repo.create_category(data=category_data)
         category = PrivateReadCategoryDTO.model_construct(
             id=category_instance.id,
@@ -36,7 +36,7 @@ class CreateCategoryService:
 
         return category
 
-    async def __run_business_validations(self, category_data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: dict[str, Any]) -> None:
         """
         Ejecuta las validaciones de reglas de negocio previas a la creación.
 
@@ -45,17 +45,16 @@ class CreateCategoryService:
         """
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos
-        exists = await self.__category_repo.exists_category(
-            filters={"name": category_data["name"]}
-        )
+        if data.get("name"):
+            exists = await self.__category_repo.exists_category(filters={"name": data["name"]})
 
-        if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "name"),
-                        "msg": CategoryEntity.NAME_IN_USE.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
+            if exists:
+                raise RequestValidationError(
+                    errors=[
+                        {
+                            "loc": ("body", "name"),
+                            "msg": CategoryEntity.NAME_IN_USE.value,
+                            "type": "domain_validation",
+                        }
+                    ]
+                )

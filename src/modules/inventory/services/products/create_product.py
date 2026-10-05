@@ -30,7 +30,7 @@ class CreateProductService(ProductPricingMixin):
 
         # Validaciones de negocio
         product_data = data.model_dump()
-        await self.__run_business_validations(product_data=product_data)
+        await self.__run_business_validations(data=product_data)
 
         iva: VatRatesProduct = product_data["iva"]
         product_data["iva"] = iva.value
@@ -75,7 +75,7 @@ class CreateProductService(ProductPricingMixin):
             status=instance.status,
         )
 
-    async def __run_business_validations(self, product_data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: dict[str, Any]) -> None:
         """
         Ejecuta las validaciones de negocio previas a la creación del producto.
 
@@ -86,44 +86,47 @@ class CreateProductService(ProductPricingMixin):
         errors = []
 
         # Validar que el nombre del producto no esté registrado en la base de datos
-        exists = await self.__product_repo.exists_product(filters={"name": product_data["name"]})
+        if data.get("name"):
+            exists = await self.__product_repo.exists_product(filters={"name": data["name"]})
 
-        if exists:
-            errors.append(
-                {
-                    "loc": ("body", "name"),
-                    "msg": ProductEntity.NAME_IN_USE.value,
-                    "type": "domain_validation",
-                }
-            )
+            if exists:
+                errors.append(
+                    {
+                        "loc": ("body", "name"),
+                        "msg": ProductEntity.NAME_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                )
 
         # Validar que cada elemento de la lista de imágenes sea una URL válida
-        adapter = TypeAdapter(HttpUrl)
+        if data.get("images"):
+            adapter = TypeAdapter(HttpUrl)
 
-        for i, url in enumerate(product_data["images"]):
-            try:
-                adapter.validate_python(url)
-            except Exception:
-                errors.append(
-                    {
-                        "loc": ("body", "images", i),
-                        "msg": ProductEntity.URL_INVALID.value,
-                        "type": "domain_validation",
-                    }
-                )
+            for i, url in enumerate(data["images"]):
+                try:
+                    adapter.validate_python(url)
+                except Exception:
+                    errors.append(
+                        {
+                            "loc": ("body", "images", i),
+                            "msg": ProductEntity.URL_INVALID.value,
+                            "type": "domain_validation",
+                        }
+                    )
 
         # Validar que cada categoría exista en la base de datos
-        for i, category in enumerate(product_data["categories"]):
-            exists = await self.__category_repo.exists_category(filters={"name": category})
+        if data.get("categories"):
+            for i, category in enumerate(data["categories"]):
+                exists = await self.__category_repo.exists_category(filters={"name": category})
 
-            if not exists:
-                errors.append(
-                    {
-                        "loc": ("body", "categories", i),
-                        "msg": ProductEntity.CATEGORY_NOT_FOUND.value,
-                        "type": "domain_validation",
-                    }
-                )
+                if not exists:
+                    errors.append(
+                        {
+                            "loc": ("body", "categories", i),
+                            "msg": ProductEntity.CATEGORY_NOT_FOUND.value,
+                            "type": "domain_validation",
+                        }
+                    )
 
         if errors:
             raise RequestValidationError(errors=errors)

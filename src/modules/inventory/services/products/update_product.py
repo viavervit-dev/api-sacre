@@ -43,7 +43,7 @@ class UpdateProductService(ProductPricingMixin):
         if not instance:
             raise ResourceNotFound()
 
-        await self.__run_business_validations(product_data=product_data, instance=instance)
+        await self.__run_business_validations(data=product_data, instance=instance)
         stock_total: int | None = product_data.get("stock_total")
 
         if stock_total and stock_total == 0 and instance.stock_hand == 0:
@@ -83,11 +83,7 @@ class UpdateProductService(ProductPricingMixin):
 
         return product
 
-    async def __run_business_validations(
-        self,
-        product_data: dict[str, Any],
-        instance: Product,
-    ) -> None:
+    async def __run_business_validations(self, data: dict[str, Any], instance: Product) -> None:
         """
         Ejecuta las validaciones de negocio previas a la actualización del producto.
 
@@ -98,8 +94,8 @@ class UpdateProductService(ProductPricingMixin):
         errors = []
 
         # Validar que el stock_total no sea menor al stock_hand
-        if product_data.get("stock_total"):
-            stock_total: int | None = product_data.get("stock_total")
+        if data.get("stock_total"):
+            stock_total: int | None = data.get("stock_total")
 
             if stock_total and stock_total < instance.stock_hand:
                 errors.append(
@@ -111,10 +107,8 @@ class UpdateProductService(ProductPricingMixin):
                 )
 
         # Validar que el nombre del producto no esté registrado en la base de datos
-        if product_data.get("name"):
-            exists = await self.__product_repo.exists_product(
-                filters={"name": product_data["name"]}
-            )
+        if data.get("name"):
+            exists = await self.__product_repo.exists_product(filters={"name": data["name"]})
 
             if exists:
                 errors.append(
@@ -126,10 +120,10 @@ class UpdateProductService(ProductPricingMixin):
                 )
 
         # Validar que cada elemento de la lista de imágenes sea una URL válida
-        if product_data.get("images"):
+        if data.get("images"):
             adapter = TypeAdapter(HttpUrl)
 
-            for i, url in enumerate(product_data["images"]):
+            for i, url in enumerate(data["images"]):
                 try:
                     adapter.validate_python(url)
                 except Exception:
@@ -142,8 +136,8 @@ class UpdateProductService(ProductPricingMixin):
                     )
 
         # Validar que cada categoría exista en la base de datos
-        if product_data.get("categories"):
-            for i, category in enumerate(product_data["categories"]):
+        if data.get("categories"):
+            for i, category in enumerate(data["categories"]):
                 exists = await self.__category_repo.exists_category(filters={"name": category})
 
                 if not exists:

@@ -52,8 +52,8 @@ class AdminEntity(Enum):
     LAST_NAMES_MAX_LENGTH = 40
 
 
-class WholesaleEntity(Enum):
-    """Constantes y metadatos asociados a la entidad `Wholesale`."""
+class CustomerWholesaleEntity(Enum):
+    """Constantes y metadatos asociados a la entidad `CustomerWholesale`."""
 
     # Descripciones para los campos de la entidad
     NAME_OR_COMPANY_NAME_DESCRIPTION = "Nombre o razón social del mayorista."

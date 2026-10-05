@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.config.database import Base
-from src.modules.users.constants import WholesaleEntity
+from src.modules.users.constants import CustomerWholesaleEntity
 
 
 class CustomerWholesale(Base):
@@ -28,37 +28,37 @@ class CustomerWholesale(Base):
         nullable=False,
     )
     name_or_company_name: Mapped[str] = mapped_column(
-        String(length=WholesaleEntity.NAME_OR_COMPANY_NAME_MAX_LENGTH.value),
-        doc=WholesaleEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
+        String(length=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_MAX_LENGTH.value),
+        doc=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
         nullable=False,
         unique=True,
     )
     email: Mapped[str] = mapped_column(
-        String(length=WholesaleEntity.EMAIL_MAX_LENGTH.value),
-        doc=WholesaleEntity.EMAIL_DESCRIPTION.value,
+        String(length=CustomerWholesaleEntity.EMAIL_MAX_LENGTH.value),
+        doc=CustomerWholesaleEntity.EMAIL_DESCRIPTION.value,
         nullable=False,
         unique=True,
     )
     ruc: Mapped[str | None] = mapped_column(
-        String(length=WholesaleEntity.RUC_MAX_LENGTH.value),
-        doc=WholesaleEntity.RUC_DESCRIPTION.value,
+        String(length=CustomerWholesaleEntity.RUC_MAX_LENGTH.value),
+        doc=CustomerWholesaleEntity.RUC_DESCRIPTION.value,
         nullable=True,
         unique=True,
     )
     phone: Mapped[str] = mapped_column(
-        String(length=WholesaleEntity.PHONE_MAX_LENGTH.value),
-        doc=WholesaleEntity.PHONE_DESCRIPTION.value,
+        String(length=CustomerWholesaleEntity.PHONE_MAX_LENGTH.value),
+        doc=CustomerWholesaleEntity.PHONE_DESCRIPTION.value,
         nullable=False,
         unique=True,
     )
     location: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
-        doc=WholesaleEntity.LOCATION_DESCRIPTION.value,
+        doc=CustomerWholesaleEntity.LOCATION_DESCRIPTION.value,
         nullable=False,
     )
     extra_contacts: Mapped[dict[str, Any] | None] = mapped_column(
         JSONB,
-        doc=WholesaleEntity.EXTRA_CONTACTS_DESCRIPTION.value,
+        doc=CustomerWholesaleEntity.EXTRA_CONTACTS_DESCRIPTION.value,
         nullable=True,
     )
     date_joined: Mapped[datetime] = mapped_column(

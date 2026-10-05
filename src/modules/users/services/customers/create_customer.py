@@ -68,42 +68,45 @@ class CreateCustomerService:
         errors = []
 
         # Validar que el correo electrónico no esté registrado en la base de datos
-        exists = await self.__user_repo.exists_user(filters={"email": data["email"]})
+        if data.get("email"):
+            exists = await self.__user_repo.exists_user(filters={"email": data["email"]})
 
-        if exists:
-            errors.append(
-                {
-                    "loc": ("body", "email"),
-                    "msg": UserEntity.EMAIL_IN_USE.value,
-                    "type": "domain_validation",
-                }
-            )
+            if exists:
+                errors.append(
+                    {
+                        "loc": ("body", "email"),
+                        "msg": UserEntity.EMAIL_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                )
 
         # Validar que el número de teléfono no esté registrado en la base de datos
-        exists = await self.__customer_repo.exists_customer(filters={"phone": data["phone"]})
+        if data.get("phone"):
+            exists = await self.__customer_repo.exists_customer(filters={"phone": data["phone"]})
 
-        if exists:
-            errors.append(
-                {
-                    "loc": ("body", "phone"),
-                    "msg": CustomerEntity.PHONE_IN_USE.value,
-                    "type": "domain_validation",
-                }
-            )
+            if exists:
+                errors.append(
+                    {
+                        "loc": ("body", "phone"),
+                        "msg": CustomerEntity.PHONE_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                )
 
         # Validar que el número de documento no esté registrado en la base de datos
-        exists = await self.__customer_repo.exists_customer(
-            filters={"document_number": data["document_number"]},
-        )
-
-        if exists:
-            errors.append(
-                {
-                    "loc": ("body", "document_number"),
-                    "msg": CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
-                    "type": "domain_validation",
-                }
+        if data.get("document_number"):
+            exists = await self.__customer_repo.exists_customer(
+                filters={"document_number": data["document_number"]},
             )
+
+            if exists:
+                errors.append(
+                    {
+                        "loc": ("body", "document_number"),
+                        "msg": CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                )
 
         if errors:
             raise RequestValidationError(errors=errors)
