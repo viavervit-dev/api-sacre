@@ -34,11 +34,11 @@ class UpdateCategoryService:
         if not instance:
             raise ResourceNotFound()
 
-        await self.__run_business_validations(category_data=category_data)
+        await self.__run_business_validations(data=category_data)
 
         # Actualizar el producto en la base de datos
         instance = await self.__category_repo.update_category(
-            update_data=category_data,
+            data=category_data,
             instance=instance,
         )
         category = PrivateReadCategoryDTO.model_construct(
@@ -51,7 +51,7 @@ class UpdateCategoryService:
 
         return category
 
-    async def __run_business_validations(self, category_data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: dict[str, Any]) -> None:
         """
         Ejecuta las validaciones de reglas de negocio previas a la actualización.
 
@@ -60,10 +60,8 @@ class UpdateCategoryService:
         """
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos
-        if category_data.get("name"):
-            exists = await self.__category_repo.exists_category(
-                filters={"name": category_data["name"]}
-            )
+        if data.get("name"):
+            exists = await self.__category_repo.exists_category(filters={"name": data["name"]})
 
             if exists:
                 raise RequestValidationError(

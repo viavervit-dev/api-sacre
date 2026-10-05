@@ -55,9 +55,9 @@ class CategoryRepository(ICategoryRepository):
 
         return instance
 
-    async def update_category(self, update_data: dict[str, Any], instance: Category) -> Category:
+    async def update_category(self, data: dict[str, Any], instance: Category) -> Category:
 
-        for key, value in update_data.items():
+        for key, value in data.items():
             setattr(instance, key, value)
 
         await self.__db.flush()

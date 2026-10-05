@@ -165,16 +165,15 @@ async def get_list_products(
     ),
 ) -> Response[PaginatedData[PrivateReadProductDTO | PublicReadProductDTO]]:
     """
-    Obtiene una lista paginada de productos con visibilidad adaptativa según el usuario.
-
-    ### Descripción
-    Consulta y retorna el catálogo de productos con soporte para paginación y ordenamiento
-    cronológico descendente. La información y los filtros aplicados se adaptan dinámicamente
-    según el nivel de privilegios del usuario solicitante:
+    Permite consultar el listado de productos almacenados con soporte para paginación y
+    ordenamiento cronológico descendente. La información y los filtros aplicados se adaptan
+    dinámicamente según el nivel de privilegios del usuario solicitante:
     - **Público / Clientes:** Acceso libre o como cliente. Solo lista productos
      activos (`status=True`) y expone datos comerciales públicos.
     - **privado / Administradores:** Usuarios con rol de administrador. Acceden a todos los
      productos (activos e inactivos) y visualizan de datos comerciales públicos y privados.
+
+    Estos productos hacen parte del catálogo de productos que se ofrecen a los usuarios finales.
 
     ### Requisitos de Acceso
     - **Acceso Anónimo:** Permitido sin autenticación (vista pública).

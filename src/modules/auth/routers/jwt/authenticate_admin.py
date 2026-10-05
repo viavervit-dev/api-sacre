@@ -34,13 +34,10 @@ async def authenticate_admin(
     response: Response,
 ) -> None:
     """
-    Autentica a un administrador y establece las cookies de sesión con tokens JWT.
-
-    ### Descripción
-    Valida las credenciales de un administrador (correo y contraseña), comprueba que la cuenta
-    posea los privilegios necesarios para autenticarse (`authentication.jwt`) y genera un par de
-    tokens criptográficos (acceso y actualización). Los tokens se configuran directamente en
-    cookies seguras, devolviendo una respuesta sin contenido.
+    Permite validar las credenciales de un usuario administrador (correo y contraseña), comprueba
+    que la cuenta posea los privilegios necesarios para autenticarse (`authentication.jwt`)
+    y genera un par de tokens criptográficos (acceso y actualización). Los tokens se
+    configuran directamente en cookies seguras, devolviendo una respuesta sin contenido.
 
     ### Requisitos de Acceso
     - **Acceso Público:** Endpoint abierto para inicio de sesión de administradores.

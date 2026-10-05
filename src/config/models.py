@@ -21,4 +21,4 @@ from src.modules.inventory.models.product import Product
 # Modelos del módulo de usuarios
 from src.modules.users.models.admin import Admin
 from src.modules.users.models.customer import Customer
-from src.modules.users.models.wholesale import CustomerWholesale
+from src.modules.users.models.customer_wholesale import CustomerWholesale

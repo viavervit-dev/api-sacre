@@ -60,14 +60,10 @@ async def add_product_wholesaler(
     service: Annotated[AddProductWholesaleService, Depends(get_add_product_wholesale_service)],
 ) -> Response[ReadProductWholesalerDTO]:
     """
-    Crea un nuevo producto en el inventario asignado exclusivamente a un cliente mayorista.
-
-    ### Descripción
-    Registra un producto exclusivo para un cliente mayorista a partir de los datos
-    proporcionados y su identificador (`wholesaler_id`), ejecutando validaciones sintácticas
-    y de negocio. Tras validar los datos y la existencia del mayorista, calcula el precio
-    de venta final, determina el estado inicial, incrementa el contador de productos en las
-    categorías asociadas y persiste la información vinculada al mayorista en la base de datos.
+    Permite crear un producto exclusivo para un cliente mayorista a partir de los datos
+    proporcionados. Ejecuta validaciones sintácticas y comprobaciones de unicidad en la base
+    de datos para prevenir duplicados. Este producto no hará parte del catálogo de productos
+    que se ofrecen a los usuarios finales.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

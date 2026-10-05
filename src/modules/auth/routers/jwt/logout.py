@@ -34,10 +34,7 @@ async def logout(
     service: Annotated[LogoutService, Depends(get_jwt_logout_service)],
 ) -> None:
     """
-    Cierra la sesión activa del usuario e invalida sus tokens JWT.
-
-    ### Descripción
-    Revoca la sesión activa del usuario autenticado invalidando los tokens de acceso y
+    Permite revocar la sesión activa del usuario autenticado invalidando los tokens de acceso y
     actualización provistos en las cookies de la petición. Incrementa la versión de sesión
     (`session_version`) del usuario en la base de datos, lo que inhabilita de forma inmediata
     todos los tokens previamente emitidos. Incluye detección de integridad contra tokens cruzados

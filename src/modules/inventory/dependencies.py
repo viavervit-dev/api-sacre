@@ -21,7 +21,7 @@ from src.modules.inventory.services.products.get_products_wholesaler import (
 )
 from src.modules.inventory.services.products.update_product import UpdateProductService
 from src.modules.users.dependencies import get_customer_wholesale_repository
-from src.modules.users.repositories.wholesale import CustomerWholesaleRepository
+from src.modules.users.repositories.customer_wholesale import CustomerWholesaleRepository
 
 
 def get_category_repository(

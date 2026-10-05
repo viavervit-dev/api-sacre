@@ -36,13 +36,10 @@ async def get_organization_country(
     ],
 ) -> Response[ReadAdministrativeStructureDTO]:
     """
-    Obtiene la estructura político-territorial y administrativa de un país.
-
-    ### Descripción
-    Consulta y retorna la organización territorial jerárquica de un país registrado en el
-    sistema (provincias, cantones, ciudades o divisiones equivalentes). Es utilizado por
-    el cliente frontend para poblar selectores geográficos en cascada y validar direcciones
-    de entrega en los perfiles de clientes y mayoristas.
+    Permite consultar la organización territorial jerárquica de un país registrado en el
+    sistema. Proporciona a las aplicaciones cliente los datos básicos necesarios para poblar
+    selectores geográficos de registro, facturación y direcciones de entrega sin cargar
+    estructuras territoriales pesadas.
 
     ### Requisitos de Acceso
     - **Acceso Público:** Endpoint abierto. No requiere autenticación ni cookies de sesión.

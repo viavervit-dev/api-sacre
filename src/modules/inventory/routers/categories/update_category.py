@@ -58,13 +58,9 @@ async def update_category(
     service: Annotated[UpdateCategoryService, Depends(get_update_category_service)],
 ) -> Response[PrivateReadCategoryDTO]:
     """
-    Actualiza parcialmente una categoría existente en el catálogo.
-
-    ### Descripción
-    Actualiza los datos de una categoría en la base de datos mediante una modificación parcial
-    (PATCH) a partir de su identificador único (`category_id`). Permite modificar su nombre
-    y/o su descripción, verificando la unicidad del nuevo nombre en el inventario antes de
-    aplicar los cambios.
+    Permite modificar de forma parcial los datos de una categoría de productos. Ejecuta
+    validaciones sintácticas y comprobaciones de unicidad en la base de datos para prevenir
+    duplicados.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).
@@ -92,6 +88,6 @@ async def update_category(
     return Response(
         success=True,
         pagination=False,
-        message="Categoria de producto actualizada exitosamente.",
+        message="Categoría de producto actualizada exitosamente.",
         data=updated_category,
     )

@@ -57,7 +57,6 @@ class UpdateCategoryDTO(BaseModel):
     name: str | None = Field(
         max_length=CategoryEntity.NAME_MAX_LENGTH.value,
         description=CategoryEntity.NAME_DESCRIPTION.value,
-        default=None,
         examples=["Rosarios"],
         json_schema_extra={
             "x-validation-errors": [
@@ -67,11 +66,11 @@ class UpdateCategoryDTO(BaseModel):
                 CategoryEntity.NAME_IN_USE.value,
             ]
         },
+        default=None,
     )
     description: str | None = Field(
         max_length=CategoryEntity.DESCRIPTION_MAX_LENGTH.value,
         description=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
-        default=None,
         examples=[
             "Descubre nuestra colección de rosarios, elaborados con dedicación y pensados para "
             "acompañarte en cada momento de oración y reflexión. Contamos con una amplia variedad "
@@ -85,6 +84,7 @@ class UpdateCategoryDTO(BaseModel):
                 DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
+        default=None,
     )
 
 
@@ -288,7 +288,6 @@ class UpdateProductDTO(BaseModel):
     name: str | None = Field(
         max_length=ProductEntity.NAME_MAX_LENGTH.value,
         description=ProductEntity.NAME_DESCRIPTION.value,
-        default=None,
         examples=["Rosario de madera"],
         json_schema_extra={
             "x-validation-errors": [
@@ -298,10 +297,10 @@ class UpdateProductDTO(BaseModel):
                 ProductEntity.NAME_IN_USE.value,
             ]
         },
+        default=None,
     )
     categories: list[Annotated[str, Field(max_length=CATEGORY_NAME_MAX_LENGTH)]] | None = Field(
         description=ProductEntity.CATEGORIES_DESCRIPTION.value,
-        default=None,
         examples=[["Rosarios", "Madera"]],
         json_schema_extra={
             "x-validation-errors": [
@@ -311,11 +310,11 @@ class UpdateProductDTO(BaseModel):
                 ProductEntity.CATEGORY_NOT_FOUND.value,
             ]
         },
+        default=None,
     )
     description_short: str | None = Field(
         max_length=ProductEntity.DESCRIPTION_SHORT_MAX_LENGTH.value,
         description=ProductEntity.DESCRIPTION_SHORT_DESCRIPTION.value,
-        default=None,
         examples=["Rosario hecho a mano con cuentas de madera."],
         json_schema_extra={
             "x-validation-errors": [
@@ -324,11 +323,11 @@ class UpdateProductDTO(BaseModel):
                 DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
+        default=None,
     )
     description_long: str | None = Field(
         max_length=ProductEntity.DESCRIPTION_LONG_MAX_LENGTH.value,
         description=ProductEntity.DESCRIPTION_LONG_DESCRIPTION.value,
-        default=None,
         examples=[
             "Este rosario está fabricado a mano utilizando madera de alta calidad, ideal para "
             "orar en el día a día. Cuenta con un diseño elegante y tradicional."
@@ -340,12 +339,12 @@ class UpdateProductDTO(BaseModel):
                 DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
+        default=None,
     )
     images: list[Annotated[str, Field(max_length=URL_IMAGES_MAX_LENGTH)]] | None = Field(
         min_length=ProductEntity.MINIMUM_NUMBER_IMAGES.value,
         max_length=ProductEntity.MAXIMUM_NUMBER_IMAGES.value,
         description=ProductEntity.IMAGES_DESCRIPTION.value,
-        default=None,
         examples=[
             [
                 "https://example.com/image1.jpg",
@@ -361,6 +360,7 @@ class UpdateProductDTO(BaseModel):
                 ProductEntity.URL_INVALID.value,
             ]
         },
+        default=None,
     )
     price_neto: Decimal | None = Field(
         ge=ProductEntity.PRICE_NETO_MIN_VALUE.value,
@@ -368,7 +368,6 @@ class UpdateProductDTO(BaseModel):
         max_digits=ProductEntity.PRICE_NETO_MAX_DIGITS.value,
         decimal_places=ProductEntity.PRICE_NETO_DECIMAL_PLACES.value,
         description=ProductEntity.PRICE_NETO_DESCRIPTION.value,
-        default=None,
         examples=[Decimal("10.55")],
         json_schema_extra={
             "x-validation-errors": [
@@ -380,6 +379,7 @@ class UpdateProductDTO(BaseModel):
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
             ]
         },
+        default=None,
     )
     profit_margin: Decimal | None = Field(
         ge=ProductEntity.PROFIT_MARGIN_MIN_VALUE.value,
@@ -387,7 +387,6 @@ class UpdateProductDTO(BaseModel):
         max_digits=ProductEntity.PROFIT_MARGIN_MAX_DIGITS.value,
         decimal_places=ProductEntity.PROFIT_MARGIN_DECIMAL_PLACES.value,
         description=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
-        default=None,
         examples=[Decimal("0.1600")],
         json_schema_extra={
             "x-validation-errors": [
@@ -399,10 +398,10 @@ class UpdateProductDTO(BaseModel):
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
             ]
         },
+        default=None,
     )
     iva: VatRatesProduct | None = Field(
         description=ProductEntity.IVA_DESCRIPTION.value,
-        default=None,
         examples=VatRatesProduct.values(),
         json_schema_extra={
             "x-validation-errors": [
@@ -411,12 +410,12 @@ class UpdateProductDTO(BaseModel):
                 DTOValidationErrorMessages.ENUM.value,
             ]
         },
+        default=None,
     )
     stock_total: int | None = Field(
         ge=ProductEntity.STOCK_TOTAL_MIN_VALUE.value,
         le=ProductEntity.STOCK_TOTAL_MAX_VALUE.value,
         description=ProductEntity.STOCK_TOTAL_DESCRIPTION.value,
-        default=None,
         examples=[100],
         json_schema_extra={
             "x-validation-errors": [
@@ -426,6 +425,7 @@ class UpdateProductDTO(BaseModel):
                 DTOValidationErrorMessages.MISSING.value,
             ]
         },
+        default=None,
     )
 
     @field_validator("iva", mode="before")

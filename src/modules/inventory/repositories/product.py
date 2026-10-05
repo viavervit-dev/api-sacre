@@ -79,9 +79,9 @@ class ProductRepository(IProductRepository):
 
         return instance
 
-    async def update_product(self, update_data: dict[str, Any], instance: Product) -> Product:
+    async def update_product(self, data: dict[str, Any], instance: Product) -> Product:
 
-        for key, value in update_data.items():
+        for key, value in data.items():
             setattr(instance, key, value)
 
         await self.__db.flush()

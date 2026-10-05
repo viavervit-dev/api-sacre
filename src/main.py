@@ -144,10 +144,7 @@ class HealthCheck(BaseModel):
 )
 async def health_check(response: FastAPIResponse) -> Response[HealthCheck]:
     """
-    Verifica el estado de salud y disponibilidad de los componentes de la API.
-
-    ### Descripción
-    Comprueba activamente la conectividad y operatividad de las dependencias críticas del
+    Permite comprobar activamente la conectividad y operatividad de las dependencias críticas del
     sistema (actualmente la base de datos PostgreSQL) mediante una sonda ligera con timeout
     estricto. Permite a balanceadores de carga, sondas de Kubernetes (liveness/readiness)
     y sistemas de monitoreo determinar la disponibilidad del servicio.

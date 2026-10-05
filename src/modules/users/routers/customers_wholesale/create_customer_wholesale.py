@@ -14,19 +14,19 @@ from src.modules.auth.dependencies import UserPermissionChecker
 from src.modules.auth.models.user import User
 from src.modules.users.dependencies import get_create_customer_wholesale_service
 from src.modules.users.dto import CreateCustomerWholesaleDTO, ReadCustomerWholesaleDTO
-from src.modules.users.models.wholesale import CustomerWholesale
-from src.modules.users.services.customers_wholesale.create_wholesale import (
+from src.modules.users.models.customer_wholesale import CustomerWholesale
+from src.modules.users.services.customers_wholesale.create_customer_wholesale import (
     CreateCustomerWholesaleService,
 )
 
-create_wholesale_router = APIRouter(prefix="/users", tags=["Usuarios"])
+create_customer_wholesale_router = APIRouter(prefix="/users", tags=["Usuarios"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
     permissions={UserRoles.ADMINISTRATOR.value: f"{CustomerWholesale.__tablename__}.create"},
 )
 
 
-@create_wholesale_router.post(
+@create_customer_wholesale_router.post(
     path="/customer_wholesale/",
     response_description="**(CREATED)** Cliente mayorista creado exitosamente.",
     status_code=status.HTTP_201_CREATED,
@@ -53,12 +53,8 @@ async def create_customer_wholesale(
     ],
 ) -> Response[ReadCustomerWholesaleDTO]:
     """
-    Registra un nuevo cliente mayorista en el sistema.
-
-    ### Descripción
-    Crea un perfil de cliente mayorista con sus datos comerciales, identificación
-    tributaria (RUC), canales de contacto y dirección de entrega. Ejecuta validaciones
-    sintácticas y comprobaciones de unicidad en la base de datos para prevenir duplicados.
+    Permite crear un cliente mayorista. Ejecuta validaciones sintácticas y comprobaciones
+    de unicidad en la base de datos para prevenir duplicados.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

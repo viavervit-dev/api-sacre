@@ -7,13 +7,16 @@ from src.config.database import get_db_session
 from src.modules.auth.dependencies import get_user_repository
 from src.modules.auth.repositories.user import UserRepository
 from src.modules.users.repositories.customer import CustomerRepository
-from src.modules.users.repositories.wholesale import CustomerWholesaleRepository
+from src.modules.users.repositories.customer_wholesale import CustomerWholesaleRepository
 from src.modules.users.services.customers.create_customer import CreateCustomerService
-from src.modules.users.services.customers_wholesale.create_wholesale import (
+from src.modules.users.services.customers_wholesale.create_customer_wholesale import (
     CreateCustomerWholesaleService,
 )
 from src.modules.users.services.customers_wholesale.get_list_customer_wholesale import (
     RetrieveListCustomerWholesaleService,
+)
+from src.modules.users.services.customers_wholesale.update_customer_wholesale import (
+    UpdateCustomerWholesaleService,
 )
 
 
@@ -50,6 +53,16 @@ def get_create_customer_wholesale_service(
     """Provee una instancia del servicio de creación de clientes mayoristas."""
 
     return CreateCustomerWholesaleService(customer_wholesale_repo=customer_wholesale_repo)
+
+
+def get_update_customer_wholesale_service(
+    customer_wholesale_repo: Annotated[
+        CustomerWholesaleRepository, Depends(get_customer_wholesale_repository)
+    ],
+) -> UpdateCustomerWholesaleService:
+    """Provee una instancia del servicio de actualización de clientes mayoristas."""
+
+    return UpdateCustomerWholesaleService(customer_wholesale_repo=customer_wholesale_repo)
 
 
 def get_retrieve_list_customer_wholesale_service(

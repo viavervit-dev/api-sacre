@@ -51,10 +51,7 @@ async def get_current_user(
     service: Annotated[type[RetrieveCurrentUserService], Depends(get_retrieve_user_service)],
 ) -> Response[ReadUserDTO]:
     """
-    Obtiene la información del perfil del usuario autenticado en la sesión actual.
-
-    ### Descripción
-    Recupera los datos personales y de cuenta del usuario que inició la sesión activa
+    Permite consultar los datos personales y de cuenta del usuario que inició la sesión activa
     a partir del token JWT almacenado en las cookies. Soporta perfiles de administradores
     y de clientes, resolviendo dinámicamente sus atributos de perfil según su rol.
 

@@ -55,13 +55,9 @@ async def delete_category(
     service: Annotated[DeleteCategoryService, Depends(get_delete_category_service)],
 ) -> Response[dict[str, str]]:
     """
-    Elimina una categoría del catálogo tras verificar sus dependencias.
-
-    ### Descripción
-    Elimina de forma permanente una categoría existente en la base de datos a partir de su
-    identificador único (`category_id`). Antes de proceder con el borrado, comprueba la existencia
-    del recurso y valida que no cuente con productos asociados para preservar la integridad
-    del inventario.
+    Permite eliminar de forma permanente una categoría de productos. Antes de proceder con
+    el borrado, comprueba la existencia del recurso y valida que no cuente con productos
+    asociados para preservar la integridad del inventario.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

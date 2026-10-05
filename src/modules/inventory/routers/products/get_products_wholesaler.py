@@ -136,12 +136,9 @@ async def get_products_by_wholesaler(
     ),
 ) -> Response[PaginatedData[PrivateReadProductDTO]]:
     """
-    Obtiene una lista paginada de productos asignados a un cliente mayorista.
-
-    ### Descripción
-    Consulta y retorna el catálogo exclusivo de productos asociados a un cliente mayorista
-    específico (`wholesaler_id`) con soporte para paginación y ordenamiento cronológico
-    descendente.
+    Permite consultar el listado de productos exclusivos asociados a un cliente mayorista
+    específico con soporte para paginación y ordenamiento cronológico descendente.
+    Estos productos no hacen parte del catálogo de productos que se ofrecen a los usuarios finales.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

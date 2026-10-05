@@ -5,7 +5,7 @@ from src.modules.inventory.models.category import Category
 from src.modules.inventory.models.product import Product
 from src.modules.users.models.admin import Admin
 from src.modules.users.models.customer import Customer
-from src.modules.users.models.wholesale import CustomerWholesale
+from src.modules.users.models.customer_wholesale import CustomerWholesale
 
 
 class RoleGroupConfig(TypedDict):
