@@ -84,7 +84,7 @@ async def create_customer_wholesale(
         - Guarda el registro en la base de datos.
     """
 
-    customer_wholesale = await service.create_wholesale(data=data)
+    customer_wholesale = await service.create_customer_wholesale(data=data)
 
     return Response(
         success=True,

@@ -29,13 +29,13 @@ class ICategoryRepository(ABC):
 
     @abstractmethod
     async def create_category(self, data: dict[str, Any]) -> Category:
-        """Crea y registra una nueva categoría en la base de datos."""
+        """Crea una nueva categoría en la base de datos."""
 
         pass
 
     @abstractmethod
     async def update_category(self, update_data: dict[str, Any], instance: Category) -> Category:
-        """Actualiza los atributos de una categoría existente."""
+        """Actualiza una categoría en la base de datos."""
 
         pass
 
@@ -47,13 +47,13 @@ class ICategoryRepository(ABC):
 
     @abstractmethod
     async def delete_category(self, instance: Category) -> None:
-        """Elimina una categoría existente de la base de datos."""
+        """Elimina una categoría de la base de datos."""
 
         pass
 
     @abstractmethod
     async def exists_category(self, filters: dict[str, Any]) -> bool:
-        """Verifica si existe al menos una categoría que coincida con los filtros especificados."""
+        """Verifica si existe una categoría que coincida con los filtros especificados."""
 
         pass
 
@@ -100,18 +100,18 @@ class IProductRepository(ABC):
 
     @abstractmethod
     async def update_product(self, update_data: dict[str, Any], instance: Product) -> Product:
-        """Actualiza los atributos de un producto existente."""
+        """Actualiza un producto en la base de datos."""
 
         pass
 
     @abstractmethod
     async def delete_product(self, instance: Product) -> None:
-        """Elimina un producto existente de la base de datos."""
+        """Elimina un producto de la base de datos."""
 
         pass
 
     @abstractmethod
     async def exists_product(self, filters: dict[str, Any]) -> bool:
-        """Verifica si existe al menos un producto que coincida con los filtros especificados."""
+        """Verifica si existe un producto que coincida con los filtros especificados."""
 
         pass

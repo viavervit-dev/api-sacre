@@ -14,7 +14,10 @@ class CreateCustomerWholesaleService:
     def __init__(self, customer_wholesale_repo: ICustomerWholesaleRepository) -> None:
         self.__customer_wholesale_repo = customer_wholesale_repo
 
-    async def create_wholesale(self, data: CreateCustomerWholesaleDTO) -> ReadCustomerWholesaleDTO:
+    async def create_customer_wholesale(
+        self,
+        data: CreateCustomerWholesaleDTO,
+    ) -> ReadCustomerWholesaleDTO:
         """
         Registra un nuevo cliente mayorista tras validar las reglas de negocio del dominio.
 
@@ -27,7 +30,7 @@ class CreateCustomerWholesaleService:
         await self.__run_business_validations(data=wholesale_data)
 
         # Creamos el usuario
-        wholesale_instance = await self.__customer_wholesale_repo.create_wholesale(
+        wholesale_instance = await self.__customer_wholesale_repo.create_customer_wholesale(
             data=wholesale_data
         )
 
@@ -52,7 +55,7 @@ class CreateCustomerWholesaleService:
         errors = []
 
         # Validar que el correo electrónico no esté registrado en la base de datos
-        exists = await self.__customer_wholesale_repo.exists_wholesale(
+        exists = await self.__customer_wholesale_repo.exists_customer_wholesale(
             filters={"email": data["email"]}
         )
 
@@ -66,7 +69,7 @@ class CreateCustomerWholesaleService:
             )
 
         # Validar que el nombre o razón social no esté registrado en la base de datos
-        exists = await self.__customer_wholesale_repo.exists_wholesale(
+        exists = await self.__customer_wholesale_repo.exists_customer_wholesale(
             filters={"name_or_company_name": data["name_or_company_name"]}
         )
 
@@ -80,7 +83,7 @@ class CreateCustomerWholesaleService:
             )
 
         # Validar que el número de teléfono no esté registrado en la base de datos
-        exists = await self.__customer_wholesale_repo.exists_wholesale(
+        exists = await self.__customer_wholesale_repo.exists_customer_wholesale(
             filters={"phone": data["phone"]}
         )
 
@@ -94,7 +97,7 @@ class CreateCustomerWholesaleService:
             )
 
         # Validar que el número de documento no esté registrado en la base de datos
-        exists = await self.__customer_wholesale_repo.exists_wholesale(
+        exists = await self.__customer_wholesale_repo.exists_customer_wholesale(
             filters={"ruc": data["ruc"]},
         )
 

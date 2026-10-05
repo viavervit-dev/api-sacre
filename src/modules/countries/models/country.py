@@ -32,6 +32,7 @@ class Country(Base):
         doc="Nombre del país.",
         nullable=False,
         unique=True,
+        index=True,
     )
     code: Mapped[str] = mapped_column(
         String(length=5),

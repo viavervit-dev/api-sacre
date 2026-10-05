@@ -46,13 +46,13 @@ class IUserRepository(ABC):
         password: str,
         role: str,
     ) -> User:
-        """Crea y registra un nuevo usuario asignándole su rol y grupo de permisos inicial."""
+        """Crea un nuevo usuario asignándole su rol y grupo de permisos inicial."""
 
         pass
 
     @abstractmethod
     async def exists_user(self, filters: dict[str, Any]) -> bool:
-        """Verifica si existe al menos un usuario que coincida con los filtros especificados."""
+        """Verifica si existe un usuario que coincida con los filtros especificados."""
 
         pass
 
