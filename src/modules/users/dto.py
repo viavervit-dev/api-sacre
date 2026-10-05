@@ -349,6 +349,86 @@ class CreateCustomerWholesaleDTO(BaseModel):
     )
 
 
+class UpdateCustomerWholesaleDTO(BaseModel):
+    """DTO para la actualización de un cliente mayorista."""
+
+    email: EmailStr | None = Field(
+        max_length=UserEntity.EMAIL_MAX_LENGTH.value,
+        description=UserEntity.EMAIL_DESCRIPTION.value,
+        examples=["user@email.com"],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR_EMAIL.value,
+                UserEntity.EMAIL_IN_USE.value,
+            ]
+        },
+        default=None,
+    )
+    name_or_company_name: str | None = Field(
+        max_length=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_MAX_LENGTH.value,
+        description=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
+        examples=["Juan Pablo", "Parroquia San José de Chaltura"],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_IN_USE.value,
+            ]
+        },
+        default=None,
+    )
+    ruc: str | None = Field(
+        max_length=CustomerWholesaleEntity.RUC_MAX_LENGTH.value,
+        description=CustomerWholesaleEntity.RUC_DESCRIPTION.value,
+        examples=["1790011674001"],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                CustomerWholesaleEntity.RUC_IN_USE.value,
+            ]
+        },
+        default=None,
+    )
+    phone: str | None = Field(
+        max_length=CustomerWholesaleEntity.PHONE_MAX_LENGTH.value,
+        description=CustomerWholesaleEntity.PHONE_DESCRIPTION.value,
+        examples=["+593 123456789"],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                CustomerWholesaleEntity.PHONE_IN_USE.value,
+            ]
+        },
+        default=None,
+    )
+    location: LocationDTO | None = Field(
+        description=CustomerWholesaleEntity.LOCATION_DESCRIPTION.value,
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+        default=None,
+    )
+    extra_contacts: list[ExtraContactsDTO] | None = Field(
+        description=CustomerWholesaleEntity.EXTRA_CONTACTS_DESCRIPTION.value,
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+        default=None,
+    )
+
+
 class ReadCustomerWholesaleDTO(BaseModel):
     """DTO de lectura para el registro de un cliente mayorista."""
 

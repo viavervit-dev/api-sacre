@@ -128,12 +128,8 @@ async def get_customers_wholesale(
     ),
 ) -> Response[PaginatedData[ReadCustomerWholesaleDTO]]:
     """
-    Obtiene una lista paginada de clientes mayoristas registrados en el sistema.
-
-    ### Descripción
-    Consulta y retorna el listado de clientes mayoristas almacenados en el esquema
-    `users.customer_wholesale` con soporte para paginación y ordenamiento cronológico
-    descendente.
+    Permite consultar el listado de clientes mayoristas almacenados con soporte para
+    paginación y ordenamiento cronológico descendente.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

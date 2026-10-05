@@ -55,12 +55,9 @@ async def delete_product(
     service: Annotated[DeleteProductService, Depends(get_delete_product_service)],
 ) -> Response[dict[str, str]]:
     """
-    Elimina un producto del catálogo tras verificar las reglas de inventario.
-
-    ### Descripción
-    Elimina de forma permanente un producto existente en la base de datos a partir de su
-    identificador único (`product_id`). Antes de proceder con el borrado, comprueba la existencia
-    del recurso y valida que no existan compromisos de stock activo que impidan su eliminación.
+    Permite eliminar de forma permanente un producto. Antes de proceder con el borrado, comprueba
+    la existencia del recurso y valida que no existan compromisos de stock activo que impidan
+    su eliminación.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

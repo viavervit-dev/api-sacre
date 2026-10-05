@@ -48,13 +48,9 @@ async def create_product(
     service: Annotated[CreateProductService, Depends(get_create_product_service)],
 ) -> Response[PrivateReadProductDTO]:
     """
-    Crea un nuevo producto en el inventario y calcula sus precios de venta.
-
-    ### Descripción
-    Registra un producto en el catálogo del sistema a partir de los datos proporcionados,
-    ejecutando validaciones sintácticas y de negocio. Tras validar los datos, calcula el precio
-    de venta final, determina el estado inicial del producto, incrementa el contador de productos
-    en las categorías asociadas y persiste la información en la base de datos.
+    Permite crear un nuevo producto. Ejecuta validaciones sintácticas y comprobaciones de
+    unicidad en la base de datos para prevenir duplicados. Este producto sí hará parte del
+    catálogo de productos que se ofrecen a los usuarios finales.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

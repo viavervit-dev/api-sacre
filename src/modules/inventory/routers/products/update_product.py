@@ -58,13 +58,8 @@ async def update_product(
     service: Annotated[UpdateProductService, Depends(get_update_product_service)],
 ) -> Response[PrivateReadProductDTO]:
     """
-    Actualiza parcialmente un producto existente y recalcula sus precios de venta.
-
-    ### Descripción
-    Actualiza los datos de un producto en el catálogo mediante una modificación parcial (PATCH).
-    Permite modificar atributos informativos, listas de categorías, URLs de imágenes, costos,
-    márgenes y existencias. Si se alteran valores financieros (`price_neto`, `profit_margin` o
-    `iva`), recalcula automáticamente el precio de venta final (`price_sale`).
+    Permite modificar de forma parcial los datos de un producto. Ejecuta validaciones
+    sintácticas y comprobaciones de unicidad en la base de datos para prevenir duplicados.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

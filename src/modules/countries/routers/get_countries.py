@@ -23,13 +23,10 @@ async def get_countries(
     service: Annotated[RetrieveContriesService, Depends(get_retrieve_contries_service)],
 ) -> Response[list[ReadCountryDTO]]:
     """
-    Obtiene la lista de países disponibles en el sistema.
-
-    ### Descripción
-    Consulta y retorna el catálogo general de países registrados con su nombre oficial y código
-    internacional (ISO). Proporciona a las aplicaciones cliente los datos básicos necesarios
-    para poblar selectores geográficos de registro, facturación y direcciones de entrega sin
-    cargar estructuras territoriales pesadas.
+    Permite consultar una lista del catálogo general de países registrados con su nombre
+    oficial y código internacional (ISO). Proporciona a las aplicaciones cliente los datos
+    básicos necesarios para poblar selectores geográficos de registro, facturación
+    y direcciones de entrega sin cargar estructuras territoriales pesadas.
 
     ### Requisitos de Acceso
     - **Acceso Público:** Endpoint abierto. No requiere autenticación ni cookies de sesión.

@@ -36,10 +36,7 @@ async def refresh_token(
     response: Response,
 ) -> None:
     """
-    Renueva el token de acceso expirado utilizando el token de actualización.
-
-    ### Descripción
-    Genera un nuevo token de acceso (`access_token`) a partir de un token de actualización
+    Permite generar un nuevo token de acceso (`access_token`) a partir de un token de actualización
     (`refresh_token`) válido y vigente. Requiere que el token de acceso previo haya expirado
     para evitar renovaciones innecesarias, verifica la integridad entre ambos tokens y actualiza
     la cookie de sesión correspondiente con una respuesta sin contenido.

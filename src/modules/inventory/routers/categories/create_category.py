@@ -48,12 +48,8 @@ async def create_category(
     service: Annotated[CreateCategoryService, Depends(get_create_category_service)],
 ) -> Response[PrivateReadCategoryDTO]:
     """
-    Crea una nueva categoría de productos e inicializa sus métricas.
-
-    ### Descripción
-    Registra una nueva categoría en el sistema a partir del nombre y la descripción provistos.
-    Verifica la unicidad del nombre en el inventario e inicializa automáticamente los valores
-    por defecto de la entidad (contador de productos en cero y estado inactivo).
+    Permite crear una nueva categoría de productos. Ejecuta validaciones sintácticas y
+    comprobaciones de unicidad en la base de datos para prevenir duplicados.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

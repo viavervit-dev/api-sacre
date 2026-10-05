@@ -26,13 +26,8 @@ async def create_customer(
     data: CreateCustomerDTO,
 ) -> Response[ReadUserDTO]:
     """
-    Registra un nuevo cliente en el sistema y crea su cuenta de usuario.
-
-    ### Descripción
-    Crea una cuenta de usuario con rol de cliente y su perfil asociado con datos
-    personales, de identificación y de contacto. Ejecuta validaciones sintácticas y de negocio
-    para garantizar la unicidad de las credenciales y documentos, encripta la contraseña de forma
-    segura y asigna automáticamente los permisos correspondientes al rol.
+    Permite crear una cuenta de usuario con rol de cliente. Ejecuta validaciones sintácticas y
+    comprobaciones de unicidad en la base de datos para prevenir duplicados.
 
     ### Requisitos de Acceso
     - **Acceso Público:** Endpoint abierto. No requiere autenticación previa.

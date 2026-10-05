@@ -143,12 +143,9 @@ async def get_list_categories(
     ),
 ) -> Response[PaginatedData[PrivateReadCategoryDTO | PublicReadCategoryDTO]]:
     """
-    Obtiene una lista paginada de categorías con visibilidad adaptativa según el usuario.
-
-    ### Descripción
-    Consulta y retorna las categorías de productos con soporte para paginación y ordenamiento
-    cronológico descendente. La información y los filtros aplicados se adaptan dinámicamente
-    según el nivel de privilegios del usuario solicitante:
+    Permite consultar el listado de categorías de productos con soporte para paginación y
+    ordenamiento cronológico descendente. La información y los filtros aplicados se adaptan
+    dinámicamente según el nivel de privilegios del usuario solicitante:
     - **Público / Clientes:** Acceso libre o como cliente. Solo lista categorías
      activas (`status=True`) y expone datos comerciales públicos.
     - **Privado / Administradores:** Usuarios con rol de administrador. Acceden a todas las

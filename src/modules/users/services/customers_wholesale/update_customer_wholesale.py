@@ -5,9 +5,8 @@ from fastapi.exceptions import RequestValidationError
 
 from src.common.exceptions import ResourceNotFound
 from src.modules.auth.constants import UserEntity
-from src.modules.inventory.dto import UpdateCategoryDTO
 from src.modules.users.constants import CustomerWholesaleEntity
-from src.modules.users.dto import ReadCustomerWholesaleDTO
+from src.modules.users.dto import ReadCustomerWholesaleDTO, UpdateCustomerWholesaleDTO
 from src.modules.users.repositories.interfaces import ICustomerWholesaleRepository
 
 
@@ -19,7 +18,7 @@ class UpdateCustomerWholesaleService:
 
     async def update_customer_wholesale(
         self,
-        data: UpdateCategoryDTO,
+        data: UpdateCustomerWholesaleDTO,
         id: UUID,
     ) -> ReadCustomerWholesaleDTO:
         """
