@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.modules.users.models.wholesale import CustomerWholesale
+from src.modules.users.models.customer_wholesale import CustomerWholesale
 from src.modules.users.repositories.interfaces import ICustomerWholesaleRepository
 
 
@@ -48,6 +48,19 @@ class CustomerWholesaleRepository(ICustomerWholesaleRepository):
 
         instance = CustomerWholesale(**data)
         self.__db.add(instance)
+        await self.__db.flush()
+
+        return instance
+
+    async def update_customer_wholesale(
+        self,
+        instance: CustomerWholesale,
+        data: dict[str, Any],
+    ) -> CustomerWholesale:
+
+        for key, value in data.items():
+            setattr(instance, key, value)
+
         await self.__db.flush()
 
         return instance

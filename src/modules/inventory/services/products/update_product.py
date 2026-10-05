@@ -61,7 +61,7 @@ class UpdateProductService(ProductPricingMixin):
 
         # Actualizar el producto en la base de datos
         instance = await self.__product_repo.update_product(
-            update_data=product_data,
+            data=product_data,
             instance=instance,
         )
         product = PrivateReadProductDTO.model_construct(

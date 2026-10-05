@@ -7,7 +7,7 @@ from src.config.database import get_db_session
 from src.modules.auth.dependencies import get_user_repository
 from src.modules.auth.repositories.user import UserRepository
 from src.modules.users.repositories.customer import CustomerRepository
-from src.modules.users.repositories.wholesale import CustomerWholesaleRepository
+from src.modules.users.repositories.customer_wholesale import CustomerWholesaleRepository
 from src.modules.users.services.customers.create_customer import CreateCustomerService
 from src.modules.users.services.customers_wholesale.create_wholesale import (
     CreateCustomerWholesaleService,

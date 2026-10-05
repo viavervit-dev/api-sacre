@@ -15,7 +15,7 @@ from src.modules.auth.dependencies import UserPermissionChecker
 from src.modules.auth.models.user import User
 from src.modules.users.dependencies import get_retrieve_list_customer_wholesale_service
 from src.modules.users.dto import ReadCustomerWholesaleDTO
-from src.modules.users.models.wholesale import CustomerWholesale
+from src.modules.users.models.customer_wholesale import CustomerWholesale
 from src.modules.users.services.customers_wholesale.get_list_customer_wholesale import (
     RetrieveListCustomerWholesaleService,
 )

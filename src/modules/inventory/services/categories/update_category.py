@@ -38,7 +38,7 @@ class UpdateCategoryService:
 
         # Actualizar el producto en la base de datos
         instance = await self.__category_repo.update_category(
-            update_data=category_data,
+            data=category_data,
             instance=instance,
         )
         category = PrivateReadCategoryDTO.model_construct(

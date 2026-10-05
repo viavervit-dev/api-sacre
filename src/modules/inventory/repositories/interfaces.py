@@ -34,7 +34,7 @@ class ICategoryRepository(ABC):
         pass
 
     @abstractmethod
-    async def update_category(self, update_data: dict[str, Any], instance: Category) -> Category:
+    async def update_category(self, data: dict[str, Any], instance: Category) -> Category:
         """Actualiza una categoría en la base de datos."""
 
         pass
@@ -99,7 +99,7 @@ class IProductRepository(ABC):
         pass
 
     @abstractmethod
-    async def update_product(self, update_data: dict[str, Any], instance: Product) -> Product:
+    async def update_product(self, data: dict[str, Any], instance: Product) -> Product:
         """Actualiza un producto en la base de datos."""
 
         pass
