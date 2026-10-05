@@ -18,7 +18,7 @@ from src.modules.inventory.dto import PrivateReadCategoryDTO, PublicReadCategory
 from src.modules.inventory.models.category import Category
 from src.modules.inventory.services.categories.get_list_category import RetrieveListCategoryService
 
-get_categories_router = APIRouter(prefix="/inventory", tags=["Inventario"])
+get_list_categories_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserOptionalPermissionChecker(
     allowed_roles=[
         UserRoles.ADMINISTRATOR.value,
@@ -31,7 +31,7 @@ require_admin = UserOptionalPermissionChecker(
 )
 
 
-@get_categories_router.get(
+@get_list_categories_router.get(
     path="/category/",
     status_code=status.HTTP_200_OK,
     responses={

@@ -12,6 +12,9 @@ from src.modules.users.services.customers.create_customer import CreateCustomerS
 from src.modules.users.services.customers_wholesale.create_wholesale import (
     CreateCustomerWholesaleService,
 )
+from src.modules.users.services.customers_wholesale.get_list_customer_wholesale import (
+    RetrieveListCustomerWholesaleService,
+)
 
 
 def get_customer_repository(
@@ -47,3 +50,13 @@ def get_create_customer_wholesale_service(
     """Provee una instancia del servicio de creación de clientes mayoristas."""
 
     return CreateCustomerWholesaleService(customer_wholesale_repo=customer_wholesale_repo)
+
+
+def get_retrieve_list_customer_wholesale_service(
+    customer_wholesale_repo: Annotated[
+        CustomerWholesaleRepository, Depends(get_customer_wholesale_repository)
+    ],
+) -> RetrieveListCustomerWholesaleService:
+    """Provee una instancia del servicio de obtención de lista de clientes mayoristas."""
+
+    return RetrieveListCustomerWholesaleService(customer_wholesale_repo=customer_wholesale_repo)
