@@ -39,7 +39,9 @@ class AddProductWholesaleService(ProductPricingMixin):
         """
 
         # Validar que el cliente mayorista exista en la base de datos
-        wholesale_instance = await self.__customer_wholesale_repo.get_wholesale(id=wholesaler_id)
+        wholesale_instance = await self.__customer_wholesale_repo.get_customer_wholesale(
+            id=wholesaler_id
+        )
 
         if not wholesale_instance:
             raise ResourceNotFound()

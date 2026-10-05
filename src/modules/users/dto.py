@@ -199,7 +199,7 @@ class LocationDTO(BaseModel):
     province: str = Field(
         max_length=100,
         description="Nombre oficial de la provincia.",
-        examples=["Juan Pablo"],
+        examples=["Pichincha"],
         json_schema_extra={
             "x-validation-errors": [
                 DTOValidationErrorMessages.STRING_TOO_LONG.value,
@@ -208,22 +208,22 @@ class LocationDTO(BaseModel):
             ]
         },
     )
-    canton: EmailStr = Field(
+    canton: str = Field(
         max_length=100,
         description="Nombre oficial del cantón.",
-        examples=["user@email.com"],
+        examples=["Quito"],
         json_schema_extra={
             "x-validation-errors": [
                 DTOValidationErrorMessages.STRING_TOO_LONG.value,
                 DTOValidationErrorMessages.MISSING.value,
-                DTOValidationErrorMessages.VALUE_ERROR_EMAIL.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
     )
     city: str = Field(
         max_length=100,
         description="Nombre oficial de la ciudad o localidad.",
-        examples=["+593 123456789"],
+        examples=["Zámbiza"],
         json_schema_extra={
             "x-validation-errors": [
                 DTOValidationErrorMessages.STRING_TOO_LONG.value,
@@ -257,15 +257,15 @@ class ReadLocationDTO(BaseModel):
     )
     province: str = Field(
         description="Nombre oficial de la provincia.",
-        examples=["Juan Pablo"],
+        examples=["Pichincha"],
     )
-    canton: EmailStr = Field(
+    canton: str = Field(
         description="Nombre oficial del cantón.",
-        examples=["user@email.com"],
+        examples=["Quito"],
     )
     city: str = Field(
         description="Nombre oficial de la ciudad o localidad.",
-        examples=["+593 123456789"],
+        examples=["Zámbiza"],
     )
     address: str = Field(
         description="Dirección de entrega.",
