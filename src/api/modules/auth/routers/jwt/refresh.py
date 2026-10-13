@@ -2,11 +2,16 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
 
+from src.api.common.exceptions import MissingJWT
 from src.api.common.schema import (
     response_scheme_401,
     response_scheme_503,
 )
-from src.api.modules.auth.dependencies import get_jwt_refresh_token_service, get_raw_tokens
+from src.api.modules.auth.constants import ExceptionErrorMessages
+from src.api.modules.auth.dependencies import (
+    get_jwt_refresh_token_service,
+    get_optional_raw_tokens,
+)
 from src.api.modules.auth.services.jwt.refresh import RefreshTokenService
 from src.api.settings.parameters import api_parameters
 
@@ -31,7 +36,7 @@ jwt_refresh_router = APIRouter(prefix="/authentication", tags=["Autenticación"]
     },
 )
 async def refresh_token(
-    tokens: Annotated[tuple[str, str], Depends(get_raw_tokens)],
+    tokens: Annotated[tuple[str | None, str | None], Depends(get_optional_raw_tokens)],
     service: Annotated[RefreshTokenService, Depends(get_jwt_refresh_token_service)],
     response: Response,
 ) -> None:
@@ -42,34 +47,30 @@ async def refresh_token(
     la cookie de sesión correspondiente con una respuesta sin contenido.
 
     ### Requisitos de Acceso
-    - **Autenticación requerida:** Cookies obligatorias `access_token` y `refresh_token` (JWT).
-    - **Condición de Renovación:** El `access_token` debe haber expirado y el `refresh_token`
-      debe estar vigente.
+    - **Acceso Público:** Endpoint abierto para renovación de tokens de acceso.
+    - **Condición de Renovación:** El `refresh_token` debe estar vigente y válido.
 
     ### Flujo de Ejecución
     1. **Extracción y Validación de Cookies:**
-        - Intercepta los tokens `access_token` y `refresh_token` presentes en las cookies HTTP.
-        - Si falta alguno de los tokens, interrumpe el flujo con error 401 (MissingJWT).
-    2. **Validación del Token de Acceso:**
-        - Verifica la firma criptográfica del `access_token`.
-        - Comprueba que el `access_token` efectivamente haya expirado. Si aún es vigente,
-         deniega la renovación.
-    3. **Validación del Token de Actualización:**
+        - Intercepta el token `refresh_token` presentes en las cookies HTTP.
+        - Si falta el token, interrumpe el flujo con error 401 (MissingJWT).
+    2. **Validación del Token de Actualización:**
         - Verifica la firma y comprueba que el `refresh_token` se encuentre vigente (no expirado).
-    4. **Comprobación de Integridad y Sesión:**
+    3. **Comprobación de Integridad y Sesión:**
         - Comprueba que ambos tokens pertenezcan al mismo usuario (`sub`).
         - Verifica que el usuario exista en la base de datos y que la versión de sesión
          (`session_version`) coincida con la registrada en el token.
-    5. **Emisión del Nuevo Token y Actualización de Cookie:**
+    4. **Emisión del Nuevo Token y Actualización de Cookie:**
         - Genera un nuevo `access_token` con una nueva fecha de expiración.
         - Configura la cookie `access_token` (`HttpOnly`, `SameSite=Lax`, `Secure`).
     """
 
-    access_token, refresh_token = tokens
-    new_access_token = await service.refresh_token(
-        access_token=access_token,
-        refresh_token=refresh_token,
-    )
+    _, refresh_token = tokens
+
+    if not refresh_token:
+        raise MissingJWT(message=ExceptionErrorMessages.REFRESH_JWT_MISSING.value)
+
+    new_access_token = await service.refresh_token(refresh_token=refresh_token)
     response.set_cookie(
         key="access_token",
         value=new_access_token,

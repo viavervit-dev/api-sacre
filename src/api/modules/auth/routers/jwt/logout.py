@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 
 from src.api.common.schema import (
     response_scheme_401,
@@ -8,6 +8,7 @@ from src.api.common.schema import (
 )
 from src.api.modules.auth.dependencies import get_jwt_logout_service, get_raw_tokens
 from src.api.modules.auth.services.jwt.logout import LogoutService
+from src.api.settings.parameters import api_parameters
 
 jwt_logout_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
 
@@ -32,6 +33,7 @@ jwt_logout_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
 async def logout(
     tokens: Annotated[tuple[str, str], Depends(get_raw_tokens)],
     service: Annotated[LogoutService, Depends(get_jwt_logout_service)],
+    response: Response,
 ) -> None:
     """
     Permite revocar la sesión activa del usuario autenticado invalidando los tokens de acceso y
@@ -58,7 +60,24 @@ async def logout(
         - Incrementa en `1` la columna `session_version` del usuario en el esquema `auth.users`.
         - Al alterarse la versión, cualquier token emitido previamente queda revocado para
          todas las peticiones subsiguientes.
+    5. **Eliminación de Cookies en el Navegador:**
+        - Configura la respuesta HTTP para eliminar las cookies `access_token` y `refresh_token`
+         del navegador.
     """
 
     access_token, refresh_token = tokens
     await service.logout(access_token=access_token, refresh_token=refresh_token)
+
+    # Eliminar cookies en el navegador
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=not api_parameters.debug,
+        samesite="lax",
+    )
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=not api_parameters.debug,
+        samesite="lax",
+    )
