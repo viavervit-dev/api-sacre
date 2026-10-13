@@ -3,30 +3,25 @@
 import asyncio
 import os
 from logging.config import fileConfig
+from typing import Any
 
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config, pool, text
+from sqlalchemy import create_engine, pool, text
 from sqlalchemy.engine import Connection
 
-import src.config.models
-from src.config.database import Base
-from src.config.parameters import settings
+import src.api.settings.models
+from src.api.settings.database import Base
+from src.api.settings.parameters import api_parameters
 
-load_dotenv()
 config = context.config
 
-# Sobreescribe la URL del .ini con la URL real proveniente de las variables de entorno.
-# Esto evita hardcodear credenciales en alembic.ini, que sí se sube al repositorio.
-alembic_url = (
-    os.getenv("ALEMBIC_DATABASE_URL")  # Usá esta si está definida
-    or os.getenv("DATABASE_URL", "").replace(
-        "+asyncpg", "+psycopg2"
-    )  # Sino, transformá la async en sync
-)
-config.set_main_option("sqlalchemy.url", alembic_url)
 
-if config.config_file_name is not None:
+if (
+    config.config_file_name is not None
+    and config.config_file_name.endswith(".ini")
+    and os.path.exists(config.config_file_name)
+):
     fileConfig(config.config_file_name)
 
 # Metadata de la Base declarativa. Alembic la compara contra el esquema real
@@ -40,7 +35,7 @@ def get_all_model_schemas() -> set[str]:
     return {table.schema for table in target_metadata.tables.values() if table.schema is not None}
 
 
-def include_name(name: str | None, type_: str, parent_names: dict) -> bool:
+def include_name(name: str | None, type_: Any, parent_names: Any) -> bool:
     """
     Filtra los objetos para que Alembic no compare ni intente alterar
     esquemas internos propios de PostgreSQL (como pg_catalog, pg_toast, etc.).
@@ -77,12 +72,26 @@ def cleanup_empty_schemas(connection: Connection) -> None:
         connection.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" RESTRICT;'))
 
 
-def run_migrations_offline() -> None:
-    """Ejecuta las migraciones en modo **offline**."""
+def get_database_url() -> str:
+    """Obtiene la URL de la base de datos para Alembic."""
 
-    url = config.get_main_option("sqlalchemy.url")
+    alembic_database_url = api_parameters.alembic_database_url
+
+    if not alembic_database_url:
+        raise ValueError(
+            "La URL de la base de datos para Alembic no está configurada. "
+            "Asegúrate de establecer 'ALEMBIC_DATABASE_URL' en el archivo "
+            ".env o en las variables de entorno."
+        )
+
+    return alembic_database_url
+
+
+def run_migrations_offline() -> None:
+    """Ejecuta las migraciones en modo `offline`."""
+
     context.configure(
-        url=url,
+        url=get_database_url(),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -97,11 +106,10 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Ejecuta las migraciones en modo **online**."""
+    """Ejecuta las migraciones en modo `online`."""
 
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    connectable = create_engine(
+        url=get_database_url(),
         poolclass=pool.NullPool,
     )
 

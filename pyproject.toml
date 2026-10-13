@@ -29,7 +29,6 @@ pyjwt = { extras = ["crypto"], version = "^2.12.1" }
 development = [
     "ruff (>=0.15.0,<0.16.0)",
     "mypy (>=1.19.1,<2.0.0)",
-    "commitizen (>=4.13.8,<5.0.0)",
     "pre-commit (>=4.5.1,<5.0.0)",
 ]
 testing = [
@@ -75,88 +74,23 @@ known-first-party = ["src"]
 quote-style = "double"
 indent-style = "space"
 
-# === Commitizen Configuration ===
-[tool.commitizen]
-name = "cz_customize"
+# === Alembic Configuration ===
+[tool.alembic]
+script_location = "%(here)s/alembic"
+file_template = "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s"
+prepend_sys_path = ["."]
 
-[tool.commitizen.customize]
-# Template for the commit message (header + body + optional footer)
-message_template = """{{change_type}}{% if scope %}({{scope}}){% endif %}: {{message}}{% if body %}
+[[tool.alembic.post_write_hooks]]
+name = "ruff_check"
+type = "module"
+module = "ruff"
+options = "check --fix REVISION_SCRIPT_FILENAME"
 
-{{ body[:1] | upper }}{{ body[1:] }}{% endif %}{% if footer %}
-
-{{footer}}{% endif %}"""
-
-# The schema to display with `cz schema`
-schema = "<type>(<scope>): <description>\n\n<body>\n\n<footer>"
-
-# Regex to validate the message with `cz check`:
-# - Allowed types, without feat or fix.
-# - Optional scope in parentheses.
-# - Required short description.
-# - Optional body (can be done with line breaks).
-# - Optional footer, and if present, may contain BREAKING CHANGE.
-schema_pattern = "^(docs|style|refactor|perf|test|build|ci|chore|revert|wip|add)(\\([^\\)]+\\))?:\\s.+?(\\n\\n[\\s\\S]+?)?(\\n\\nBREAKING CHANGE: [\\s\\S]+)?$"
-change_type_order = [
-    "wip",
-    "add",
-    "chore",
-    "docs",
-    "style",
-    "refactor",
-    "perf",
-    "test",
-    "build",
-    "ci",
-    "revert",
-]
-
-[[tool.commitizen.customize.questions]]
-type = "list"
-name = "change_type"
-message = "Seleccione el tipo de cambio que está implementando."
-choices = [
-    { value = "wip", name = "wip: Trabajo en progreso, marca un registro temporal de una funcionalidad incompleta." },
-    { value = "add", name = "add: Añadir una nuevo cambio o característica." },
-    { value = "chore", name = "chore: Tareas de mantenimiento que no modifica la lógica de una funcionalidad." },
-    { value = "docs", name = "docs: Cambios en la documentación, guías, README, comentarios de ódigo, etc." },
-    { value = "style", name = "style: Cambios que afectan la apariencia del código (formato) sin cambiar la lógica." },
-    { value = "refactor", name = "refactor: Cambios en el código que no alteran una funcionalidad pero mejora la estructura, legibilidad o mantenibilidad." },
-    { value = "perf", name = "perf: Cambios cuyo objetivo principal es mejorar rendimiento." },
-    { value = "test", name = "test: Añadir, modificar o arreglar pruebas automatizadas." },
-    { value = "build", name = "build: Cambios que afectan el sistema de compilación, empaquetado o dependencias." },
-    { value = "ci", name = "ci: Cambios en la configuración de integración continua (pipelines o workflows)." },
-    { value = "revert", name = "revert: Revertir un commit previo." },
-]
-
-[[tool.commitizen.customize.questions]]
-type = "input"
-name = "scope"
-message = '¿Cuál es el "scope" de este cambio? (opcional): '
-default = ""
-
-[[tool.commitizen.customize.questions]]
-type = "input"
-name = "message"
-message = """
-------------------------------------------------------
-  RECORDATORIO: ¡Revisa tu ortografía y gramática! 
-  Una buena redacción facilita la lectura del historial.
-  ------------------------------------------------------
-
-  Escriba una breve descripción imperativa del cambio: """
-
-[[tool.commitizen.customize.questions]]
-type = "input"
-name = "body"
-message = "Proporcione una descripción más detallada. (opcional): "
-default = ""
-
-[[tool.commitizen.customize.questions]]
-type = "input"
-name = "breaking_description"
-message = 'Proporcione una descripción para el "BREAKING CHANGE". (opcional): '
-default = ""
+[[tool.alembic.post_write_hooks]]
+name = "ruff_format"
+type = "module"
+module = "ruff"
+options = "format REVISION_SCRIPT_FILENAME"
 
 # === Mypy Configuration ===
 [tool.mypy]

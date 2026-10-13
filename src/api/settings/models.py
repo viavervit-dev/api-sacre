@@ -1,0 +1,24 @@
+# ruff: noqa: F401
+
+"""
+Registro central de modelos ORM.
+
+Importa aquí TODOS los modelos SQLAlchemy del proyecto para que Alembic los detecte al generar
+migraciones con autogenerate. Cada vez que crees un nuevo modelo, agrégalo a este archivo.
+"""
+
+# Modelos del módulo de autenticación
+from src.api.modules.auth.models.permission import Group, Permission, PermissionGroup
+from src.api.modules.auth.models.user import User, UserGroup
+
+# Modelos del módulo de países
+from src.api.modules.countries.models.country import Country
+
+# Modelos del módulo de productos
+from src.api.modules.inventory.models.category import Category
+from src.api.modules.inventory.models.product import Product
+
+# Modelos del módulo de usuarios
+from src.api.modules.users.models.admin import Admin
+from src.api.modules.users.models.customer import Customer
+from src.api.modules.users.models.customer_wholesale import CustomerWholesale

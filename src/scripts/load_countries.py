@@ -6,8 +6,8 @@ from anyio import Path
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config.database import close_db_pool, create_db_pool, get_db_session
-from src.modules.countries.models.country import Country
+from src.api.modules.countries.models.country import Country
+from src.api.settings.database import close_db_pool, create_db_pool, get_db_session
 
 
 def __read_fixture_data(file_path: Path) -> dict[str, Any]:

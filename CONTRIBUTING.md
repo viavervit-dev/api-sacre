@@ -69,24 +69,3 @@ ruff format .
 # Verificar el tipado estático del código
 mypy .
 ```
-
-## 🔹 4. Asistente de Commits
-
-El comando `cz commit` utiliza **Commitizen** para guiarte paso a paso en la creación de commits:
-
-```txt
-cz commit
-```
-
-El asistente te hará las siguientes preguntas:
-
-1. **Tipo de cambio:** Selecciona el prefijo del commit.
-2. **Scope (opcional):** Indica el ámbito o área del cambio.
-3. **Descripción:** Escribe una descripción corta e imperativa del cambio.
-4. **Descripción detallada (opcional):** Agrega contexto adicional si es necesario.
-5. **Breaking Change (opcional):** Indica si el cambio rompe compatibilidad.
-
-La configuración del asistente se encuentra en el archivo `pyproject.toml`, dentro de la sección `[tool.commitizen.customize]`, donde se definen los tipos de cambio permitidos, las preguntas del flujo interactivo y el formato del mensaje de commit.
-
-> [!IMPORTANT]
-> El scope debe seguir reglas específicas de formato. Consulta la sección **[6. Scope](workflow/create_commit.md#-6-scope)** en la guía de commits para conocer todas las reglas.
