@@ -9,7 +9,7 @@ class UserRoles(Enum):
 
 
 class UserEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `Users`."""
+    """Metadatos asociados a la entidad `User`."""
 
     # Descripciones para los campos de la entidad
     EMAIL_DESCRIPTION = "Correo electrónico del usuario."
@@ -34,7 +34,7 @@ class UserEntity(Enum):
 
 
 class PermissionEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `Permissions`."""
+    """Metadatos asociados a la entidad `Permission`."""
 
     # Descripciones para los campos de la entidad
     NAME_DESCRIPTION = "Nombre del permiso."
@@ -44,29 +44,13 @@ class PermissionEntity(Enum):
 
 
 class GroupEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `Groups`."""
+    """Metadatos asociados a la entidad `Group`."""
 
     # Descripciones para los campos de la entidad
     NAME_DESCRIPTION = "Nombre del grupo."
 
     # Propiedades para los campos de la entidad
     NAME_MAX_LENGTH = 100
-
-
-class JWTEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `JWT`."""
-
-    # Descripciones para los campos de la entidad
-    TOKEN_DESCRIPTION = "JWT almacenado en la lista negra para revocación de tokens."
-    JTI_DESCRIPTION = "Identificador único del token."
-    TOKEN_TYPE_DESCRIPTION = "Tipo de token."
-    USER_ID_DESCRIPTION = "ID del usuario al que pertenece el token."
-    ACCESS_TOKEN_DESCRIPTION = "Token de acceso JWT para autenticación de un usuario."
-
-    # Propiedades para los campos de la entidad
-    TOKEN_TYPE_MAX_LENGTH = 20
-    TOKEN_MAX_LENGTH = 512
-    JTI_MAX_LENGTH = 200
 
 
 class ExceptionErrorMessages(Enum):

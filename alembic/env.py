@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, pool, text
 from sqlalchemy.engine import Connection
 
 import src.api.settings.models
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 from src.api.settings.parameters import api_parameters
 
 config = context.config
@@ -26,7 +26,7 @@ if (
 
 # Metadata de la Base declarativa. Alembic la compara contra el esquema real
 # de la BD para determinar qué cambios generar con --autogenerate.
-target_metadata = Base.metadata
+target_metadata = ModelBase.metadata
 
 
 def get_all_model_schemas() -> set[str]:

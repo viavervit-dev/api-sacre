@@ -5,16 +5,11 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.api.modules.users.constants import AdminEntity
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 
 
-class Admin(Base):
-    """
-    Modelo ORM para el perfil de usuario administrador.
-
-    Almacena los datos personales del administrador en el esquema `admin` y se
-    vincula directamente mediante una relación uno a uno con la cuenta base `User`.
-    """
+class Admin(ModelBase):
+    """Modelo ORM para el perfil de un usuario administrador."""
 
     __tablename__ = "admins"
     __table_args__ = {"schema": "users"}

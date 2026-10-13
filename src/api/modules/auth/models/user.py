@@ -9,19 +9,14 @@ from src.api.modules.auth.constants import UserEntity
 from src.api.modules.auth.models.permission import Group
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 
 # Constantes para validaciones de campos numéricos
 SESSION_VERSION_MIN_VALUE = UserEntity.SESSION_VERSION_MIN_VALUE.value
 
 
-class User(Base):
-    """
-    Modelo ORM para la entidad de usuario y credenciales de autenticación.
-
-    Gestiona el acceso al sistema, ciclo de vida de sesiones, roles y la
-    vinculación con perfiles específicos y grupos de permisos.
-    """
+class User(ModelBase):
+    """Modelo ORM para la entidad de usuario y credenciales de autenticación."""
 
     __tablename__ = "users"
     __table_args__ = {"schema": "auth"}
@@ -110,13 +105,8 @@ class User(Base):
         return False
 
 
-class UserGroup(Base):
-    """
-    Modelo asociativo para la relación muchos a muchos entre usuarios y grupos.
-
-    Representa la tabla intermedia `auth.user_groups` que vincula las entidades
-    `User` y `Group`.
-    """
+class UserGroup(ModelBase):
+    """Modelo asociativo para la relación muchos a muchos entre usuarios y grupos."""
 
     __tablename__ = "user_groups"
     __table_args__ = {"schema": "auth"}

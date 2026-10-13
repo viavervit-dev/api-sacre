@@ -2,7 +2,7 @@ from enum import Enum, StrEnum
 
 
 class CustomerEntity(Enum):
-    """Constantes y metadatos asociados a la entidad `Customer`."""
+    """Metadatos asociados a la entidad `Customer`."""
 
     # Descripciones para los campos de la entidad
     FIRST_NAMES_DESCRIPTION = "Primer y segundo nombre del cliente."
@@ -40,7 +40,7 @@ class DocumentTypesCustomer(StrEnum):
 
 
 class AdminEntity(Enum):
-    """Constantes y metadatos asociados a la entidad `Admin`."""
+    """Metadatos asociados a la entidad `Admin`."""
 
     # Descripciones para los campos de la entidad
     FIRST_NAMES_DESCRIPTION = "Primer y segundo nombre del administrador."
@@ -53,7 +53,7 @@ class AdminEntity(Enum):
 
 
 class CustomerWholesaleEntity(Enum):
-    """Constantes y metadatos asociados a la entidad `CustomerWholesale`."""
+    """Metadatos asociados a la entidad `CustomerWholesale`."""
 
     # Descripciones para los campos de la entidad
     NAME_OR_COMPANY_NAME_DESCRIPTION = "Nombre o razón social del mayorista."

@@ -6,10 +6,10 @@ from sqlalchemy import DateTime, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 
 
-class Country(Base):
+class Country(ModelBase):
     """
     Modelo ORM para la gestión de países y divisiones territoriales.
 

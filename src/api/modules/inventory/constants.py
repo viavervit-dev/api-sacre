@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class CategoryEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `Customer`."""
+    """Metadatos asociados a la entidad `Category`."""
 
     # Descripciones para los campos de la entidad
     NAME_DESCRIPTION = "Nombre de la categoria."
@@ -22,7 +22,7 @@ class CategoryEntity(Enum):
 
 
 class ProductEntity(Enum):
-    """Enumeración que define constantes relacionadas con la entidad `Product`."""
+    """Metadatos asociados a la entidad `Product`."""
 
     # Descripciones para los campos de la entidad
     NAME_DESCRIPTION = "Nombre del producto."
@@ -56,11 +56,11 @@ class ProductEntity(Enum):
     URL_IMAGES_MAX_LENGTH = 2048
     PRICE_NETO_MAX_DIGITS = 7
     PRICE_NETO_DECIMAL_PLACES = 2
-    PRICE_NETO_MAX_VALUE = Decimal(value="10000.00")
+    PRICE_NETO_MAX_VALUE = Decimal(value="99999.99")
     PRICE_NETO_MIN_VALUE = Decimal(value="0.00")
     PRICE_SALE_MAX_DIGITS = 7
     PRICE_SALE_DECIMAL_PLACES = 2
-    PRICE_SALE_MAX_VALUE = Decimal(value="10000.00")
+    PRICE_SALE_MAX_VALUE = Decimal(value="99999.99")
     PRICE_SALE_MIN_VALUE = Decimal(value="0.00")
     PROFIT_MARGIN_MAX_DIGITS = 5
     PROFIT_MARGIN_DECIMAL_PLACES = 4

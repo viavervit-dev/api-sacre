@@ -5,16 +5,11 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.api.modules.auth.constants import GroupEntity, PermissionEntity
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 
 
-class Permission(Base):
-    """
-    Modelo ORM que define un permiso de acceso o acción en el sistema.
-
-    Representa privilegios individuales asignables a roles o conjuntos lógicos
-    a través de grupos de permisos (`Group`).
-    """
+class Permission(ModelBase):
+    """Modelo ORM que define un permiso de acceso o acción en el sistema."""
 
     __tablename__ = "permissions"
     __table_args__ = {"schema": "auth"}
@@ -46,13 +41,8 @@ class Permission(Base):
     )
 
 
-class Group(Base):
-    """
-    Modelo ORM para la agrupación y gestión colectiva de permisos.
-
-    Permite clasificar usuarios en conjuntos lógicos que comparten un mismo
-    paquete de privilegios de acceso dentro del sistema.
-    """
+class Group(ModelBase):
+    """Modelo ORM para la agrupación y gestión colectiva de permisos."""
 
     __tablename__ = "groups"
     __table_args__ = {"schema": "auth"}
@@ -84,13 +74,8 @@ class Group(Base):
     )
 
 
-class PermissionGroup(Base):
-    """
-    Modelo asociativo para la relación muchos a muchos entre permisos y grupos.
-
-    Representa la tabla intermedia `auth.permission_groups` que vincula las entidades
-    `Permission` y `Group`.
-    """
+class PermissionGroup(ModelBase):
+    """Modelo asociativo para la relación muchos a muchos entre permisos y grupos."""
 
     __tablename__ = "permission_groups"
     __table_args__ = {"schema": "auth"}

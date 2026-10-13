@@ -15,7 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.api.modules.inventory.constants import CategoryEntity, ProductEntity
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 
 # Constantes para validaciones de campos numéricos
 PRICE_NETO_MAX = ProductEntity.PRICE_NETO_MAX_VALUE.value
@@ -34,13 +34,8 @@ STOCK_SALE_MAX = ProductEntity.STOCK_SALE_MAX_VALUE.value
 STOCK_SALE_MIN = ProductEntity.STOCK_SALE_MIN_VALUE.value
 
 
-class Product(Base):
-    """
-    Modelo ORM para la gestión de productos y artículos del inventario.
-
-    Centraliza la información de catálogo, categorización, precios, cálculo de
-    márgenes e IVA, y el control de existencias en almacén y venta (`inventory.products`).
-    """
+class Product(ModelBase):
+    """Modelo ORM para la gestión de productos y artículos del inventario."""
 
     __tablename__ = "products"
     __table_args__ = {"schema": "inventory"}

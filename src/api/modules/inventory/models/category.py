@@ -5,20 +5,15 @@ from sqlalchemy import Boolean, CheckConstraint, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.api.modules.inventory.constants import CategoryEntity
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 
 # Constantes para validaciones de campos numéricos
 MAXIMUM_PRODUCTS = CategoryEntity.MAXIMUM_NUMBER_PRODUCTS.value
 MINIMUM_PRODUCTS = CategoryEntity.MINIMUM_NUMBER_PRODUCTS.value
 
 
-class Category(Base):
-    """
-    Modelo ORM para la clasificación y categorización de productos en el inventario.
-
-    Define la agrupación lógica de productos en el esquema `inventory`, gestionando su
-    estado operativo, descripción y el conteo acumulado de artículos asociados.
-    """
+class Category(ModelBase):
+    """Modelo ORM para la clasificación y categorización de productos en el inventario."""
 
     __tablename__ = "categories"
     __table_args__ = {"schema": "inventory"}

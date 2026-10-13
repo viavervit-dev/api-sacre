@@ -7,16 +7,11 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.api.modules.users.constants import CustomerWholesaleEntity
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 
 
-class CustomerWholesale(Base):
-    """
-    Modelo ORM para el perfil de cliente mayorista.
-
-    Gestiona la información comercial, identificación tributaria (RUC), canales de
-    contacto y ubicación geográfica en el esquema `users` (`users.wholesale`).
-    """
+class CustomerWholesale(ModelBase):
+    """Modelo ORM para el perfil de un cliente mayorista."""
 
     __tablename__ = "customer_wholesale"
     __table_args__ = {"schema": "users"}

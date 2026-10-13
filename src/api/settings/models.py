@@ -18,6 +18,9 @@ from src.api.modules.countries.models.country import Country
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.models.product import Product
 
+# Modelos del módulo de órdenes
+from src.api.modules.orders.models.order import Order
+
 # Modelos del módulo de usuarios
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer

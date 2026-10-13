@@ -13,7 +13,7 @@ from sqlalchemy.orm import DeclarativeBase
 from src.api.settings.parameters import api_parameters
 
 
-class Base(DeclarativeBase):
+class ModelBase(DeclarativeBase):
     """Clase base para todos los modelos ORM del proyecto."""
 
     metadata = MetaData(

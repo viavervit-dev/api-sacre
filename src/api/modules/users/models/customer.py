@@ -5,16 +5,11 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.api.modules.users.constants import CustomerEntity
-from src.api.settings.database import Base
+from src.api.settings.database import ModelBase
 
 
-class Customer(Base):
-    """
-    Modelo ORM para el perfil de cliente.
-
-    Almacena los datos personales, de identificación y de contacto del cliente en el
-    esquema `users`, vinculándose mediante una relación uno a uno con la cuenta base `User`.
-    """
+class Customer(ModelBase):
+    """Modelo ORM para el perfil de un cliente."""
 
     __tablename__ = "customers"
     __table_args__ = {"schema": "users"}
