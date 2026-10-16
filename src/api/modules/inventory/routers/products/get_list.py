@@ -189,8 +189,9 @@ async def get_list_products(
         - Valida que el rol sea `admin` o `customer` y verifique sus permisos respectivos.
         - Si no se envían tokens, permite el acceso con rol público / anónimo.
     2. **Determinación de Visibilidad y Filtros:**
-        - Si el usuario es administrador (`admin`): `private=True` y `status=None`.
-        - Si es anónimo o cliente (`customer`): `private=False` y `status=True`.
+        - Si el usuario es administrador (`admin`): Puede leer los datos públicos y privados de
+         las productos.
+        - Si es anónimo o cliente (`customer`): Puede leer los datos públicos de las productos.
     3. **Consulta en Base de Datos y Paginación:**
         - Realiza el conteo total de registros coincidentes para los metadatos de paginación.
         - Si existen registros, consulta los productos ordenados descendentemente por fecha de

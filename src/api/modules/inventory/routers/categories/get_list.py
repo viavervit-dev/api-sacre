@@ -13,7 +13,7 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import retrieve_list_category_service
-from src.api.modules.inventory.dto import PrivateReadCategoryDTO, PublicReadCategoryDTO
+from src.api.modules.inventory.dto import ReadCategoryPrivateDTO, ReadCategoryPublicDTO
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.services.categories.get_list import GetListCategoryService
 from src.api.settings.parameters import api_parameters
@@ -37,7 +37,7 @@ require_admin = UserOptionalPermissionChecker(
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de categorías de productos obtenida exitosamente.",
-            "model": Response[PaginatedData[PrivateReadCategoryDTO | PublicReadCategoryDTO]],
+            "model": Response[PaginatedData[ReadCategoryPrivateDTO | ReadCategoryPublicDTO]],
             "content": {
                 "application/json": {
                     "examples": {
@@ -141,7 +141,7 @@ async def get_list_categories(
         le=api_parameters.pagination_limit,
         ge=1,
     ),
-) -> Response[PaginatedData[PrivateReadCategoryDTO | PublicReadCategoryDTO]]:
+) -> Response[PaginatedData[ReadCategoryPrivateDTO | ReadCategoryPublicDTO]]:
     """
     Permite consultar el listado de categorías de productos con soporte para paginación y
     ordenamiento cronológico descendente. La información y los filtros aplicados se adaptan
@@ -163,8 +163,9 @@ async def get_list_categories(
         - Valida que el rol sea `admin` o `customer` y verifique sus permisos respectivos.
         - Si no se envían tokens, permite el acceso con rol público / anónimo.
     2. **Determinación de Visibilidad y Filtros:**
-        - Si el usuario es administrador (`admin`): `private=True` y `status=None`.
-        - Si es anónimo o cliente (`customer`): `private=False` y `status=True`.
+        - Si el usuario es administrador (`admin`): Puede leer los datos públicos y privados de
+         las categorías.
+        - Si es anónimo o cliente (`customer`): Puede leer los datos públicos de las categorías.
     3. **Consulta en Base de Datos y Paginación:**
         - Realiza el conteo total de registros coincidentes para los metadatos de paginación.
         - Si existen registros, consulta las categorías ordenadas descendentemente por fecha de
@@ -174,16 +175,8 @@ async def get_list_categories(
          interno.
     """
 
-    status: bool | None = True
-    private = False
-
-    if user and user.role == UserRoles.ADMINISTRATOR.value:
-        private = True
-        status = None
-
     categories, total_items = await service.get_list_categories(
-        private=private,
-        status=status,
+        user=user,
         offset=offset,
         limit=limit,
     )

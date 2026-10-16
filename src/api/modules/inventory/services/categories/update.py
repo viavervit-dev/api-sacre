@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 
 from src.api.common.exceptions import ResourceNotFound
 from src.api.modules.inventory.constants import CategoryEntity
-from src.api.modules.inventory.dto import PrivateReadCategoryDTO, UpdateCategoryDTO
+from src.api.modules.inventory.dto import ReadCategoryPrivateDTO, UpdateCategoryDTO
 from src.api.modules.inventory.repositories.interfaces import ICategoryRepository
 
 
@@ -19,7 +19,7 @@ class UpdateCategoryService:
         self,
         data: UpdateCategoryDTO,
         category_id: UUID,
-    ) -> PrivateReadCategoryDTO:
+    ) -> ReadCategoryPrivateDTO:
         """
         Actualiza una categoría tras validar las reglas de negocio del dominio.
 
@@ -29,7 +29,7 @@ class UpdateCategoryService:
         """
 
         category_data = data.model_dump(exclude_unset=True)
-        instance = await self.__category_repo.get_category(id=category_id)
+        instance = await self.__category_repo.get_category_by_id(id=category_id)
 
         if not instance:
             raise ResourceNotFound()
@@ -41,11 +41,10 @@ class UpdateCategoryService:
             data=category_data,
             instance=instance,
         )
-        category = PrivateReadCategoryDTO.model_construct(
+        category = ReadCategoryPrivateDTO.model_construct(
             id=instance.id,
             name=instance.name,
             description=instance.description,
-            product_count=instance.product_count,
             status=instance.status,
         )
 

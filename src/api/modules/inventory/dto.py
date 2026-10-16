@@ -84,8 +84,8 @@ class UpdateCategoryDTO(BaseModel):
     )
 
 
-class PublicReadCategoryDTO(BaseModel):
-    """DTO para la lectura de una categoría de producto con información pública."""
+class ReadCategoryPublicDTO(BaseModel):
+    """DTO para la lectura de la información pública de una categoría producto."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -104,17 +104,10 @@ class PublicReadCategoryDTO(BaseModel):
             "personal como para regalo."
         ],
     )
-    product_count: int = Field(
-        description=CategoryEntity.PRODUCT_NUMBER_DESCRIPTION.value,
-        examples=[10, 15],
-    )
 
 
-class PrivateReadCategoryDTO(PublicReadCategoryDTO):
-    """
-    DTO para la lectura de una categoría de producto con información completa, incluyendo campos
-    que solo deberían ser visibles para administradores.
-    """
+class ReadCategoryPrivateDTO(ReadCategoryPublicDTO):
+    """DTO para la lectura de la información pública y privada de una categoría producto."""
 
     status: bool = Field(
         description=CategoryEntity.STATUS_DESCRIPTION.value,

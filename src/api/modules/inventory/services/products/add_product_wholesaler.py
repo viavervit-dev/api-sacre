@@ -105,10 +105,6 @@ class AddProductWholesaleService(ProductPricingMixin):
         else:
             product_data["status"] = False
 
-        # Incrementar el contador de productos asociados a cada categoría
-        for category in product_data["categories"]:
-            await self.__category_repo.add_product_to_category(name=category)
-
         # Calcular el precio de venta
         product_data["price_sale"] = self._calculate_sale_price(
             price_neto=product_data["price_neto"],

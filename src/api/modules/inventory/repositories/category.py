@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.inventory.models.category import Category
@@ -15,37 +15,49 @@ class CategoryRepository(ICategoryRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db
 
-    async def get_list_categories(
-        self,
-        offset: int,
-        limit: int,
-        status: bool | None = None,
-    ) -> tuple[Sequence[Category], int]:
+    async def get_list_categories(self, offset: int, limit: int) -> tuple[Sequence[Category], int]:
 
         # Total para metadatos de paginación
         count_stmt = select(func.count(Category.id))
-
-        if status is not None:
-            count_stmt = count_stmt.where(Category.status == status)
-
         total_items = await self.__db.scalar(count_stmt) or 0
 
         if total_items == 0:
             return [], 0
 
         # Paginación y ordenamiento
-        stmt = select(Category)
-
-        if status is not None:
-            stmt = stmt.where(Category.status == status)
-
-        stmt = stmt.order_by(Category.date_joined.desc()).offset(offset).limit(limit)
+        stmt = select(Category).order_by(Category.date_joined.desc()).offset(offset).limit(limit)
         result = await self.__db.scalars(stmt)
         items = result.all()
 
         return items, total_items
 
-    async def get_category(self, id: UUID) -> Category | None:
+    async def get_list_categories_activated(
+        self,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[Category], int]:
+
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Category.id)).where(Category.status == True)  # noqa: E712
+        total_items = await self.__db.scalar(count_stmt) or 0
+
+        if total_items == 0:
+            return [], 0
+
+        # Paginación y ordenamiento
+        stmt = (
+            select(Category)
+            .where(Category.status == True)  # noqa: E712
+            .order_by(Category.date_joined.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.__db.scalars(stmt)
+        items = result.all()
+
+        return items, total_items
+
+    async def get_category_by_id(self, id: UUID) -> Category | None:
 
         return await self.__db.get(Category, id)
 
@@ -65,18 +77,6 @@ class CategoryRepository(ICategoryRepository):
         await self.__db.flush()
 
         return instance
-
-    async def add_product_to_category(self, name: str) -> None:
-        # fmt: off
-        stmt = (
-            update(Category).where(Category.name == name)
-            .values({Category.product_count: Category.product_count + 1})
-            .returning(Category)
-        )
-        # fmt: off
-
-        await self.__db.execute(stmt)
-        await self.__db.flush()
 
     async def delete_category(self, instance: Category) -> None:
 

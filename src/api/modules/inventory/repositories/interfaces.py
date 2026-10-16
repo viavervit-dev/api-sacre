@@ -11,18 +11,28 @@ class ICategoryRepository(ABC):
     """Contrato de persistencia para operaciones sobre categorías (`inventory.categories`)."""
 
     @abstractmethod
-    async def get_list_categories(
-        self,
-        offset: int,
-        limit: int,
-        status: bool | None = None,
-    ) -> tuple[Sequence[Category], int]:
-        """Obtiene una lista paginada de categorías y el total de registros encontrados."""
+    async def get_list_categories(self, offset: int, limit: int) -> tuple[Sequence[Category], int]:
+        """
+        Obtiene una lista paginada de categorías activadas/desactivadas y el total de
+        registros encontrados.
+        """
 
         pass
 
     @abstractmethod
-    async def get_category(self, id: UUID) -> Category | None:
+    async def get_list_categories_activated(
+        self,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[Category], int]:
+        """
+        Obtiene una lista paginada de categorías activadas y el total de registros encontrados.
+        """
+
+        pass
+
+    @abstractmethod
+    async def get_category_by_id(self, id: UUID) -> Category | None:
         """Obtiene una categoría por su identificador único."""
 
         pass
@@ -36,12 +46,6 @@ class ICategoryRepository(ABC):
     @abstractmethod
     async def update_category(self, data: dict[str, Any], instance: Category) -> Category:
         """Actualiza una categoría en la base de datos."""
-
-        pass
-
-    @abstractmethod
-    async def add_product_to_category(self, name: str) -> None:
-        """Incrementa en uno el contador de productos asociados a la categoría."""
 
         pass
 

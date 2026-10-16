@@ -8,7 +8,6 @@ class CategoryEntity(Enum):
     # Descripciones para los campos de la entidad
     NAME_DESCRIPTION = "Nombre de la categoria."
     DESCRIPTION_DESCRIPTION = "Descripción de la categoria."
-    PRODUCT_NUMBER_DESCRIPTION = "Número de productos de la categoria."
     STATUS_DESCRIPTION = "Estado de la categoria."
 
     # Mensajes de error
@@ -17,8 +16,6 @@ class CategoryEntity(Enum):
     # Propiedades para los campos de la entidad
     NAME_MAX_LENGTH = 50
     DESCRIPTION_MAX_LENGTH = 1000
-    MAXIMUM_NUMBER_PRODUCTS = 1000
-    MINIMUM_NUMBER_PRODUCTS = 0
 
 
 class ProductEntity(Enum):

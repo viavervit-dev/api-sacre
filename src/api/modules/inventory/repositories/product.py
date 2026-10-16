@@ -32,7 +32,6 @@ class ProductRepository(IProductRepository):
             Product.exclusive == False,  # noqa: E712
             Product.status == True,  # noqa: E712
         )
-
         total_items = await self.__db.scalar(count_stmt) or 0
 
         if total_items == 0:
@@ -61,7 +60,6 @@ class ProductRepository(IProductRepository):
 
         # Total para metadatos de paginación
         count_stmt = select(func.count(Product.id)).where(Product.exclusive == False)  # noqa: E712
-
         total_items = await self.__db.scalar(count_stmt) or 0
 
         if total_items == 0:

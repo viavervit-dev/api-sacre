@@ -13,7 +13,7 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import create_category_service
-from src.api.modules.inventory.dto import CreateCategoryDTO, PrivateReadCategoryDTO
+from src.api.modules.inventory.dto import CreateCategoryDTO, ReadCategoryPrivateDTO
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.services.categories.create import CreateCategoryService
 
@@ -46,7 +46,7 @@ async def create_category(
     user: Annotated[User, Depends(require_admin)],
     data: CreateCategoryDTO,
     service: Annotated[CreateCategoryService, Depends(create_category_service)],
-) -> Response[PrivateReadCategoryDTO]:
+) -> Response[ReadCategoryPrivateDTO]:
     """
     Permite crear una nueva categoría de productos. Ejecuta validaciones sintácticas y
     comprobaciones de unicidad en la base de datos para prevenir duplicados.

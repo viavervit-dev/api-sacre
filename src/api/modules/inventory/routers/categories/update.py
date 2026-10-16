@@ -15,7 +15,7 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import update_category_service
-from src.api.modules.inventory.dto import PrivateReadCategoryDTO, UpdateCategoryDTO
+from src.api.modules.inventory.dto import ReadCategoryPrivateDTO, UpdateCategoryDTO
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.services.categories.update import UpdateCategoryService
 
@@ -56,7 +56,7 @@ async def update_category(
         ),
     ],
     service: Annotated[UpdateCategoryService, Depends(update_category_service)],
-) -> Response[PrivateReadCategoryDTO]:
+) -> Response[ReadCategoryPrivateDTO]:
     """
     Permite modificar de forma parcial los datos de una categoría de productos. Ejecuta
     validaciones sintácticas y comprobaciones de unicidad en la base de datos para prevenir

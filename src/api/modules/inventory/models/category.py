@@ -1,15 +1,11 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.api.modules.inventory.constants import CategoryEntity
 from src.api.settings.database import ModelBase
-
-# Constantes para validaciones de campos numéricos
-MAXIMUM_PRODUCTS = CategoryEntity.MAXIMUM_NUMBER_PRODUCTS.value
-MINIMUM_PRODUCTS = CategoryEntity.MINIMUM_NUMBER_PRODUCTS.value
 
 
 class Category(ModelBase):
@@ -33,15 +29,6 @@ class Category(ModelBase):
     description: Mapped[str] = mapped_column(
         String(length=CategoryEntity.DESCRIPTION_MAX_LENGTH.value),
         doc=CategoryEntity.DESCRIPTION_DESCRIPTION.value,
-        nullable=False,
-    )
-    product_count: Mapped[int] = mapped_column(
-        Integer,
-        CheckConstraint(
-            sqltext=f"product_count >= {MINIMUM_PRODUCTS} AND product_count <= {MAXIMUM_PRODUCTS}",
-            name="product_count_range",
-        ),
-        doc=CategoryEntity.PRODUCT_NUMBER_DESCRIPTION.value,
         nullable=False,
     )
     status: Mapped[bool] = mapped_column(

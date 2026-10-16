@@ -3,7 +3,7 @@ from typing import Any
 from fastapi.exceptions import RequestValidationError
 
 from src.api.modules.inventory.constants import CategoryEntity
-from src.api.modules.inventory.dto import CreateCategoryDTO, PrivateReadCategoryDTO
+from src.api.modules.inventory.dto import CreateCategoryDTO, ReadCategoryPrivateDTO
 from src.api.modules.inventory.repositories.interfaces import ICategoryRepository
 
 
@@ -13,7 +13,7 @@ class CreateCategoryService:
     def __init__(self, category_repo: ICategoryRepository) -> None:
         self.__category_repo = category_repo
 
-    async def create_category(self, data: CreateCategoryDTO) -> PrivateReadCategoryDTO:
+    async def create_category(self, data: CreateCategoryDTO) -> ReadCategoryPrivateDTO:
         """
         Crea una nueva categoría aplicando valores iniciales y validaciones de negocio.
 
@@ -22,15 +22,13 @@ class CreateCategoryService:
         """
 
         category_data = data.model_dump()
-        category_data["status"] = False  # Asignar estado activo por defecto
-        category_data["product_count"] = 0  # Asignar contador de productos por defecto
+        category_data["status"] = False
         await self.__run_business_validations(data=category_data)
         category_instance = await self.__category_repo.create_category(data=category_data)
-        category = PrivateReadCategoryDTO.model_construct(
+        category = ReadCategoryPrivateDTO.model_construct(
             id=category_instance.id,
             name=category_instance.name,
             description=category_instance.description,
-            product_count=category_instance.product_count,
             status=category_instance.status,
         )
 
