@@ -22,7 +22,8 @@ class CategoryRepository(ICategoryRepository):
         status: bool | None = None,
     ) -> tuple[Sequence[Category], int]:
 
-        count_stmt = select(func.count()).select_from(Category)
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Category.id))
 
         if status is not None:
             count_stmt = count_stmt.where(Category.status == status)
@@ -32,6 +33,7 @@ class CategoryRepository(ICategoryRepository):
         if total_items == 0:
             return [], 0
 
+        # Paginación y ordenamiento
         stmt = select(Category)
 
         if status is not None:

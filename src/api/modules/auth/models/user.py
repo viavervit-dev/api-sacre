@@ -2,13 +2,14 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 import bcrypt
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.api.modules.auth.constants import UserEntity
 from src.api.modules.auth.models.permission import Group
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
+from src.api.modules.users.models.customer_wholesale import CustomerWholesale
 from src.api.settings.database import ModelBase
 
 # Constantes para validaciones de campos numéricos
@@ -19,7 +20,10 @@ class User(ModelBase):
     """Modelo ORM para la entidad de usuario y credenciales de autenticación."""
 
     __tablename__ = "users"
-    __table_args__ = {"schema": "auth"}
+    __table_args__ = (
+        Index("ix_users_id_role", "id", "role"),
+        {"schema": "auth"},
+    )
 
     id: Mapped[UUID] = mapped_column(
         doc="Identificador único (UUID v4).",
@@ -61,6 +65,11 @@ class User(ModelBase):
 
     customer: Mapped[Customer] = relationship(
         argument="Customer",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    customer_wholesale: Mapped[CustomerWholesale] = relationship(
+        argument="CustomerWholesale",
         uselist=False,
         cascade="all, delete-orphan",
     )

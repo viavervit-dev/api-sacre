@@ -13,8 +13,6 @@
         "src/api/settings/models.py",
         "alembic/*"
     ],
-    "python.analysis.inlayHints.variableTypes": true,
-    "python.analysis.inlayHints.functionReturnTypes": true,
     "mypy-type-checker.args": [
         "--config-file=pyproject.toml"
     ],

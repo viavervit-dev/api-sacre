@@ -13,8 +13,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import get_products_by_wholesaler_service
-from src.api.modules.inventory.dto import PrivateReadProductDTO
+from src.api.modules.inventory.dependencies import products_by_wholesaler_service
+from src.api.modules.inventory.dto import ReadProductPrivateDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.get_products_wholesaler import (
     RetrieveProductsWholesalerService,
@@ -34,7 +34,7 @@ require_admin = UserPermissionChecker(
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de productos obtenida exitosamente.",
-            "model": Response[PaginatedData[PrivateReadProductDTO]],
+            "model": Response[PaginatedData[ReadProductPrivateDTO]],
             "content": {
                 "application/json": {
                     "examples": {
@@ -120,9 +120,7 @@ async def get_products_by_wholesaler(
             description="El ID del cliente mayorista del cual se obtendrán los productos.",
         ),
     ],
-    service: Annotated[
-        RetrieveProductsWholesalerService, Depends(get_products_by_wholesaler_service)
-    ],
+    service: Annotated[RetrieveProductsWholesalerService, Depends(products_by_wholesaler_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,
@@ -134,7 +132,7 @@ async def get_products_by_wholesaler(
         le=api_parameters.pagination_limit,
         ge=1,
     ),
-) -> Response[PaginatedData[PrivateReadProductDTO]]:
+) -> Response[PaginatedData[ReadProductPrivateDTO]]:
     """
     Permite consultar el listado de productos exclusivos asociados a un cliente mayorista
     específico con soporte para paginación y ordenamiento cronológico descendente.

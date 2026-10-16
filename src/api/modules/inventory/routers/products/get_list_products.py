@@ -12,8 +12,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import get_retrieve_list_products_service
-from src.api.modules.inventory.dto import PrivateReadProductDTO, PublicReadProductDTO
+from src.api.modules.inventory.dependencies import retrieve_list_products_service
+from src.api.modules.inventory.dto import ReadProductPrivateDTO, ReadProductPublicDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.get_list_products import (
     RetrieveListProductsService,
@@ -39,7 +39,7 @@ require_admin = UserOptionalPermissionChecker(
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de productos obtenida exitosamente.",
-            "model": Response[PaginatedData[PrivateReadProductDTO | PublicReadProductDTO]],
+            "model": Response[PaginatedData[ReadProductPublicDTO | ReadProductPrivateDTO]],
             "content": {
                 "application/json": {
                     "examples": {
@@ -153,7 +153,7 @@ require_admin = UserOptionalPermissionChecker(
 )
 async def get_list_products(
     user: Annotated[User | None, Depends(require_admin)],
-    service: Annotated[RetrieveListProductsService, Depends(get_retrieve_list_products_service)],
+    service: Annotated[RetrieveListProductsService, Depends(retrieve_list_products_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,
@@ -165,7 +165,7 @@ async def get_list_products(
         le=api_parameters.pagination_limit,
         ge=1,
     ),
-) -> Response[PaginatedData[PrivateReadProductDTO | PublicReadProductDTO]]:
+) -> Response[PaginatedData[ReadProductPublicDTO | ReadProductPrivateDTO]]:
     """
     Permite consultar el listado de productos almacenados con soporte para paginación y
     ordenamiento cronológico descendente. La información y los filtros aplicados se adaptan
@@ -200,16 +200,8 @@ async def get_list_products(
          sensibles de negocio al DTO de lectura.
     """
 
-    status: bool | None = True
-    private = False
-
-    if user and user.role == UserRoles.ADMINISTRATOR.value:
-        private = True
-        status = None
-
     products, total_items = await service.get_list_products(
-        private=private,
-        status=status,
+        user=user,
         offset=offset,
         limit=limit,
     )

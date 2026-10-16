@@ -22,7 +22,9 @@ class AuthAdminService:
 
         password = credentials.password
         email = credentials.email
-        instance = await self.__user_repo.get_user(role=UserRoles.ADMINISTRATOR.value, email=email)
+        instance = await self.__user_repo.get_user(
+            filters={"email": email, "role": UserRoles.ADMINISTRATOR.value}
+        )
 
         if not instance:
             raise AuthenticationFailed(message=ExceptionErrorMessages.CREDENTIALS_INVALID.value)

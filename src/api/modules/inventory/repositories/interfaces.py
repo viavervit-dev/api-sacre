@@ -62,26 +62,41 @@ class IProductRepository(ABC):
     """Contrato de persistencia para operaciones sobre productos (`inventory.products`)."""
 
     @abstractmethod
-    async def get_products(
-        self,
-        offset: int,
-        limit: int,
-        status: bool | None = None,
-    ) -> tuple[Sequence[Product], int]:
-        """Obtiene una lista paginada de productos y el total de registros encontrados."""
+    async def get_product_by_id(self, id: UUID) -> Product | None:
+        """Obtiene un producto por su identificador único."""
 
         pass
 
     @abstractmethod
-    async def get_product(self, id: UUID) -> Product | None:
-        """Obtiene un producto por su identificador único."""
+    async def get_products_public_catalog(
+        self,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[Product], int]:
+        """
+        Obtiene una lista paginada de productos del catálogo público y el total de registros
+        encontrados.
+        """
+
+        pass
+
+    @abstractmethod
+    async def get_products_private_catalog(
+        self,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[Product], int]:
+        """
+        Obtiene una lista paginada de productos del catálogo privado y el total de registros
+        encontrados.
+        """
 
         pass
 
     @abstractmethod
     async def get_products_by_wholesaler(
         self,
-        wholesaler_id: UUID,
+        products_id: list[UUID],
         offset: int,
         limit: int,
     ) -> tuple[Sequence[Product], int]:

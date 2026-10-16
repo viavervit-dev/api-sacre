@@ -22,7 +22,7 @@ class Admin(ModelBase):
     )
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.users.id"),
-        doc=AdminEntity.ID_USER_DESCRIPTION.value,
+        doc="Identificador único de la cuenta de usuario vinculada a este perfil.",
         unique=True,
         nullable=False,
     )

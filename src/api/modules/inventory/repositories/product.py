@@ -15,58 +15,95 @@ class ProductRepository(IProductRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db
 
-    async def get_products(
-        self,
-        offset: int,
-        limit: int,
-        status: bool | None = None,
-    ) -> tuple[Sequence[Product], int]:
-
-        # Total para metadatos de paginación
-        count_stmt = select(func.count(Product.id)).where(Product.wholesaler_id.is_(None))
-
-        if status is not None:
-            count_stmt = count_stmt.where(Product.status == status)
-
-        total_items = await self.__db.scalar(count_stmt) or 0
-
-        if total_items == 0:
-            return [], 0
-
-        # Registros paginados
-        stmt = select(Product).where(Product.wholesaler_id.is_(None))
-
-        if status is not None:
-            stmt = stmt.where(Product.status == status)
-
-        stmt = stmt.order_by(Product.date_joined.desc()).offset(offset).limit(limit)
-        result = await self.__db.scalars(stmt)
-
-        return result.all(), total_items
-
-    async def get_product(self, id: UUID) -> Product | None:
+    async def get_product_by_id(self, id: UUID) -> Product | None:
 
         instance = await self.__db.get(Product, id)
 
         return instance
 
-    async def get_products_by_wholesaler(
+    async def get_products_public_catalog(
         self,
-        wholesaler_id: UUID,
         offset: int,
         limit: int,
     ) -> tuple[Sequence[Product], int]:
 
         # Total para metadatos de paginación
-        count_stmt = select(func.count(Product.id)).where(Product.wholesaler_id == wholesaler_id)
+        count_stmt = select(func.count(Product.id)).where(
+            Product.exclusive == False,  # noqa: E712
+            Product.status == True,  # noqa: E712
+        )
+
+        total_items = await self.__db.scalar(count_stmt) or 0
+
+        if total_items == 0:
+            return [], 0
+
+        # Paginación y ordenamiento
+        stmt = (
+            select(Product)
+            .where(
+                Product.exclusive == False,  # noqa: E712
+                Product.status == True,  # noqa: E712
+            )
+            .order_by(Product.date_joined.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.__db.scalars(stmt)
+
+        return result.all(), total_items
+
+    async def get_products_private_catalog(
+        self,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[Product], int]:
+
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Product.id)).where(Product.exclusive == False)  # noqa: E712
+
+        total_items = await self.__db.scalar(count_stmt) or 0
+
+        if total_items == 0:
+            return [], 0
+
+        # Paginación y ordenamiento
+        stmt = (
+            select(Product)
+            .where(Product.exclusive == False)  # noqa: E712
+            .order_by(Product.date_joined.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.__db.scalars(stmt)
+
+        return result.all(), total_items
+
+    async def get_products_by_wholesaler(
+        self,
+        products_id: list[UUID],
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[Product], int]:
+
+        if not products_id:
+            return [], 0
+
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Product.id)).where(Product.id.in_(products_id))
         total_items = await self.__db.scalar(count_stmt) or 0
 
         if total_items == 0:
             return [], 0
 
         # Registros paginados
-        stmt = select(Product).where(Product.wholesaler_id == wholesaler_id)
-        stmt = stmt.order_by(Product.date_joined.desc()).offset(offset).limit(limit)
+        stmt = (
+            select(Product)
+            .where(Product.id.in_(products_id))
+            .order_by(Product.date_joined.desc())
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.__db.scalars(stmt)
 
         return result.all(), total_items

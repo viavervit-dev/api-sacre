@@ -9,8 +9,8 @@ class ProductPricingMixin:
     @staticmethod
     def _calculate_sale_price(
         price_neto: Decimal,
-        iva: Decimal,
         profit_margin: Decimal,
+        iva: Decimal,
     ) -> Decimal:
         """
         Calcula el precio de venta redondeado aplicando el margen de beneficio y el IVA.
@@ -23,6 +23,25 @@ class ProductPricingMixin:
         raw_price_sale = raw_price_sale * (Decimal("1.0000") + iva)
 
         return raw_price_sale.quantize(
+            exp=TWO_DECIMAL_PLACES,
+            rounding=ROUND_HALF_UP,
+        )
+
+    @staticmethod
+    def _calculate_tax_amount(
+        price_sale: Decimal,
+        iva: Decimal,
+    ) -> Decimal:
+        """
+        Calcula el monto del IVA sobre el precio de venta.
+
+        Returns:
+            Decimal con el monto del IVA.
+        """
+
+        tax_amount = price_sale * iva
+
+        return tax_amount.quantize(
             exp=TWO_DECIMAL_PLACES,
             rounding=ROUND_HALF_UP,
         )

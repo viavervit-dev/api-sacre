@@ -1,8 +1,10 @@
+import secrets
 from typing import Any
 
 from fastapi.exceptions import RequestValidationError
 
-from src.api.modules.auth.constants import UserEntity
+from src.api.modules.auth.constants import UserEntity, UserRoles
+from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.users.constants import CustomerWholesaleEntity
 from src.api.modules.users.dto import CreateCustomerWholesaleDTO, ReadCustomerWholesaleDTO
 from src.api.modules.users.repositories.interfaces import ICustomerWholesaleRepository
@@ -11,8 +13,13 @@ from src.api.modules.users.repositories.interfaces import ICustomerWholesaleRepo
 class CreateCustomerWholesaleService:
     """Servicio encargado de la validación de negocio y registro de clientes mayoristas."""
 
-    def __init__(self, customer_wholesale_repo: ICustomerWholesaleRepository) -> None:
+    def __init__(
+        self,
+        customer_wholesale_repo: ICustomerWholesaleRepository,
+        user_repo: IUserRepository,
+    ) -> None:
         self.__customer_wholesale_repo = customer_wholesale_repo
+        self.__user_repo = user_repo
 
     async def create_customer_wholesale(
         self,
@@ -29,19 +36,27 @@ class CreateCustomerWholesaleService:
         wholesale_data = data.model_dump()
         await self.__run_business_validations(data=wholesale_data)
 
-        # Creamos el usuario
-        instance = await self.__customer_wholesale_repo.create_customer_wholesale(
-            data=wholesale_data
+        # Creamos el usuario base con su rol y permisos
+        user_instance = await self.__user_repo.create_user(
+            email=wholesale_data.pop("email"),
+            password=secrets.token_urlsafe(nbytes=12),
+            role=UserRoles.CUSTOMER_WHOLESALE.value,
         )
 
+        # Creamos el usuario
+        profile_instance = await self.__customer_wholesale_repo.create_customer_wholesale(
+            data=wholesale_data
+        )
+        user_instance.customer_wholesale = profile_instance
+
         return ReadCustomerWholesaleDTO.model_construct(
-            id=instance.id,
-            email=instance.email,
-            name_or_company_name=instance.name_or_company_name,
-            ruc=instance.ruc,
-            phone=instance.phone,
-            location=instance.location,
-            extra_contacts=instance.extra_contacts,
+            id=user_instance.id,
+            email=user_instance.email,
+            name_or_company_name=profile_instance.name_or_company_name,
+            ruc=profile_instance.ruc,
+            phone=profile_instance.phone,
+            location=profile_instance.location,
+            extra_contacts=profile_instance.extra_contacts,
         )
 
     async def __run_business_validations(self, data: dict[str, Any]) -> None:
@@ -56,9 +71,7 @@ class CreateCustomerWholesaleService:
 
         # Validar que el correo electrónico no esté registrado en la base de datos
         if data.get("email"):
-            exists = await self.__customer_wholesale_repo.exists_customer_wholesale(
-                filters={"email": data["email"]}
-            )
+            exists = await self.__user_repo.exists_user(filters={"email": data["email"]})
 
             if exists:
                 errors.append(

@@ -21,7 +21,7 @@ class DeleteProductService:
             ResourceNotFound: Si el producto no existe en la base de datos.
         """
 
-        instance = await self.__product_repo.get_product(id=product_id)
+        instance = await self.__product_repo.get_product_by_id(id=product_id)
 
         if not instance:
             raise ResourceNotFound()

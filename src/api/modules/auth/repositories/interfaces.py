@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import Any, Literal, overload
+from typing import Any
 from uuid import UUID
 
 from src.api.modules.auth.models.user import User
@@ -9,33 +9,25 @@ from src.api.modules.auth.models.user import User
 class IUserRepository(ABC):
     """Contrato de persistencia para operaciones sobre usuarios (`auth.users`)."""
 
-    @overload
-    async def get_user(
-        self,
-        role: Literal["customer"],
-        id: UUID | None = None,
-        email: str | None = None,
-        load_permissions: bool = True,
-    ) -> User | None: ...
-
-    @overload
-    async def get_user(
-        self,
-        role: Literal["admin"],
-        id: UUID | None = None,
-        email: str | None = None,
-        load_permissions: bool = True,
-    ) -> User | None: ...
-
     @abstractmethod
     async def get_user(
         self,
-        role: str,
-        id: UUID | None = None,
-        email: str | None = None,
+        filters: dict[str, Any],
         load_permissions: bool = True,
     ) -> User | None:
-        """Obtiene un usuario por ID o email, cargando su perfil según el rol y sus permisos."""
+        """Obtiene un usuario aplicando filtros dinámicos y cargando su perfil y permisos."""
+
+        pass
+
+    @abstractmethod
+    async def get_list_users(
+        self,
+        offset: int,
+        limit: int,
+        filters: dict[str, Any],
+        load_permissions: bool = True,
+    ) -> tuple[Sequence[User], int]:
+        """Obtiene una lista paginada y ordenada de usuarios junto con el total de registros."""
 
         pass
 

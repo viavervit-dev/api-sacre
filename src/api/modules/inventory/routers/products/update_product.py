@@ -14,8 +14,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import get_update_product_service
-from src.api.modules.inventory.dto import PrivateReadProductDTO, UpdateProductDTO
+from src.api.modules.inventory.dependencies import update_product_service
+from src.api.modules.inventory.dto import ReadProductPrivateDTO, UpdateProductPublicDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.update_product import UpdateProductService
 
@@ -31,7 +31,7 @@ require_admin = UserPermissionChecker(
     response_description="**(OK)** Producto actualizado exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=UpdateProductDTO),
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=UpdateProductPublicDTO),
         status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
@@ -47,7 +47,7 @@ require_admin = UserPermissionChecker(
 )
 async def update_product(
     user: Annotated[User, Depends(require_admin)],
-    data: UpdateProductDTO,
+    data: UpdateProductPublicDTO,
     product_id: Annotated[
         UUID,
         Path(
@@ -55,8 +55,8 @@ async def update_product(
             description="El identificador único en formato UUID v4.",
         ),
     ],
-    service: Annotated[UpdateProductService, Depends(get_update_product_service)],
-) -> Response[PrivateReadProductDTO]:
+    service: Annotated[UpdateProductService, Depends(update_product_service)],
+) -> Response[ReadProductPrivateDTO]:
     """
     Permite modificar de forma parcial los datos de un producto. Ejecuta validaciones
     sintácticas y comprobaciones de unicidad en la base de datos para prevenir duplicados.

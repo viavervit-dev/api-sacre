@@ -2,16 +2,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from sqlalchemy import (
-    ARRAY,
-    Boolean,
-    CheckConstraint,
-    DateTime,
-    ForeignKey,
-    Integer,
-    Numeric,
-    String,
-)
+from sqlalchemy import ARRAY, Boolean, CheckConstraint, DateTime, Index, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.api.modules.inventory.constants import CategoryEntity, ProductEntity
@@ -24,8 +15,8 @@ PRICE_SALE_MAX = ProductEntity.PRICE_SALE_MAX_VALUE.value
 PRICE_SALE_MIN = ProductEntity.PRICE_SALE_MIN_VALUE.value
 PROFIT_MAX = ProductEntity.PROFIT_MARGIN_MAX_VALUE.value
 PROFIT_MIN = ProductEntity.PROFIT_MARGIN_MIN_VALUE.value
-IVA_MAX = ProductEntity.IVA_MAX_VALUE.value
-IVA_MIN = ProductEntity.IVA_MIN_VALUE.value
+TAX_AMOUNT_MAX_VALUE = ProductEntity.TAX_AMOUNT_MAX_VALUE.value
+TAX_AMOUNT_MIN_VALUE = ProductEntity.TAX_AMOUNT_MIN_VALUE.value
 STOCK_TOTAL_MAX = ProductEntity.STOCK_TOTAL_MAX_VALUE.value
 STOCK_TOTAL_MIN = ProductEntity.STOCK_TOTAL_MIN_VALUE.value
 STOCK_HAND_MAX = ProductEntity.STOCK_HAND_MAX_VALUE.value
@@ -38,19 +29,16 @@ class Product(ModelBase):
     """Modelo ORM para la gestión de productos y artículos del inventario."""
 
     __tablename__ = "products"
-    __table_args__ = {"schema": "inventory"}
+    __table_args__ = (
+        Index("ix_products_exclusive_status_date", "exclusive", "status", "date_joined"),
+        {"schema": "inventory"},
+    )
 
     id: Mapped[UUID] = mapped_column(
         doc="Identificador único (UUID v4).",
         default=uuid4,
         primary_key=True,
         nullable=False,
-    )
-    wholesaler_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey(column="users.customer_wholesale.id", ondelete="CASCADE"),
-        doc="ID del cliente mayorista al que se le vende el producto.",
-        nullable=True,
-        index=True,
     )
     name: Mapped[str] = mapped_column(
         String(length=ProductEntity.NAME_MAX_LENGTH.value),
@@ -117,17 +105,17 @@ class Product(ModelBase):
         doc=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
         nullable=False,
     )
-    iva: Mapped[Decimal] = mapped_column(
+    tax_amount: Mapped[Decimal] = mapped_column(
         Numeric(
-            precision=ProductEntity.IVA_MAX_DIGITS.value,
-            scale=ProductEntity.IVA_DECIMAL_PLACES.value,
+            precision=ProductEntity.TAX_AMOUNT_MAX_DIGITS.value,
+            scale=ProductEntity.TAX_AMOUNT_DECIMAL_PLACES.value,
             asdecimal=True,
         ),
         CheckConstraint(
-            sqltext=f"iva >= {IVA_MIN} AND iva <= {IVA_MAX}",
-            name="iva_range",
+            sqltext=f"tax_amount >= {TAX_AMOUNT_MIN_VALUE} AND tax_amount <= {TAX_AMOUNT_MAX_VALUE}",  # noqa: E501
+            name="tax_amount_range",
         ),
-        doc=ProductEntity.IVA_DESCRIPTION.value,
+        doc=ProductEntity.TAX_AMOUNT_DESCRIPTION.value,
         nullable=False,
     )
     stock_total: Mapped[int] = mapped_column(
@@ -161,7 +149,11 @@ class Product(ModelBase):
         Boolean,
         doc=ProductEntity.STATUS_DESCRIPTION.value,
         nullable=False,
-        index=True,
+    )
+    exclusive: Mapped[bool] = mapped_column(
+        Boolean,
+        doc=ProductEntity.EXCLUSIVE_DESCRIPTION.value,
+        nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

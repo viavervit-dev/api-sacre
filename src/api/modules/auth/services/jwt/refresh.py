@@ -45,8 +45,10 @@ class RefreshTokenService:
             raise InvalidJWT(message=ExceptionErrorMessages.REFRESH_JWT_INVALID.value)  # noqa
 
         instance = await self.__user_repo.get_user(
-            role=refresh_token_payload["user_role"],
-            id=UUID(refresh_token_payload["sub"]),
+            filters={
+                "id": UUID(refresh_token_payload["sub"]),
+                "role": refresh_token_payload["user_role"],
+            }
         )
 
         if not instance:

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
@@ -26,24 +25,6 @@ class ICustomerRepository(ABC):
 
 class ICustomerWholesaleRepository(ABC):
     """Contrato de persistencia para el perfil de cliente mayorista `users.customer_wholesale`."""
-
-    @abstractmethod
-    async def get_customers_wholesale(
-        self,
-        offset: int,
-        limit: int,
-    ) -> tuple[Sequence[CustomerWholesale], int]:
-        """
-        Obtiene una lista paginada de clientes mayoristas y el total de registros encontrados.
-        """
-
-        pass
-
-    @abstractmethod
-    async def get_customer_wholesale(self, id: UUID) -> CustomerWholesale | None:
-        """Obtiene un cliente mayorista por su identificador único."""
-
-        pass
 
     @abstractmethod
     async def create_customer_wholesale(self, data: dict[str, Any]) -> CustomerWholesale:

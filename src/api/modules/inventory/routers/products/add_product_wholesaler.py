@@ -14,8 +14,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import get_add_product_wholesale_service
-from src.api.modules.inventory.dto import CreateProductDTO, ReadProductWholesalerDTO
+from src.api.modules.inventory.dependencies import add_product_wholesale_service
+from src.api.modules.inventory.dto import CreateProductWholesaleDTO, ReadProductPrivateDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.add_product_wholesaler import (
     AddProductWholesaleService,
@@ -33,7 +33,7 @@ require_admin = UserPermissionChecker(
     response_description="**(CREATED)** Producto agregado exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateProductDTO),
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateProductWholesaleDTO),
         status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
@@ -49,7 +49,7 @@ require_admin = UserPermissionChecker(
 )
 async def add_product_wholesaler(
     user: Annotated[User, Depends(require_admin)],
-    data: CreateProductDTO,
+    data: CreateProductWholesaleDTO,
     wholesaler_id: Annotated[
         UUID,
         Path(
@@ -57,8 +57,8 @@ async def add_product_wholesaler(
             description="El ID del cliente mayorista al que se le asignará el producto.",
         ),
     ],
-    service: Annotated[AddProductWholesaleService, Depends(get_add_product_wholesale_service)],
-) -> Response[ReadProductWholesalerDTO]:
+    service: Annotated[AddProductWholesaleService, Depends(add_product_wholesale_service)],
+) -> Response[ReadProductPrivateDTO]:
     """
     Permite crear un producto exclusivo para un cliente mayorista a partir de los datos
     proporcionados. Ejecuta validaciones sintácticas y comprobaciones de unicidad en la base
@@ -86,15 +86,8 @@ async def add_product_wholesaler(
         - **URLs de Imágenes:** Comprueba que cada URL de la lista sea válida.
         - **Categorías:** Comprueba que cada una de las categorías indicadas exista
          previamente en la base de datos.
-    5. **Cálculos y Transformaciones:**
-        - **Precio de Venta (`price_sale`):** Se calcula automáticamente mediante la fórmula:
-         `price_sale = round_half_up(price_neto * (1 + profit_margin) * (1 + iva), 2)`.
-        - **Estado inicial (`status`):** Se establece en `True` si `stock_total > 0`;
-         en caso contrario, se define en `False`.
-        - **Stocks auxiliares:** Inicializa `stock_hand` en `0` y `stock_sale` con `stock_total`.
-        - **Categorías:** Incrementa en `1` el contador de productos (`product_count`)
-         de cada categoría asignada.
-        - **Asignación:** Vincula el producto al mayorista mediante `wholesaler_id`.
+    5. **Cálculos:**
+        - Se calcula automáticamente `price_sale` y `tax_amount`.
     6. **Persistencia:**
         - Guarda el registro en la base de datos.
     """

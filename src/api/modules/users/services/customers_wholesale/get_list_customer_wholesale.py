@@ -1,12 +1,13 @@
+from src.api.modules.auth.constants import UserRoles
+from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.users.dto import ReadCustomerWholesaleDTO
-from src.api.modules.users.repositories.interfaces import ICustomerWholesaleRepository
 
 
 class RetrieveListCustomerWholesaleService:
     """Servicio encargado de la consulta y serialización de clientes mayoristas."""
 
-    def __init__(self, customer_wholesale_repo: ICustomerWholesaleRepository) -> None:
-        self.__customer_wholesale_repo = customer_wholesale_repo
+    def __init__(self, user_repo: IUserRepository) -> None:
+        self.__user_repo = user_repo
 
     async def get_customers_wholesale(
         self,
@@ -15,28 +16,27 @@ class RetrieveListCustomerWholesaleService:
     ) -> tuple[list[ReadCustomerWholesaleDTO], int]:
         """Obtiene una lista paginada de clientes mayoristas y el total de registros."""
 
-        (
-            customers_wholesale,
-            total_items,
-        ) = await self.__customer_wholesale_repo.get_customers_wholesale(
+        users, total_items = await self.__user_repo.get_list_users(
+            filters={"role": UserRoles.CUSTOMER_WHOLESALE.value},
+            load_permissions=False,
             offset=offset,
             limit=limit,
         )
 
-        if not customers_wholesale:
+        if not users:
             return [], 0
 
         result = []
 
-        for customer_wholesale in customers_wholesale:
+        for user in users:
             dto = ReadCustomerWholesaleDTO.model_construct(
-                id=customer_wholesale.id,
-                email=customer_wholesale.email,
-                name_or_company_name=customer_wholesale.name_or_company_name,
-                ruc=customer_wholesale.ruc,
-                phone=customer_wholesale.phone,
-                location=customer_wholesale.location,
-                extra_contacts=customer_wholesale.extra_contacts,
+                id=user.id,
+                email=user.email,
+                name_or_company_name=user.customer_wholesale.name_or_company_name,
+                ruc=user.customer_wholesale.ruc,
+                phone=user.customer_wholesale.phone,
+                location=user.customer_wholesale.location,
+                extra_contacts=user.customer_wholesale.extra_contacts,
             )
             result.append(dto)
 

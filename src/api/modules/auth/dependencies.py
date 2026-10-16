@@ -92,7 +92,7 @@ async def get_user(
     user_id = UUID(payload["sub"])
 
     # Buscamos el usuario
-    instance = await user_repo.get_user(role=payload["user_role"], id=user_id)
+    instance = await user_repo.get_user(filters={"id": user_id, "role": payload["user_role"]})
 
     if not instance:
         raise UserNotFound()
@@ -135,7 +135,7 @@ async def get_user_optional(
     user_id = UUID(payload["sub"])
 
     # Buscamos el usuario
-    instance = await user_repo.get_user(role=payload["user_role"], id=user_id)
+    instance = await user_repo.get_user(filters={"id": user_id, "role": payload["user_role"]})
 
     if not instance:
         raise UserNotFound()

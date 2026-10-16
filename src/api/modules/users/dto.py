@@ -1,14 +1,14 @@
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from src.api.common.exceptions import DTOValidationErrorMessages
 from src.api.modules.auth.constants import UserEntity
+from src.api.modules.countries.dto import LocationEcuadorDTO, ReadLocationEcuadorDTO
 from src.api.modules.users.constants import (
     CustomerEntity,
     CustomerWholesaleEntity,
     DocumentTypesCustomer,
-    Ecuador,
 )
 
 
@@ -180,99 +180,6 @@ class ReadExtraContactsDTO(BaseModel):
     )
 
 
-class LocationDTO(BaseModel):
-    """DTO para los datos de ubicación geográfica y dirección."""
-
-    model_config = ConfigDict(use_enum_values=True)
-
-    country: Ecuador = Field(
-        description="Nombre del país.",
-        examples=Ecuador.values(),
-        json_schema_extra={
-            "x-validation-errors": [
-                DTOValidationErrorMessages.MISSING.value,
-                DTOValidationErrorMessages.VALUE_ERROR.value,
-                DTOValidationErrorMessages.ENUM.value,
-            ]
-        },
-    )
-    province: str = Field(
-        max_length=100,
-        description="Nombre oficial de la provincia.",
-        examples=["Pichincha"],
-        json_schema_extra={
-            "x-validation-errors": [
-                DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
-                DTOValidationErrorMessages.VALUE_ERROR.value,
-            ]
-        },
-    )
-    canton: str = Field(
-        max_length=100,
-        description="Nombre oficial del cantón.",
-        examples=["Quito"],
-        json_schema_extra={
-            "x-validation-errors": [
-                DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
-                DTOValidationErrorMessages.VALUE_ERROR.value,
-            ]
-        },
-    )
-    city: str = Field(
-        max_length=100,
-        description="Nombre oficial de la ciudad o localidad.",
-        examples=["Zámbiza"],
-        json_schema_extra={
-            "x-validation-errors": [
-                DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
-                DTOValidationErrorMessages.VALUE_ERROR.value,
-            ]
-        },
-    )
-    address: str = Field(
-        max_length=100,
-        description="Dirección de entrega.",
-        examples=["Manzana 12 casa 32"],
-        json_schema_extra={
-            "x-validation-errors": [
-                DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
-                DTOValidationErrorMessages.VALUE_ERROR.value,
-            ]
-        },
-    )
-
-
-class ReadLocationDTO(BaseModel):
-    """DTO de lectura para los datos de ubicación geográfica y dirección."""
-
-    model_config = ConfigDict(use_enum_values=True)
-
-    country: Ecuador = Field(
-        description="Nombre del país.",
-        examples=Ecuador.values(),
-    )
-    province: str = Field(
-        description="Nombre oficial de la provincia.",
-        examples=["Pichincha"],
-    )
-    canton: str = Field(
-        description="Nombre oficial del cantón.",
-        examples=["Quito"],
-    )
-    city: str = Field(
-        description="Nombre oficial de la ciudad o localidad.",
-        examples=["Zámbiza"],
-    )
-    address: str = Field(
-        description="Dirección de entrega.",
-        examples=["Manzana 12 casa 32"],
-    )
-
-
 class CreateCustomerWholesaleDTO(BaseModel):
     """DTO para el registro de un cliente mayorista."""
 
@@ -328,7 +235,7 @@ class CreateCustomerWholesaleDTO(BaseModel):
             ]
         },
     )
-    location: LocationDTO = Field(
+    location: LocationEcuadorDTO = Field(
         description=CustomerWholesaleEntity.LOCATION_DESCRIPTION.value,
         json_schema_extra={
             "x-validation-errors": [
@@ -407,7 +314,7 @@ class UpdateCustomerWholesaleDTO(BaseModel):
         },
         default=None,
     )
-    location: LocationDTO | None = Field(
+    location: LocationEcuadorDTO | None = Field(
         description=CustomerWholesaleEntity.LOCATION_DESCRIPTION.value,
         json_schema_extra={
             "x-validation-errors": [
@@ -452,7 +359,7 @@ class ReadCustomerWholesaleDTO(BaseModel):
         description=CustomerWholesaleEntity.PHONE_DESCRIPTION.value,
         examples=["+593 123456789"],
     )
-    location: ReadLocationDTO = Field(
+    location: ReadLocationEcuadorDTO = Field(
         description=CustomerWholesaleEntity.LOCATION_DESCRIPTION.value
     )
     extra_contacts: list[ReadExtraContactsDTO] | None = Field(

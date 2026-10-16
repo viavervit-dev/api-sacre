@@ -5,9 +5,10 @@ from uuid import UUID
 from fastapi.exceptions import RequestValidationError
 from pydantic import HttpUrl, TypeAdapter
 
+from src.api.common.constants import TAX_PERCENTAGE
 from src.api.common.exceptions import ResourceNotFound
-from src.api.modules.inventory.constants import ProductEntity, VatRatesProduct
-from src.api.modules.inventory.dto import PrivateReadProductDTO, UpdateProductDTO
+from src.api.modules.inventory.constants import ProductEntity
+from src.api.modules.inventory.dto import ReadProductPrivateDTO, UpdateProductPublicDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
@@ -29,9 +30,9 @@ class UpdateProductService(ProductPricingMixin):
 
     async def update_product(
         self,
-        data: UpdateProductDTO,
+        data: UpdateProductPublicDTO,
         product_id: UUID,
-    ) -> PrivateReadProductDTO:
+    ) -> ReadProductPrivateDTO:
         """
         Actualiza un producto aplicando validaciones de negocio y recálculo de precios.
 
@@ -41,7 +42,7 @@ class UpdateProductService(ProductPricingMixin):
         """
 
         product_data = data.model_dump(exclude_unset=True)
-        instance = await self.__product_repo.get_product(id=product_id)
+        instance = await self.__product_repo.get_product_by_id(id=product_id)
 
         if not instance:
             raise ResourceNotFound()
@@ -55,19 +56,21 @@ class UpdateProductService(ProductPricingMixin):
         # Calcular el precio de venta
         price_neto: Decimal | None = product_data.get("price_neto")
         profit_margin: Decimal | None = product_data.get("profit_margin")
-        iva: VatRatesProduct | None = product_data.get("iva")
         product_data["price_sale"] = self._calculate_sale_price(
             price_neto=price_neto or instance.price_neto,
-            iva=iva.value if iva else instance.iva,
             profit_margin=profit_margin or instance.profit_margin,
+            iva=TAX_PERCENTAGE,
+        )
+
+        # Calcular el monto del IVA
+        product_data["tax_amount"] = self._calculate_tax_amount(
+            price_sale=product_data["price_sale"],
+            iva=TAX_PERCENTAGE,
         )
 
         # Actualizar el producto en la base de datos
-        instance = await self.__product_repo.update_product(
-            data=product_data,
-            instance=instance,
-        )
-        product = PrivateReadProductDTO.model_construct(
+        instance = await self.__product_repo.update_product(data=product_data, instance=instance)
+        product = ReadProductPrivateDTO.model_construct(
             id=instance.id,
             name=instance.name,
             categories=instance.categories,
@@ -77,7 +80,7 @@ class UpdateProductService(ProductPricingMixin):
             price_neto=instance.price_neto,
             price_sale=instance.price_sale,
             profit_margin=instance.profit_margin,
-            iva=instance.iva,
+            tax_amount=instance.tax_amount,
             stock_total=instance.stock_total,
             stock_hand=instance.stock_hand,
             stock_sale=instance.stock_sale,

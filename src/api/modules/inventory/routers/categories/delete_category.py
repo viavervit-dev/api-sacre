@@ -14,7 +14,7 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import get_delete_category_service
+from src.api.modules.inventory.dependencies import delete_category_service
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.services.categories.delete_category import DeleteCategoryService
 
@@ -52,7 +52,7 @@ async def delete_category(
             description="El identificador único en formato UUID v4.",
         ),
     ],
-    service: Annotated[DeleteCategoryService, Depends(get_delete_category_service)],
+    service: Annotated[DeleteCategoryService, Depends(delete_category_service)],
 ) -> Response[dict[str, str]]:
     """
     Permite eliminar de forma permanente una categoría de productos. Antes de proceder con

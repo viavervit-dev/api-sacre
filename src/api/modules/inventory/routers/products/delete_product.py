@@ -14,7 +14,7 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import get_delete_product_service
+from src.api.modules.inventory.dependencies import delete_product_service
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.delete_product import DeleteProductService
 
@@ -52,7 +52,7 @@ async def delete_product(
             description="El identificador único en formato UUID v4.",
         ),
     ],
-    service: Annotated[DeleteProductService, Depends(get_delete_product_service)],
+    service: Annotated[DeleteProductService, Depends(delete_product_service)],
 ) -> Response[dict[str, str]]:
     """
     Permite eliminar de forma permanente un producto. Antes de proceder con el borrado, comprueba

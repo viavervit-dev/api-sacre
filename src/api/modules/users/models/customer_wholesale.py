@@ -2,7 +2,8 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import ARRAY, DateTime, ForeignKey, String
+from sqlalchemy import UUID as SQLAlchemyUUID
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -22,15 +23,20 @@ class CustomerWholesale(ModelBase):
         primary_key=True,
         nullable=False,
     )
-    name_or_company_name: Mapped[str] = mapped_column(
-        String(length=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_MAX_LENGTH.value),
-        doc=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey(column="auth.users.id"),
+        doc="Identificador único de la cuenta de usuario vinculada a este perfil.",
         nullable=False,
         unique=True,
     )
-    email: Mapped[str] = mapped_column(
-        String(length=CustomerWholesaleEntity.EMAIL_MAX_LENGTH.value),
-        doc=CustomerWholesaleEntity.EMAIL_DESCRIPTION.value,
+    products: Mapped[list[UUID]] = mapped_column(
+        ARRAY(item_type=SQLAlchemyUUID(as_uuid=True)),
+        doc=CustomerWholesaleEntity.PRODUCTS_DESCRIPTION.value,
+        nullable=False,
+    )
+    name_or_company_name: Mapped[str] = mapped_column(
+        String(length=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_MAX_LENGTH.value),
+        doc=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
         nullable=False,
         unique=True,
     )

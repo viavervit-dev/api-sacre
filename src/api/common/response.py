@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import TypeVar
 
 from pydantic import BaseModel, Field
@@ -25,5 +26,5 @@ class PaginationMeta(BaseModel):
 class PaginatedData[T](BaseModel):
     """Estructura del payload para respuestas con paginación."""
 
-    items: list[T] = Field(description="Lista de registros de la página actual.")
+    items: Sequence[T] = Field(description="Lista de registros de la página actual.")
     meta: PaginationMeta = Field(description="Información de la paginación.")

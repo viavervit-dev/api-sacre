@@ -3,8 +3,9 @@ from typing import Any
 from fastapi.exceptions import RequestValidationError
 from pydantic import HttpUrl, TypeAdapter
 
-from src.api.modules.inventory.constants import ProductEntity, VatRatesProduct
-from src.api.modules.inventory.dto import CreateProductDTO, PrivateReadProductDTO
+from src.api.common.constants import TAX_PERCENTAGE
+from src.api.modules.inventory.constants import ProductEntity
+from src.api.modules.inventory.dto import CreateProductPublicDTO, ReadProductPrivateDTO
 from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
     IProductRepository,
@@ -12,8 +13,11 @@ from src.api.modules.inventory.repositories.interfaces import (
 from src.api.modules.inventory.services.products.utils import ProductPricingMixin
 
 
-class CreateProductService(ProductPricingMixin):
-    """Servicio para la validación de negocio, cálculo de precios y creación de productos."""
+class CreateProductPublicService(ProductPricingMixin):
+    """
+    Servicio para la validación de negocio, cálculo de precios y creación de productos
+    para el catálogo público.
+    """
 
     def __init__(
         self,
@@ -23,9 +27,9 @@ class CreateProductService(ProductPricingMixin):
         self.__product_repo = product_repo
         self.__category_repo = category_repo
 
-    async def create_product(self, data: CreateProductDTO) -> PrivateReadProductDTO:
+    async def create_product(self, data: CreateProductPublicDTO) -> ReadProductPrivateDTO:
         """
-        Crea un nuevo producto aplicando reglas de negocio, stock y cálculo de precios.
+        Crea un nuevo producto para el catálogo público.
 
         Raises:
             RequestValidationError: Si falla alguna validacion de negocio.
@@ -34,9 +38,6 @@ class CreateProductService(ProductPricingMixin):
         # Validaciones de negocio
         product_data = data.model_dump()
         await self.__run_business_validations(data=product_data)
-
-        iva: VatRatesProduct = product_data["iva"]
-        product_data["iva"] = iva.value
 
         # Asignar el estado del producto según el stock total
         if product_data["stock_total"] > 0:
@@ -52,16 +53,23 @@ class CreateProductService(ProductPricingMixin):
         product_data["price_sale"] = self._calculate_sale_price(
             price_neto=product_data["price_neto"],
             profit_margin=product_data["profit_margin"],
-            iva=product_data["iva"],
+            iva=TAX_PERCENTAGE,
         )
 
-        # Inicializar el stock en mano y el stock de venta en 0
-        product_data["stock_hand"] = 0
+        # Calcular el monto del IVA
+        product_data["tax_amount"] = self._calculate_tax_amount(
+            price_sale=product_data["price_sale"],
+            iva=TAX_PERCENTAGE,
+        )
+
+        # Inicializar el stock en mano, el stock de venta y exclusividad
         product_data["stock_sale"] = product_data["stock_total"]
+        product_data["exclusive"] = False
+        product_data["stock_hand"] = 0
 
         instance = await self.__product_repo.create_product(data=product_data)
 
-        return PrivateReadProductDTO.model_construct(
+        return ReadProductPrivateDTO.model_construct(
             id=instance.id,
             name=instance.name,
             categories=instance.categories,
@@ -71,7 +79,7 @@ class CreateProductService(ProductPricingMixin):
             price_neto=instance.price_neto,
             price_sale=instance.price_sale,
             profit_margin=instance.profit_margin,
-            iva=instance.iva,
+            tax_amount=instance.tax_amount,
             stock_total=instance.stock_total,
             stock_hand=instance.stock_hand,
             stock_sale=instance.stock_sale,

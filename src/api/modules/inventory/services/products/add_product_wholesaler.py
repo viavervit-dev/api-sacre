@@ -4,9 +4,13 @@ from uuid import UUID
 from fastapi.exceptions import RequestValidationError
 from pydantic import HttpUrl, TypeAdapter
 
+from src.api.common.constants import TAX_PERCENTAGE
 from src.api.common.exceptions import ResourceNotFound
-from src.api.modules.inventory.constants import ProductEntity, VatRatesProduct
-from src.api.modules.inventory.dto import CreateProductDTO, ReadProductWholesalerDTO
+from src.api.modules.auth.constants import UserRoles
+from src.api.modules.auth.repositories.interfaces import IUserRepository
+from src.api.modules.inventory.constants import ProductEntity
+from src.api.modules.inventory.dto import CreateProductWholesaleDTO, ReadProductPrivateDTO
+from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
     IProductRepository,
@@ -21,18 +25,20 @@ class AddProductWholesaleService(ProductPricingMixin):
     def __init__(
         self,
         customer_wholesale_repo: ICustomerWholesaleRepository,
+        user_repo: IUserRepository,
         product_repo: IProductRepository,
         category_repo: ICategoryRepository,
     ) -> None:
         self.__customer_wholesale_repo = customer_wholesale_repo
+        self.__user_repo = user_repo
         self.__product_repo = product_repo
         self.__category_repo = category_repo
 
     async def add_product(
         self,
-        data: CreateProductDTO,
+        data: CreateProductWholesaleDTO,
         wholesaler_id: UUID,
-    ) -> ReadProductWholesalerDTO:
+    ) -> ReadProductPrivateDTO:
         """
         Crea un producto exclusivo asignado a un cliente mayorista.
 
@@ -42,19 +48,56 @@ class AddProductWholesaleService(ProductPricingMixin):
         """
 
         # Validar que el cliente mayorista exista en la base de datos
-        wholesale_instance = await self.__customer_wholesale_repo.get_customer_wholesale(
-            id=wholesaler_id
+        user = await self.__user_repo.get_user(
+            filters={
+                "id": wholesaler_id,
+                "role": UserRoles.CUSTOMER_WHOLESALE.value,
+            },
+            load_permissions=False,
         )
 
-        if not wholesale_instance:
+        if not user:
             raise ResourceNotFound()
+
+        # Creamos el producto
+        product = await self.__create_product(data=data)
+
+        # Agregamos el nuevo producto a la lista de productos existente
+        products_wholesale = user.customer_wholesale.products
+        products_wholesale.append(product.id)
+        _ = self.__customer_wholesale_repo.update_customer_wholesale(
+            instance=user.customer_wholesale,
+            data={"products": products_wholesale},
+        )
+
+        return ReadProductPrivateDTO.model_construct(
+            id=product.id,
+            name=product.name,
+            categories=product.categories,
+            description_short=product.description_short,
+            description_long=product.description_long,
+            images=product.images,
+            price_neto=product.price_neto,
+            price_sale=product.price_sale,
+            profit_margin=product.profit_margin,
+            tax_amount=product.tax_amount,
+            stock_total=product.stock_total,
+            stock_hand=product.stock_hand,
+            stock_sale=product.stock_sale,
+            status=product.status,
+        )
+
+    async def __create_product(self, data: CreateProductWholesaleDTO) -> Product:
+        """
+        Crea un nuevo producto para el catálogo público.
+
+        Raises:
+            RequestValidationError: Si falla alguna validacion de negocio.
+        """
 
         # Validaciones de negocio
         product_data = data.model_dump()
-        await self.__run_business_validations(product_data=product_data)
-
-        iva: VatRatesProduct = product_data["iva"]
-        product_data["iva"] = iva.value
+        await self.__run_business_validations(data=product_data)
 
         # Asignar el estado del producto según el stock total
         if product_data["stock_total"] > 0:
@@ -70,37 +113,23 @@ class AddProductWholesaleService(ProductPricingMixin):
         product_data["price_sale"] = self._calculate_sale_price(
             price_neto=product_data["price_neto"],
             profit_margin=product_data["profit_margin"],
-            iva=product_data["iva"],
+            iva=TAX_PERCENTAGE,
         )
 
-        # Inicializar el stock en mano y el stock de venta
-        product_data["stock_hand"] = 0
+        # Calcular el monto del IVA
+        product_data["tax_amount"] = self._calculate_tax_amount(
+            price_sale=product_data["price_sale"],
+            iva=TAX_PERCENTAGE,
+        )
+
+        # Inicializar el stock en mano, el stock de venta y exclusividad
         product_data["stock_sale"] = product_data["stock_total"]
+        product_data["exclusive"] = True
+        product_data["stock_hand"] = 0
 
-        # Asignar la llave foránea al diccionario
-        product_data["wholesaler_id"] = wholesaler_id
+        return await self.__product_repo.create_product(data=product_data)
 
-        product_instance = await self.__product_repo.create_product(data=product_data)
-
-        return ReadProductWholesalerDTO.model_construct(
-            id=product_instance.id,
-            name=product_instance.name,
-            categories=product_instance.categories,
-            description_short=product_instance.description_short,
-            description_long=product_instance.description_long,
-            images=product_instance.images,
-            price_neto=product_instance.price_neto,
-            price_sale=product_instance.price_sale,
-            profit_margin=product_instance.profit_margin,
-            iva=product_instance.iva,
-            stock_total=product_instance.stock_total,
-            stock_hand=product_instance.stock_hand,
-            stock_sale=product_instance.stock_sale,
-            status=product_instance.status,
-            wholesaler_id=product_instance.wholesaler_id,
-        )
-
-    async def __run_business_validations(self, product_data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: dict[str, Any]) -> None:
         """
         Ejecuta las validaciones de negocio previas al registro del producto.
 
@@ -111,7 +140,7 @@ class AddProductWholesaleService(ProductPricingMixin):
         errors = []
 
         # Validar que el nombre del producto no esté registrado en la base de datos
-        exists = await self.__product_repo.exists_product(filters={"name": product_data["name"]})
+        exists = await self.__product_repo.exists_product(filters={"name": data["name"]})
 
         if exists:
             errors.append(
@@ -125,7 +154,7 @@ class AddProductWholesaleService(ProductPricingMixin):
         # Validar que cada elemento de la lista de imágenes sea una URL válida
         adapter = TypeAdapter(HttpUrl)
 
-        for i, url in enumerate(product_data["images"]):
+        for i, url in enumerate(data["images"]):
             try:
                 adapter.validate_python(url)
             except Exception:
@@ -138,7 +167,7 @@ class AddProductWholesaleService(ProductPricingMixin):
                 )
 
         # Validar que cada categoría exista en la base de datos
-        for i, category in enumerate(product_data["categories"]):
+        for i, category in enumerate(data["categories"]):
             exists = await self.__category_repo.exists_category(filters={"name": category})
 
             if not exists:

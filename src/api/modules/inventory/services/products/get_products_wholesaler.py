@@ -1,25 +1,45 @@
 from uuid import UUID
 
-from src.api.modules.inventory.dto import PrivateReadProductDTO
+from src.api.common.exceptions import ResourceNotFound
+from src.api.modules.auth.constants import UserRoles
+from src.api.modules.auth.repositories.interfaces import IUserRepository
+from src.api.modules.inventory.dto import ReadProductPrivateDTO
 from src.api.modules.inventory.repositories.interfaces import IProductRepository
 
 
 class RetrieveProductsWholesalerService:
     """Servicio encargado de la consulta y serialización de productos de un mayorista."""
 
-    def __init__(self, product_repo: IProductRepository) -> None:
+    def __init__(self, user_repo: IUserRepository, product_repo: IProductRepository) -> None:
         self.__product_repo = product_repo
+        self.__user_repo = user_repo
 
     async def get_products_by_wholesaler(
         self,
         wholesaler_id: UUID,
         offset: int,
         limit: int,
-    ) -> tuple[list[PrivateReadProductDTO], int]:
-        """Obtiene una lista paginada de los productos exclusivos de un cliente mayorista."""
+    ) -> tuple[list[ReadProductPrivateDTO], int]:
+        """
+        Obtiene una lista paginada de los productos exclusivos de un cliente mayorista.
+
+        Raises:
+            ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
+        """
+
+        user = await self.__user_repo.get_user(
+            filters={
+                "id": wholesaler_id,
+                "role": UserRoles.CUSTOMER_WHOLESALE.value,
+            },
+            load_permissions=False,
+        )
+
+        if not user:
+            raise ResourceNotFound()
 
         products, total_items = await self.__product_repo.get_products_by_wholesaler(
-            wholesaler_id=wholesaler_id,
+            products_id=user.customer_wholesale.products,
             offset=offset,
             limit=limit,
         )
@@ -30,7 +50,7 @@ class RetrieveProductsWholesalerService:
         result = []
 
         for product in products:
-            dto = PrivateReadProductDTO.model_construct(
+            dto = ReadProductPrivateDTO.model_construct(
                 id=product.id,
                 name=product.name,
                 categories=product.categories,
@@ -40,7 +60,7 @@ class RetrieveProductsWholesalerService:
                 price_neto=product.price_neto,
                 price_sale=product.price_sale,
                 profit_margin=product.profit_margin,
-                iva=product.iva,
+                tax_amount=product.tax_amount,
                 stock_total=product.stock_total,
                 stock_hand=product.stock_hand,
                 stock_sale=product.stock_sale,

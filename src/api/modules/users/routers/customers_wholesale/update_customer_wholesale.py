@@ -14,7 +14,7 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.users.dependencies import get_update_customer_wholesale_service
+from src.api.modules.users.dependencies import update_customer_wholesale_service
 from src.api.modules.users.dto import ReadCustomerWholesaleDTO, UpdateCustomerWholesaleDTO
 from src.api.modules.users.models.customer_wholesale import CustomerWholesale
 from src.api.modules.users.services.customers_wholesale.update_customer_wholesale import (
@@ -59,7 +59,7 @@ async def update_customer_wholesale(
     ],
     service: Annotated[
         UpdateCustomerWholesaleService,
-        Depends(get_update_customer_wholesale_service),
+        Depends(update_customer_wholesale_service),
     ],
 ) -> Response[ReadCustomerWholesaleDTO]:
     """

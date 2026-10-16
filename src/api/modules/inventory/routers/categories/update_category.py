@@ -14,7 +14,7 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import get_update_category_service
+from src.api.modules.inventory.dependencies import update_category_service
 from src.api.modules.inventory.dto import PrivateReadCategoryDTO, UpdateCategoryDTO
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.services.categories.update_category import UpdateCategoryService
@@ -55,7 +55,7 @@ async def update_category(
             description="El identificador único en formato UUID v4.",
         ),
     ],
-    service: Annotated[UpdateCategoryService, Depends(get_update_category_service)],
+    service: Annotated[UpdateCategoryService, Depends(update_category_service)],
 ) -> Response[PrivateReadCategoryDTO]:
     """
     Permite modificar de forma parcial los datos de una categoría de productos. Ejecuta

@@ -5,6 +5,7 @@ class UserRoles(Enum):
     """Enumeración que define constantes relacionadas con los roles de usuario."""
 
     CUSTOMER = "customer"
+    CUSTOMER_WHOLESALE = "customer_wholesale"
     ADMINISTRATOR = "admin"
 
 

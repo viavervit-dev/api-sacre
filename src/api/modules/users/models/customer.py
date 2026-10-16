@@ -22,7 +22,7 @@ class Customer(ModelBase):
     )
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="auth.users.id"),
-        doc=CustomerEntity.ID_USER_DESCRIPTION.value,
+        doc="Identificador único de la cuenta de usuario vinculada a este perfil.",
         nullable=False,
         unique=True,
     )

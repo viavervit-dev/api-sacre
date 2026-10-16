@@ -12,7 +12,7 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.users.dependencies import get_create_customer_wholesale_service
+from src.api.modules.users.dependencies import create_customer_wholesale_service
 from src.api.modules.users.dto import CreateCustomerWholesaleDTO, ReadCustomerWholesaleDTO
 from src.api.modules.users.models.customer_wholesale import CustomerWholesale
 from src.api.modules.users.services.customers_wholesale.create_customer_wholesale import (
@@ -49,7 +49,7 @@ async def create_customer_wholesale(
     data: CreateCustomerWholesaleDTO,
     service: Annotated[
         CreateCustomerWholesaleService,
-        Depends(get_create_customer_wholesale_service),
+        Depends(create_customer_wholesale_service),
     ],
 ) -> Response[ReadCustomerWholesaleDTO]:
     """

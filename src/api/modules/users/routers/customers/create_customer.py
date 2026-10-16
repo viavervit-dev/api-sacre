@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, status
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_400, response_scheme_503
 from src.api.modules.auth.dto import ReadUserDTO
-from src.api.modules.users.dependencies import get_create_customer_service
+from src.api.modules.users.dependencies import create_customer_service
 from src.api.modules.users.dto import CreateCustomerDTO
 from src.api.modules.users.services.customers.create_customer import CreateCustomerService
 
@@ -22,7 +22,7 @@ create_customer_router = APIRouter(prefix="/users", tags=["Usuarios"])
     },
 )
 async def create_customer(
-    service: Annotated[CreateCustomerService, Depends(get_create_customer_service)],
+    service: Annotated[CreateCustomerService, Depends(create_customer_service)],
     data: CreateCustomerDTO,
 ) -> Response[ReadUserDTO]:
     """

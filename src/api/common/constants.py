@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 TWO_DECIMAL_PLACES = Decimal("0.01")
+TAX_PERCENTAGE = Decimal("0.1500")
 
 
 PAGINATION_OFFSET_DESCRIPTION = (
