@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.countries.models.country import Country
-from src.api.settings.database import close_db_pool, create_db_pool, get_db_session
+from src.api.settings.database import close_db_pool, create_db_pool, db_session
 
 
 def __read_fixture_data(file_path: Path) -> dict[str, Any]:
@@ -91,7 +91,7 @@ async def main() -> None:
     await create_db_pool()
 
     try:
-        async for db in get_db_session():
+        async for db in db_session():
             await run(db=db, fixtures_dir=fixtures_dir)
     except Exception as e:
         print(f"Ocurrió un error inesperado: {e}")

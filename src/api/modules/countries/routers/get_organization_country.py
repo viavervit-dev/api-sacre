@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Path, status
 
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_404, response_scheme_503
-from src.api.modules.countries.dependencies import get_retrieve_organization_country_service
+from src.api.modules.countries.dependencies import get_organization_country_service
 from src.api.modules.countries.dto import ReadAdministrativeStructureDTO
 from src.api.modules.countries.services.get_organization_country import (
     RetrieveOrganizationCountryService,
@@ -31,8 +31,7 @@ async def get_organization_country(
         ),
     ],
     service: Annotated[
-        RetrieveOrganizationCountryService,
-        Depends(get_retrieve_organization_country_service),
+        RetrieveOrganizationCountryService, Depends(get_organization_country_service)
     ],
 ) -> Response[ReadAdministrativeStructureDTO]:
     """

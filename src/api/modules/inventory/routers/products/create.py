@@ -15,7 +15,7 @@ from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import create_product_public_service
 from src.api.modules.inventory.dto import CreateProductPublicDTO, ReadProductPrivateDTO
 from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.create_product import CreateProductPublicService
+from src.api.modules.inventory.services.products.create import CreateProductPublicService
 
 create_product_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(

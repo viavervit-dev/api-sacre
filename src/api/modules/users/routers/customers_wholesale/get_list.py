@@ -12,11 +12,11 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.users.dependencies import retrieve_list_customer_wholesale_service
+from src.api.modules.users.dependencies import get_list_customer_wholesale_service
 from src.api.modules.users.dto import ReadCustomerWholesaleDTO
 from src.api.modules.users.models.customer_wholesale import CustomerWholesale
-from src.api.modules.users.services.customers_wholesale.get_list_customer_wholesale import (
-    RetrieveListCustomerWholesaleService,
+from src.api.modules.users.services.customers_wholesale.get_list import (
+    GetListCustomerWholesaleService,
 )
 from src.api.settings.parameters import api_parameters
 
@@ -112,8 +112,7 @@ require_admin = UserPermissionChecker(
 async def get_customers_wholesale(
     user: Annotated[User, Depends(require_admin)],
     service: Annotated[
-        RetrieveListCustomerWholesaleService,
-        Depends(retrieve_list_customer_wholesale_service),
+        GetListCustomerWholesaleService, Depends(get_list_customer_wholesale_service)
     ],
     offset: int = Query(
         title="Registros a omitir",

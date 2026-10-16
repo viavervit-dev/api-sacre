@@ -2,7 +2,7 @@ from src.api.modules.inventory.dto import PrivateReadCategoryDTO, PublicReadCate
 from src.api.modules.inventory.repositories.interfaces import ICategoryRepository
 
 
-class RetrieveListCategoryService:
+class GetListCategoryService:
     """Servicio encargado de la consulta y serialización de categorías de productos."""
 
     def __init__(self, category_repo: ICategoryRepository) -> None:

@@ -9,7 +9,7 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.models.permission import Group
 from src.api.modules.auth.models.user import User, UserGroup
 from src.api.modules.users.models.admin import Admin
-from src.api.settings.database import close_db_pool, create_db_pool, get_db_session
+from src.api.settings.database import close_db_pool, create_db_pool, db_session
 
 # Carga las variables de entorno
 load_dotenv()
@@ -82,7 +82,7 @@ async def main() -> None:
     await create_db_pool()
 
     try:
-        async for db in get_db_session():
+        async for db in db_session():
             await run(
                 db=db,
                 email=str(os.getenv(key="ADMIN_EMAIL")),

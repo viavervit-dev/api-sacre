@@ -7,7 +7,7 @@ from src.api.common.schema import (
     response_scheme_401,
     response_scheme_503,
 )
-from src.api.modules.auth.dependencies import get_jwt_admin_service
+from src.api.modules.auth.dependencies import jwt_auth_admin_service
 from src.api.modules.auth.dto import AdminCredentialsDTO
 from src.api.modules.auth.services.jwt.authenticate_admin import AuthAdminService
 from src.api.settings.parameters import api_parameters
@@ -29,9 +29,9 @@ jwt_admin_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
     },
 )
 async def authenticate_admin(
-    service: Annotated[AuthAdminService, Depends(get_jwt_admin_service)],
     credentials: AdminCredentialsDTO,
     response: Response,
+    service: Annotated[AuthAdminService, Depends(jwt_auth_admin_service)],
 ) -> None:
     """
     Permite validar las credenciales de un usuario administrador (correo y contraseña), comprueba

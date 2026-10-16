@@ -14,20 +14,20 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import delete_product_service
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.delete_product import DeleteProductService
+from src.api.modules.inventory.dependencies import delete_category_service
+from src.api.modules.inventory.models.category import Category
+from src.api.modules.inventory.services.categories.delete import DeleteCategoryService
 
-delete_product_router = APIRouter(prefix="/inventory", tags=["Inventario"])
+delete_category_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
-    permissions={UserRoles.ADMINISTRATOR.value: f"{Product.__tablename__}.delete"},
+    permissions={UserRoles.ADMINISTRATOR.value: f"{Category.__tablename__}.delete"},
 )
 
 
-@delete_product_router.delete(
-    path="/product/{product_id}/",
-    response_description="**(OK)** Producto eliminado exitosamente.",
+@delete_category_router.delete(
+    path="/category/{category_id}/",
+    response_description="**(OK)** Categoría de producto eliminada exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_401_UNAUTHORIZED: response_scheme_401(
@@ -39,52 +39,52 @@ require_admin = UserPermissionChecker(
         ),
         status.HTTP_403_FORBIDDEN: response_scheme_403(),
         status.HTTP_404_NOT_FOUND: response_scheme_404(),
-        status.HTTP_409_CONFLICT: response_scheme_409(product_has_reserved_stock=True),
+        status.HTTP_409_CONFLICT: response_scheme_409(category_has_dependencies=True),
         status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
-async def delete_product(
+async def delete_category(
     user: Annotated[User, Depends(require_admin)],
-    product_id: Annotated[
+    category_id: Annotated[
         UUID,
         Path(
-            title="ID del producto",
+            title="ID de la categoría del producto",
             description="El identificador único en formato UUID v4.",
         ),
     ],
-    service: Annotated[DeleteProductService, Depends(delete_product_service)],
+    service: Annotated[DeleteCategoryService, Depends(delete_category_service)],
 ) -> Response[dict[str, str]]:
     """
-    Permite eliminar de forma permanente un producto. Antes de proceder con el borrado, comprueba
-    la existencia del recurso y valida que no existan compromisos de stock activo que impidan
-    su eliminación.
+    Permite eliminar de forma permanente una categoría de productos. Antes de proceder con
+    el borrado, comprueba la existencia del recurso y valida que no cuente con productos
+    asociados para preservar la integridad del inventario.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).
-    - **Permiso requerido:** `products.delete`.
+    - **Permiso requerido:** `categories.delete`.
     - **Autenticación:** Cookies obligatorias `access_token` y `refresh_token` (JWT).
 
     ### Flujo de Ejecución
     1. **Autenticación y Autorización:**
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
-        - Verifica la vigencia de la sesión y la existencia del usuario.
-        - Comprueba que el usuario tenga rol de administrador y el permiso `products.delete`.
+        - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
+        - Comprueba que el usuario tenga rol de administrador y el permiso `categories.delete`.
     2. **Búsqueda del Recurso:**
-        - Consulta el producto en la base de datos por su `product_id`.
+        - Consulta la categoría en la base de datos por su `category_id`.
         - Si no se encuentra ningún registro, interrumpe el flujo con un error 404 (Not Found).
     3. **Validación de Reglas de Negocio:**
-        - Comprueba que el producto no posea stock en reserva (`stock_hand == 0`).
-        - Si existen unidades reservadas en carritos activos (`stock_hand > 0`), deniega la
-         eliminación para preservar la integridad del proceso de compra.
+        - Comprueba que la categoría no tenga productos vinculados (`product_count == 0`).
+        - Si posee artículos asociados (`product_count > 0`), deniega la eliminación para evitar
+         inconsistencias en el catálogo.
     4. **Persistencia:**
-        - Elimina el registro del producto de la base de datos.
+        - Elimina el registro de la categoría de la base de datos.
     """
 
-    await service.delete_product(product_id=product_id)
+    await service.delete_category(category_id=category_id)
 
     return Response(
         success=True,
         pagination=False,
-        message="Producto eliminado exitosamente.",
+        message="Categoría de producto eliminada exitosamente.",
         data={},
     )

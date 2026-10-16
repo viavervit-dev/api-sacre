@@ -17,10 +17,10 @@ from src.api.modules.auth.models.user import User
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.auth.repositories.user import UserRepository
 from src.api.modules.auth.services.jwt.authenticate_admin import AuthAdminService
-from src.api.modules.auth.services.jwt.get_current_user import RetrieveCurrentUserService
+from src.api.modules.auth.services.jwt.get_current_user import GetAuthUserService
 from src.api.modules.auth.services.jwt.logout import LogoutService
 from src.api.modules.auth.services.jwt.refresh import RefreshTokenService
-from src.api.settings.database import get_db_session
+from src.api.settings.database import db_session
 from src.api.settings.parameters import api_parameters
 
 
@@ -51,21 +51,21 @@ class JWTAuthentication:
 
 
 # Instancia opcional para flujos donde permitimos usuarios anónimos
-get_optional_raw_tokens = JWTAuthentication(auto_error=False)
+optional_tokens = JWTAuthentication(auto_error=False)
 
 # Instancia estricta para flujos donde se requieren usuarios autenticados
-get_raw_tokens = JWTAuthentication(auto_error=True)
+tokens = JWTAuthentication(auto_error=True)
 
 
-def get_user_repository(db: Annotated[AsyncSession, Depends(get_db_session)]) -> IUserRepository:
+def user_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> IUserRepository:
     """Provee una instancia del repositorio de usuarios."""
 
     return UserRepository(db=db)
 
 
-async def get_user(
-    tokens: Annotated[tuple[str, str], Depends(get_raw_tokens)],
-    user_repo: Annotated[IUserRepository, Depends(get_user_repository)],
+async def user(
+    tokens: Annotated[tuple[str, str], Depends(tokens)],
+    user_repo: Annotated[IUserRepository, Depends(user_repository)],
 ) -> User:
     """
     Obtiene y valida el usuario autenticado a partir del token de acceso obligatorio.
@@ -103,9 +103,9 @@ async def get_user(
     return instance
 
 
-async def get_user_optional(
-    tokens: Annotated[tuple[str | None, str | None], Depends(get_optional_raw_tokens)],
-    user_repo: Annotated[IUserRepository, Depends(get_user_repository)],
+async def user_optional(
+    tokens: Annotated[tuple[str | None, str | None], Depends(optional_tokens)],
+    user_repo: Annotated[IUserRepository, Depends(user_repository)],
 ) -> User | None:
     """
     Obtiene y valida el usuario autenticado de forma opcional.
@@ -153,7 +153,7 @@ class UserPermissionChecker:
         self.__allowed_roles = allowed_roles
         self.__permissions = permissions
 
-    async def __call__(self, user: Annotated[User, Depends(get_user)]) -> User:
+    async def __call__(self, user: Annotated[User, Depends(user)]) -> User:
         """
         Verifica que el usuario cumpla con los roles y permisos configurados.
 
@@ -180,10 +180,7 @@ class UserOptionalPermissionChecker:
         self.__allowed_roles = allowed_roles
         self.__permissions = permissions
 
-    async def __call__(
-        self,
-        user: Annotated[User | None, Depends(get_user_optional)],
-    ) -> User | None:
+    async def __call__(self, user: Annotated[User | None, Depends(user_optional)]) -> User | None:
         """
         Verifica roles y permisos si hay un usuario autenticado en la solicitud.
 
@@ -206,30 +203,30 @@ class UserOptionalPermissionChecker:
         return user
 
 
-def get_retrieve_user_service() -> type[RetrieveCurrentUserService]:
-    """Provee la clase del servicio de consulta de usuario actual."""
+def jwt_retrieve_user_service() -> type[GetAuthUserService]:
+    """Provee la clase del servicio que obtiene la instancia del usuario autenticado con JWT."""
 
-    return RetrieveCurrentUserService
+    return GetAuthUserService
 
 
-def get_jwt_admin_service(
-    user_repo: Annotated[IUserRepository, Depends(get_user_repository)],
+def jwt_auth_admin_service(
+    user_repo: Annotated[IUserRepository, Depends(user_repository)],
 ) -> AuthAdminService:
     """Provee una instancia del servicio de autenticación de administradores."""
 
     return AuthAdminService(user_repo=user_repo)
 
 
-def get_jwt_logout_service(
-    user_repo: Annotated[IUserRepository, Depends(get_user_repository)],
+def jwt_logout_service(
+    user_repo: Annotated[IUserRepository, Depends(user_repository)],
 ) -> LogoutService:
     """Provee una instancia del servicio de cierre de sesión."""
 
     return LogoutService(user_repo=user_repo)
 
 
-def get_jwt_refresh_token_service(
-    user_repo: Annotated[IUserRepository, Depends(get_user_repository)],
+def jwt_refresh_token_service(
+    user_repo: Annotated[IUserRepository, Depends(user_repository)],
 ) -> RefreshTokenService:
     """Provee una instancia del servicio de renovación de tokens."""
 

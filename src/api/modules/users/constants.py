@@ -10,7 +10,6 @@ class CustomerEntity(Enum):
     DOCUMENT_TYPE_DESCRIPTION = "Tipo de documento del cliente."
     DOCUMENT_NUMBER_DESCRIPTION = "Número del documento del cliente."
     PHONE_DESCRIPTION = "Número de teléfono del cliente."
-    ID_USER_DESCRIPTION = "ID asignado al cliente por el sistema."
 
     # Mensajes de error
     DOCUMENT_TYPE_INVALID = "El valor seleccionado no es válido."
@@ -45,7 +44,6 @@ class AdminEntity(Enum):
     # Descripciones para los campos de la entidad
     FIRST_NAMES_DESCRIPTION = "Primer y segundo nombre del administrador."
     LAST_NAMES_DESCRIPTION = "Primer y segundo apellido del administrador."
-    ID_USER_DESCRIPTION = "ID asignado al administrador por el sistema."
 
     # Propiedades para los campos de la entidad
     FIRST_NAMES_MAX_LENGTH = 40
@@ -57,6 +55,7 @@ class CustomerWholesaleEntity(Enum):
 
     # Descripciones para los campos de la entidad
     NAME_OR_COMPANY_NAME_DESCRIPTION = "Nombre o razón social del mayorista."
+    PRODUCTS_DESCRIPTION = "Lista de productos del cliente."
     EMAIL_DESCRIPTION = "Correo electrónico del mayorista."
     RUC_DESCRIPTION = "Registro Único de Contribuyentes del mayorista."
     PHONE_DESCRIPTION = "Número de teléfono del mayorista."

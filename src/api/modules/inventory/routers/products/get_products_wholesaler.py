@@ -17,7 +17,7 @@ from src.api.modules.inventory.dependencies import products_by_wholesaler_servic
 from src.api.modules.inventory.dto import ReadProductPrivateDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.get_products_wholesaler import (
-    RetrieveProductsWholesalerService,
+    GetProductsWholesalerService,
 )
 from src.api.settings.parameters import api_parameters
 
@@ -120,7 +120,7 @@ async def get_products_by_wholesaler(
             description="El ID del cliente mayorista del cual se obtendrán los productos.",
         ),
     ],
-    service: Annotated[RetrieveProductsWholesalerService, Depends(products_by_wholesaler_service)],
+    service: Annotated[GetProductsWholesalerService, Depends(products_by_wholesaler_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,

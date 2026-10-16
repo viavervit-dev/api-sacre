@@ -15,7 +15,7 @@ from src.api.modules.auth.models.user import User
 from src.api.modules.users.dependencies import create_customer_wholesale_service
 from src.api.modules.users.dto import CreateCustomerWholesaleDTO, ReadCustomerWholesaleDTO
 from src.api.modules.users.models.customer_wholesale import CustomerWholesale
-from src.api.modules.users.services.customers_wholesale.create_customer_wholesale import (
+from src.api.modules.users.services.customers_wholesale.create import (
     CreateCustomerWholesaleService,
 )
 
@@ -47,10 +47,7 @@ require_admin = UserPermissionChecker(
 async def create_customer_wholesale(
     user: Annotated[User, Depends(require_admin)],
     data: CreateCustomerWholesaleDTO,
-    service: Annotated[
-        CreateCustomerWholesaleService,
-        Depends(create_customer_wholesale_service),
-    ],
+    service: Annotated[CreateCustomerWholesaleService, Depends(create_customer_wholesale_service)],
 ) -> Response[ReadCustomerWholesaleDTO]:
     """
     Permite crear un cliente mayorista. Ejecuta validaciones sintácticas y comprobaciones

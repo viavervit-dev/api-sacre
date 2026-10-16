@@ -17,7 +17,7 @@ from src.api.modules.auth.models.user import User
 from src.api.modules.users.dependencies import update_customer_wholesale_service
 from src.api.modules.users.dto import ReadCustomerWholesaleDTO, UpdateCustomerWholesaleDTO
 from src.api.modules.users.models.customer_wholesale import CustomerWholesale
-from src.api.modules.users.services.customers_wholesale.update_customer_wholesale import (
+from src.api.modules.users.services.customers_wholesale.update import (
     UpdateCustomerWholesaleService,
 )
 
@@ -57,10 +57,7 @@ async def update_customer_wholesale(
             description="El identificador único en formato UUID v4.",
         ),
     ],
-    service: Annotated[
-        UpdateCustomerWholesaleService,
-        Depends(update_customer_wholesale_service),
-    ],
+    service: Annotated[UpdateCustomerWholesaleService, Depends(update_customer_wholesale_service)],
 ) -> Response[ReadCustomerWholesaleDTO]:
     """
     Permite modificar de forma parcial los datos de un cliente mayorista. Ejecuta validaciones

@@ -17,7 +17,7 @@ from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import update_product_service
 from src.api.modules.inventory.dto import ReadProductPrivateDTO, UpdateProductPublicDTO
 from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.update_product import UpdateProductService
+from src.api.modules.inventory.services.products.update import UpdateProductService
 
 update_product_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(

@@ -2,7 +2,7 @@ from src.api.modules.auth.dto import ReadUserDTO
 from src.api.modules.auth.models.user import User
 
 
-class RetrieveCurrentUserService:
+class GetAuthUserService:
     """Servicio encargado de formatear la información del usuario autenticado actual."""
 
     @classmethod

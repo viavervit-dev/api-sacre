@@ -7,7 +7,7 @@ from src.api.modules.inventory.dto import ReadProductPrivateDTO
 from src.api.modules.inventory.repositories.interfaces import IProductRepository
 
 
-class RetrieveProductsWholesalerService:
+class GetProductsWholesalerService:
     """Servicio encargado de la consulta y serialización de productos de un mayorista."""
 
     def __init__(self, user_repo: IUserRepository, product_repo: IProductRepository) -> None:

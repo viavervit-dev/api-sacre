@@ -1,16 +1,14 @@
 from fastapi import APIRouter
 
 # Importación de routers de clientes
-from src.api.modules.users.routers.customers.create_customer import create_customer_router
+from src.api.modules.users.routers.customers.create import create_customer_router
 
 # Importación de routers de clientes mayoristas
-from src.api.modules.users.routers.customers_wholesale.create_customer_wholesale import (
+from src.api.modules.users.routers.customers_wholesale.create import (
     create_customer_wholesale_router,
 )
-from src.api.modules.users.routers.customers_wholesale.get_list_customer_wholesale import (
-    get_list_customers_wholesale,
-)
-from src.api.modules.users.routers.customers_wholesale.update_customer_wholesale import (
+from src.api.modules.users.routers.customers_wholesale.get_list import get_list_customers_wholesale
+from src.api.modules.users.routers.customers_wholesale.update import (
     update_customer_wholesale_router,
 )
 

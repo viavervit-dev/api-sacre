@@ -3,44 +3,36 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.modules.auth.dependencies import get_user_repository
+from src.api.modules.auth.dependencies import user_repository
 from src.api.modules.auth.repositories.user import UserRepository
 from src.api.modules.inventory.repositories.category import CategoryRepository
 from src.api.modules.inventory.repositories.product import ProductRepository
-from src.api.modules.inventory.services.categories.create_category import CreateCategoryService
-from src.api.modules.inventory.services.categories.delete_category import DeleteCategoryService
-from src.api.modules.inventory.services.categories.get_list_category import (
-    RetrieveListCategoryService,
-)
-from src.api.modules.inventory.services.categories.update_category import UpdateCategoryService
+from src.api.modules.inventory.services.categories.create import CreateCategoryService
+from src.api.modules.inventory.services.categories.delete import DeleteCategoryService
+from src.api.modules.inventory.services.categories.get_list import GetListCategoryService
+from src.api.modules.inventory.services.categories.update import UpdateCategoryService
 from src.api.modules.inventory.services.products.add_product_wholesaler import (
     AddProductWholesaleService,
 )
-from src.api.modules.inventory.services.products.create_product import CreateProductPublicService
-from src.api.modules.inventory.services.products.delete_product import DeleteProductService
-from src.api.modules.inventory.services.products.get_list_products import (
-    RetrieveListProductsService,
-)
+from src.api.modules.inventory.services.products.create import CreateProductPublicService
+from src.api.modules.inventory.services.products.delete import DeleteProductService
+from src.api.modules.inventory.services.products.get_list import GetListProductsService
 from src.api.modules.inventory.services.products.get_products_wholesaler import (
-    RetrieveProductsWholesalerService,
+    GetProductsWholesalerService,
 )
-from src.api.modules.inventory.services.products.update_product import UpdateProductService
+from src.api.modules.inventory.services.products.update import UpdateProductService
 from src.api.modules.users.dependencies import customer_wholesale_repository
 from src.api.modules.users.repositories.customer_wholesale import CustomerWholesaleRepository
-from src.api.settings.database import get_db_session
+from src.api.settings.database import db_session
 
 
-def category_repository(
-    db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> CategoryRepository:
+def category_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> CategoryRepository:
     """Provee una instancia del repositorio de categorías."""
 
     return CategoryRepository(db=db)
 
 
-def product_repository(
-    db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> ProductRepository:
+def product_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> ProductRepository:
     """Provee una instancia del repositorio de productos."""
 
     return ProductRepository(db=db)
@@ -48,19 +40,19 @@ def product_repository(
 
 def retrieve_list_products_service(
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
-) -> RetrieveListProductsService:
+) -> GetListProductsService:
     """Provee una instancia del servicio de consulta de una lista de productos."""
 
-    return RetrieveListProductsService(product_repo=product_repo)
+    return GetListProductsService(product_repo=product_repo)
 
 
 def products_by_wholesaler_service(
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
-    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
-) -> RetrieveProductsWholesalerService:
+    user_repo: Annotated[UserRepository, Depends(user_repository)],
+) -> GetProductsWholesalerService:
     """Provee una instancia del servicio de consulta de productos de un cliente mayorista."""
 
-    return RetrieveProductsWholesalerService(
+    return GetProductsWholesalerService(
         product_repo=product_repo,
         user_repo=user_repo,
     )
@@ -79,7 +71,7 @@ def create_product_public_service(
 
 
 def add_product_wholesale_service(
-    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
+    user_repo: Annotated[UserRepository, Depends(user_repository)],
     category_repo: Annotated[CategoryRepository, Depends(category_repository)],
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
     customer_wholesale_repo: Annotated[
@@ -134,10 +126,10 @@ def delete_category_service(
 
 def retrieve_list_category_service(
     category_repo: Annotated[CategoryRepository, Depends(category_repository)],
-) -> RetrieveListCategoryService:
+) -> GetListCategoryService:
     """Provee una instancia del servicio de consulta de una lista de categorías."""
 
-    return RetrieveListCategoryService(category_repo=category_repo)
+    return GetListCategoryService(category_repo=category_repo)
 
 
 def update_category_service(

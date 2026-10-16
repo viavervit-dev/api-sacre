@@ -3,7 +3,7 @@ from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.users.dto import ReadCustomerWholesaleDTO
 
 
-class RetrieveListCustomerWholesaleService:
+class GetListCustomerWholesaleService:
     """Servicio encargado de la consulta y serialización de clientes mayoristas."""
 
     def __init__(self, user_repo: IUserRepository) -> None:

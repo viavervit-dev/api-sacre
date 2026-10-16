@@ -101,7 +101,7 @@ async def check_db_connection() -> bool:
         return False
 
 
-async def get_db_session() -> AsyncGenerator[AsyncSession]:
+async def db_session() -> AsyncGenerator[AsyncSession]:
     """
     Dependencia para obtener una sesión de base de datos.
 
