@@ -73,7 +73,7 @@ async def create_category(
         - Guarda el registro en la base de datos.
     """
 
-    category = await service.create_category(data=data)
+    category = await service.create(data=data)
 
     return Response(
         success=True,

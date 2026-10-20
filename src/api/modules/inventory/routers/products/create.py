@@ -75,7 +75,7 @@ async def create_product(
         - Guarda el registro en la base de datos.
     """
 
-    product = await service.create_product(data=data)
+    product = await service.create(data=data)
 
     return Response(
         success=True,

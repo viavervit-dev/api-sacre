@@ -14,10 +14,7 @@ from src.api.modules.inventory.services.products.utils import ProductPricingMixi
 
 
 class CreateProductPublicService(ProductPricingMixin):
-    """
-    Servicio para la validación de negocio, cálculo de precios y creación de productos
-    para el catálogo público.
-    """
+    """Servicio encargado de la creación de productos para el catálogo público."""
 
     def __init__(
         self,
@@ -27,12 +24,12 @@ class CreateProductPublicService(ProductPricingMixin):
         self.__product_repo = product_repo
         self.__category_repo = category_repo
 
-    async def create_product(self, data: CreateProductPublicDTO) -> ReadProductPrivateDTO:
+    async def create(self, data: CreateProductPublicDTO) -> ReadProductPrivateDTO:
         """
         Crea un nuevo producto para el catálogo público.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         # Validaciones de negocio
@@ -63,31 +60,16 @@ class CreateProductPublicService(ProductPricingMixin):
         product_data["exclusive"] = False
         product_data["stock_hand"] = 0
 
-        instance = await self.__product_repo.create_product(data=product_data)
+        product = await self.__product_repo.create_product(data=product_data)
 
-        return ReadProductPrivateDTO.model_construct(
-            id=instance.id,
-            name=instance.name,
-            categories=instance.categories,
-            description_short=instance.description_short,
-            description_long=instance.description_long,
-            images=instance.images,
-            price_neto=instance.price_neto,
-            price_sale=instance.price_sale,
-            profit_margin=instance.profit_margin,
-            tax_amount=instance.tax_amount,
-            stock_total=instance.stock_total,
-            stock_hand=instance.stock_hand,
-            stock_sale=instance.stock_sale,
-            status=instance.status,
-        )
+        return ReadProductPrivateDTO.model_construct(**product.to_dict())
 
     async def __run_business_validations(self, data: dict[str, Any]) -> None:
         """
         Ejecuta las validaciones de negocio previas a la creación del producto.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         errors = []

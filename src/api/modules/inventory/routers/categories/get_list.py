@@ -175,11 +175,7 @@ async def get_list_categories(
          interno.
     """
 
-    categories, total_items = await service.get_list_categories(
-        user=user,
-        offset=offset,
-        limit=limit,
-    )
+    categories, total_items = await service.get_list(user=user, offset=offset, limit=limit)
 
     return Response(
         success=True,

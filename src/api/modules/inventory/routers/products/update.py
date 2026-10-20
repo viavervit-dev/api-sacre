@@ -91,7 +91,7 @@ async def update_product(
         - Aplica las modificaciones del registro en la base de datos.
     """
 
-    updated_product = await service.update_product(product_id=product_id, data=data)
+    updated_product = await service.update(product_id=product_id, data=data)
 
     return Response(
         success=True,

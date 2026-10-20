@@ -1,8 +1,8 @@
-"""esquema inicial con convencion de nombres
+"""reinicio de las migraciones para validaciones de campos
 
-Revision ID: c9bba5404f8a
+Revision ID: 4d113081d7db
 Revises:
-Create Date: 2026-09-29 09:59:27.808344
+Create Date: 2026-10-20 12:25:51.778389
 
 """
 
@@ -13,7 +13,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = "c9bba5404f8a"
+revision: str = "4d113081d7db"
 down_revision: str | Sequence[str] | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -54,75 +54,123 @@ def upgrade() -> None:
         sa.UniqueConstraint("email", name=op.f("uq_users_email")),
         schema="auth",
     )
-    op.create_table(
-        "canton_ecuador",
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("name", sa.String(length=100), nullable=False),
-        sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_canton_ecuador")),
-        sa.UniqueConstraint("name", name=op.f("uq_canton_ecuador_name")),
-        schema="countries",
-    )
-    op.create_table(
-        "city_ecuador",
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("name", sa.String(length=100), nullable=False),
-        sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_city_ecuador")),
-        sa.UniqueConstraint("name", name=op.f("uq_city_ecuador_name")),
-        schema="countries",
-    )
+    op.create_index("ix_users_id_role", "users", ["id", "role"], unique=False, schema="auth")
     op.create_table(
         "country",
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("name", sa.String(length=60), nullable=False),
+        sa.Column("code", sa.String(length=5), nullable=False),
         sa.Column(
             "administrative_structure", postgresql.JSONB(astext_type=sa.Text()), nullable=False
         ),
         sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_country")),
-        sa.UniqueConstraint("name", name=op.f("uq_country_name")),
+        sa.UniqueConstraint("code", name=op.f("uq_country_code")),
         schema="countries",
     )
-    op.create_table(
-        "province_ecuador",
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("name", sa.String(length=100), nullable=False),
-        sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_province_ecuador")),
-        sa.UniqueConstraint("name", name=op.f("uq_province_ecuador_name")),
-        schema="countries",
+    op.create_index(
+        op.f("ix_countries_country_name"), "country", ["name"], unique=True, schema="countries"
     )
     op.create_table(
         "categories",
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("name", sa.String(length=50), nullable=False),
         sa.Column("description", sa.String(length=1000), nullable=False),
-        sa.Column("product_count", sa.Integer(), nullable=False),
         sa.Column("status", sa.Boolean(), nullable=False),
         sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_categories")),
         sa.UniqueConstraint("name", name=op.f("uq_categories_name")),
-        schema="product",
+        schema="inventory",
     )
     op.create_table(
-        "wholesale",
+        "products",
         sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("name_or_company_name", sa.String(length=40), nullable=False),
-        sa.Column("email", sa.String(length=60), nullable=False),
-        sa.Column("ruc", sa.String(length=13), nullable=True),
-        sa.Column("phone", sa.String(length=25), nullable=False),
-        sa.Column("location", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("extra_contacts", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("name", sa.String(length=60), nullable=False),
+        sa.Column("categories", sa.ARRAY(sa.String(length=50)), nullable=False),
+        sa.Column("description_short", sa.String(length=100), nullable=False),
+        sa.Column("description_long", sa.String(length=1000), nullable=False),
+        sa.Column("images", sa.ARRAY(sa.String(length=2048)), nullable=False),
+        sa.Column("price_neto", sa.Numeric(precision=7, scale=2), nullable=False),
+        sa.Column("price_sale", sa.Numeric(precision=7, scale=2), nullable=False),
+        sa.Column("profit_margin", sa.Numeric(precision=5, scale=4), nullable=False),
+        sa.Column("tax_amount", sa.Numeric(precision=7, scale=2), nullable=False),
+        sa.Column("stock_total", sa.Integer(), nullable=False),
+        sa.Column("stock_hand", sa.Integer(), nullable=False),
+        sa.Column("stock_sale", sa.Integer(), nullable=False),
+        sa.Column("status", sa.Boolean(), nullable=False),
+        sa.Column("exclusive", sa.Boolean(), nullable=False),
         sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_wholesale")),
-        sa.UniqueConstraint("email", name=op.f("uq_wholesale_email")),
-        sa.UniqueConstraint(
-            "name_or_company_name", name=op.f("uq_wholesale_name_or_company_name")
+        sa.CheckConstraint(
+            "price_neto >= 0.00 AND price_neto <= 99999.99",
+            name=op.f("ck_products_price_neto_range"),
         ),
-        sa.UniqueConstraint("phone", name=op.f("uq_wholesale_phone")),
-        sa.UniqueConstraint("ruc", name=op.f("uq_wholesale_ruc")),
-        schema="users",
+        sa.CheckConstraint(
+            "price_sale >= 0.00 AND price_sale <= 99999.99",
+            name=op.f("ck_products_price_sale_range"),
+        ),
+        sa.CheckConstraint(
+            "profit_margin >= 0.00 AND profit_margin <= 2",
+            name=op.f("ck_products_profit_margin_range"),
+        ),
+        sa.CheckConstraint(
+            "stock_hand >= 0.00 AND stock_hand <= 10000", name=op.f("ck_products_stock_hand_range")
+        ),
+        sa.CheckConstraint(
+            "stock_sale >= 0.00 AND stock_sale <= 10000", name=op.f("ck_products_stock_sale_range")
+        ),
+        sa.CheckConstraint(
+            "stock_total >= 0.00 AND stock_total <= 10000",
+            name=op.f("ck_products_stock_total_range"),
+        ),
+        sa.CheckConstraint(
+            "tax_amount >= 0.00 AND tax_amount <= 99999.99",
+            name=op.f("ck_products_tax_amount_range"),
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_products")),
+        sa.UniqueConstraint("name", name=op.f("uq_products_name")),
+        schema="inventory",
+    )
+    op.create_index(
+        "ix_products_exclusive_status_date",
+        "products",
+        ["exclusive", "status", "date_joined"],
+        unique=False,
+        schema="inventory",
+    )
+    op.create_table(
+        "orders",
+        sa.Column("id", sa.Uuid(), nullable=False),
+        sa.Column("order_number", sa.UUID(), nullable=False),
+        sa.Column("customer_data", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column("product_data", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column("status", sa.String(length=100), nullable=False),
+        sa.Column("subtotal", sa.Numeric(precision=7, scale=2), nullable=False),
+        sa.Column("total", sa.Numeric(precision=8, scale=2), nullable=False),
+        sa.Column("tax_amount", sa.Numeric(precision=7, scale=2), nullable=False),
+        sa.Column("units", sa.Integer(), nullable=False),
+        sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
+        sa.CheckConstraint(
+            "subtotal > 0.00 AND subtotal <= 99999.99", name=op.f("ck_orders_subtotal_range")
+        ),
+        sa.CheckConstraint(
+            "tax_amount > 0.00 AND tax_amount <= 99999.99", name=op.f("ck_orders_tax_amount_range")
+        ),
+        sa.CheckConstraint(
+            "total > 0.00 AND total <= 999999.99", name=op.f("ck_orders_totals_range")
+        ),
+        sa.CheckConstraint("units > 0.00 AND units <= 99999", name=op.f("ck_orders_units_range")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_orders")),
+        schema="orders",
+    )
+    op.create_index(
+        op.f("ix_orders_orders_order_number"),
+        "orders",
+        ["order_number"],
+        unique=True,
+        schema="orders",
+    )
+    op.create_index(
+        op.f("ix_orders_orders_status"), "orders", ["status"], unique=False, schema="orders"
     )
     op.create_table(
         "permission_groups",
@@ -167,72 +215,6 @@ def upgrade() -> None:
         schema="auth",
     )
     op.create_table(
-        "organization_ecuador",
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("country_id", sa.Uuid(), nullable=False),
-        sa.Column("province_id", sa.Uuid(), nullable=False),
-        sa.Column("canton_id", sa.Uuid(), nullable=False),
-        sa.Column("city_id", sa.Uuid(), nullable=False),
-        sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["canton_id"],
-            ["countries.canton_ecuador.id"],
-            name=op.f("fk_organization_ecuador_canton_id_canton_ecuador"),
-            ondelete="CASCADE",
-        ),
-        sa.ForeignKeyConstraint(
-            ["city_id"],
-            ["countries.city_ecuador.id"],
-            name=op.f("fk_organization_ecuador_city_id_city_ecuador"),
-            ondelete="CASCADE",
-        ),
-        sa.ForeignKeyConstraint(
-            ["country_id"],
-            ["countries.country.id"],
-            name=op.f("fk_organization_ecuador_country_id_country"),
-            ondelete="CASCADE",
-        ),
-        sa.ForeignKeyConstraint(
-            ["province_id"],
-            ["countries.province_ecuador.id"],
-            name=op.f("fk_organization_ecuador_province_id_province_ecuador"),
-            ondelete="CASCADE",
-        ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_organization_ecuador")),
-        schema="countries",
-    )
-    op.create_table(
-        "products",
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("exclusive_client_id", sa.Uuid(), nullable=True),
-        sa.Column("name", sa.String(length=60), nullable=False),
-        sa.Column("categories", sa.ARRAY(sa.String(length=50)), nullable=False),
-        sa.Column("description_short", sa.String(length=100), nullable=False),
-        sa.Column("description_long", sa.String(length=1000), nullable=False),
-        sa.Column("images", sa.ARRAY(sa.String(length=2048)), nullable=False),
-        sa.Column("price_neto", sa.Numeric(precision=7, scale=2), nullable=False),
-        sa.Column("price_sale", sa.Numeric(precision=7, scale=2), nullable=False),
-        sa.Column("profit_margin", sa.Numeric(precision=5, scale=4), nullable=False),
-        sa.Column("iva", sa.Numeric(precision=5, scale=4), nullable=False),
-        sa.Column("stock_total", sa.Integer(), nullable=False),
-        sa.Column("stock_hand", sa.Integer(), nullable=False),
-        sa.Column("stock_sale", sa.Integer(), nullable=False),
-        sa.Column("status", sa.Boolean(), nullable=False),
-        sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["exclusive_client_id"],
-            ["users.wholesale.id"],
-            name=op.f("fk_products_exclusive_client_id_wholesale"),
-            ondelete="CASCADE",
-        ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_products")),
-        sa.UniqueConstraint("name", name=op.f("uq_products_name")),
-        schema="product",
-    )
-    op.create_index(
-        op.f("ix_product_products_status"), "products", ["status"], unique=False, schema="product"
-    )
-    op.create_table(
         "admins",
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("user_id", sa.Uuid(), nullable=False),
@@ -244,6 +226,29 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_admins")),
         sa.UniqueConstraint("user_id", name=op.f("uq_admins_user_id")),
+        schema="users",
+    )
+    op.create_table(
+        "customer_wholesale",
+        sa.Column("id", sa.Uuid(), nullable=False),
+        sa.Column("user_id", sa.Uuid(), nullable=False),
+        sa.Column("products", sa.ARRAY(sa.UUID()), nullable=False),
+        sa.Column("name_or_company_name", sa.String(length=100), nullable=False),
+        sa.Column("ruc", sa.String(length=13), nullable=True),
+        sa.Column("phone", sa.String(length=25), nullable=False),
+        sa.Column("location", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column("extra_contacts", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("date_joined", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["user_id"], ["auth.users.id"], name=op.f("fk_customer_wholesale_user_id_users")
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_customer_wholesale")),
+        sa.UniqueConstraint(
+            "name_or_company_name", name=op.f("uq_customer_wholesale_name_or_company_name")
+        ),
+        sa.UniqueConstraint("phone", name=op.f("uq_customer_wholesale_phone")),
+        sa.UniqueConstraint("ruc", name=op.f("uq_customer_wholesale_ruc")),
+        sa.UniqueConstraint("user_id", name=op.f("uq_customer_wholesale_user_id")),
         schema="users",
     )
     op.create_table(
@@ -272,18 +277,19 @@ def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table("customers", schema="users")
+    op.drop_table("customer_wholesale", schema="users")
     op.drop_table("admins", schema="users")
-    op.drop_index(op.f("ix_product_products_status"), table_name="products", schema="product")
-    op.drop_table("products", schema="product")
-    op.drop_table("organization_ecuador", schema="countries")
     op.drop_table("user_groups", schema="auth")
     op.drop_table("permission_groups", schema="auth")
-    op.drop_table("wholesale", schema="users")
-    op.drop_table("categories", schema="product")
-    op.drop_table("province_ecuador", schema="countries")
+    op.drop_index(op.f("ix_orders_orders_status"), table_name="orders", schema="orders")
+    op.drop_index(op.f("ix_orders_orders_order_number"), table_name="orders", schema="orders")
+    op.drop_table("orders", schema="orders")
+    op.drop_index("ix_products_exclusive_status_date", table_name="products", schema="inventory")
+    op.drop_table("products", schema="inventory")
+    op.drop_table("categories", schema="inventory")
+    op.drop_index(op.f("ix_countries_country_name"), table_name="country", schema="countries")
     op.drop_table("country", schema="countries")
-    op.drop_table("city_ecuador", schema="countries")
-    op.drop_table("canton_ecuador", schema="countries")
+    op.drop_index("ix_users_id_role", table_name="users", schema="auth")
     op.drop_table("users", schema="auth")
     op.drop_index(op.f("ix_auth_permissions_name"), table_name="permissions", schema="auth")
     op.drop_table("permissions", schema="auth")

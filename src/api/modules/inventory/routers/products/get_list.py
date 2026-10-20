@@ -201,7 +201,7 @@ async def get_list_products(
          sensibles de negocio al DTO de lectura.
     """
 
-    products, total_items = await service.get_list_products(
+    products, total_items = await service.get_list(
         user=user,
         offset=offset,
         limit=limit,

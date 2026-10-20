@@ -150,10 +150,7 @@ async def get_customers_wholesale(
         - Mapea la lista de clientes mayoristas al DTO de lectura.
     """
 
-    customers_wholesale, total_items = await service.get_customers_wholesale(
-        offset=offset,
-        limit=limit,
-    )
+    customers_wholesale, total_items = await service.get_list(offset=offset, limit=limit)
 
     return Response(
         success=True,

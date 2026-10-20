@@ -18,7 +18,7 @@ from src.api.modules.inventory.services.products.utils import ProductPricingMixi
 
 
 class UpdateProductService(ProductPricingMixin):
-    """Servicio para la validación de negocio y actualización de productos."""
+    """Servicio encargado de la actualización de productos."""
 
     def __init__(
         self,
@@ -28,7 +28,7 @@ class UpdateProductService(ProductPricingMixin):
         self.__product_repo = product_repo
         self.__category_repo = category_repo
 
-    async def update_product(
+    async def update(
         self,
         data: UpdateProductPublicDTO,
         product_id: UUID,
@@ -37,28 +37,28 @@ class UpdateProductService(ProductPricingMixin):
         Actualiza un producto aplicando validaciones de negocio y recálculo de precios.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
             ResourceNotFound: Si el producto no existe en la base de datos.
         """
 
         product_data = data.model_dump(exclude_unset=True)
-        instance = await self.__product_repo.get_product_by_id(id=product_id)
+        product = await self.__product_repo.get_product_by_id(id=product_id)
 
-        if not instance:
+        if not product:
             raise ResourceNotFound()
 
-        await self.__run_business_validations(data=product_data, instance=instance)
+        await self.__run_business_validations(data=product_data, instance=product)
         stock_total: int | None = product_data.get("stock_total")
 
-        if stock_total and stock_total == 0 and instance.stock_hand == 0:
+        if stock_total and stock_total == 0 and product.stock_hand == 0:
             product_data["status"] = False
 
         # Calcular el precio de venta
         price_neto: Decimal | None = product_data.get("price_neto")
         profit_margin: Decimal | None = product_data.get("profit_margin")
         product_data["price_sale"] = self._calculate_sale_price(
-            price_neto=price_neto or instance.price_neto,
-            profit_margin=profit_margin or instance.profit_margin,
+            price_neto=price_neto or product.price_neto,
+            profit_margin=profit_margin or product.profit_margin,
             iva=TAX_PERCENTAGE,
         )
 
@@ -69,32 +69,19 @@ class UpdateProductService(ProductPricingMixin):
         )
 
         # Actualizar el producto en la base de datos
-        instance = await self.__product_repo.update_product(data=product_data, instance=instance)
-        product = ReadProductPrivateDTO.model_construct(
-            id=instance.id,
-            name=instance.name,
-            categories=instance.categories,
-            description_short=instance.description_short,
-            description_long=instance.description_long,
-            images=instance.images,
-            price_neto=instance.price_neto,
-            price_sale=instance.price_sale,
-            profit_margin=instance.profit_margin,
-            tax_amount=instance.tax_amount,
-            stock_total=instance.stock_total,
-            stock_hand=instance.stock_hand,
-            stock_sale=instance.stock_sale,
-            status=instance.status,
+        updated_product = await self.__product_repo.update_product(
+            data=product_data,
+            instance=product,
         )
 
-        return product
+        return ReadProductPrivateDTO.model_construct(**updated_product.to_dict())
 
     async def __run_business_validations(self, data: dict[str, Any], instance: Product) -> None:
         """
         Ejecuta las validaciones de negocio previas a la actualización del producto.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         errors = []

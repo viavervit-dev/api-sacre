@@ -31,6 +31,34 @@ class Product(ModelBase):
     __tablename__ = "products"
     __table_args__ = (
         Index("ix_products_exclusive_status_date", "exclusive", "status", "date_joined"),
+        CheckConstraint(
+            sqltext=f"price_neto >= {PRICE_NETO_MIN} AND price_neto <= {PRICE_NETO_MAX}",
+            name="price_neto_range",
+        ),
+        CheckConstraint(
+            sqltext=f"price_sale >= {PRICE_SALE_MIN} AND price_sale <= {PRICE_SALE_MAX}",
+            name="price_sale_range",
+        ),
+        CheckConstraint(
+            sqltext=f"profit_margin >= {PROFIT_MIN} AND profit_margin <= {PROFIT_MAX}",
+            name="profit_margin_range",
+        ),
+        CheckConstraint(
+            sqltext=f"tax_amount >= {TAX_AMOUNT_MIN_VALUE} AND tax_amount <= {TAX_AMOUNT_MAX_VALUE}",  # noqa: E501
+            name="tax_amount_range",
+        ),
+        CheckConstraint(
+            sqltext=f"stock_total >= {STOCK_TOTAL_MIN} AND stock_total <= {STOCK_TOTAL_MAX}",
+            name="stock_total_range",
+        ),
+        CheckConstraint(
+            sqltext=f"stock_hand >= {STOCK_HAND_MIN} AND stock_hand <= {STOCK_HAND_MAX}",
+            name="stock_hand_range",
+        ),
+        CheckConstraint(
+            sqltext=f"stock_sale >= {STOCK_SALE_MIN} AND stock_sale <= {STOCK_SALE_MAX}",
+            name="stock_sale_range",
+        ),
         {"schema": "inventory"},
     )
 
@@ -72,10 +100,6 @@ class Product(ModelBase):
             scale=ProductEntity.PRICE_NETO_DECIMAL_PLACES.value,
             asdecimal=True,
         ),
-        CheckConstraint(
-            sqltext=f"price_neto >= {PRICE_NETO_MIN} AND price_neto <= {PRICE_NETO_MAX}",
-            name="price_neto_range",
-        ),
         doc=ProductEntity.PRICE_NETO_DESCRIPTION.value,
         nullable=False,
     )
@@ -84,10 +108,6 @@ class Product(ModelBase):
             precision=ProductEntity.PRICE_SALE_MAX_DIGITS.value,
             scale=ProductEntity.PRICE_SALE_DECIMAL_PLACES.value,
             asdecimal=True,
-        ),
-        CheckConstraint(
-            sqltext=f"price_sale >= {PRICE_SALE_MIN} AND price_sale <= {PRICE_SALE_MAX}",
-            name="price_sale_range",
         ),
         doc=ProductEntity.PRICE_SALE_DESCRIPTION.value,
         nullable=False,
@@ -98,10 +118,6 @@ class Product(ModelBase):
             scale=ProductEntity.PROFIT_MARGIN_DECIMAL_PLACES.value,
             asdecimal=True,
         ),
-        CheckConstraint(
-            sqltext=f"profit_margin >= {PROFIT_MIN} AND profit_margin <= {PROFIT_MAX}",
-            name="profit_margin_range",
-        ),
         doc=ProductEntity.PROFIT_MARGIN_DESCRIPTION.value,
         nullable=False,
     )
@@ -111,37 +127,21 @@ class Product(ModelBase):
             scale=ProductEntity.TAX_AMOUNT_DECIMAL_PLACES.value,
             asdecimal=True,
         ),
-        CheckConstraint(
-            sqltext=f"tax_amount >= {TAX_AMOUNT_MIN_VALUE} AND tax_amount <= {TAX_AMOUNT_MAX_VALUE}",  # noqa: E501
-            name="tax_amount_range",
-        ),
         doc=ProductEntity.TAX_AMOUNT_DESCRIPTION.value,
         nullable=False,
     )
     stock_total: Mapped[int] = mapped_column(
         Integer,
-        CheckConstraint(
-            sqltext=f"stock_total >= {STOCK_TOTAL_MIN} AND stock_total <= {STOCK_TOTAL_MAX}",
-            name="stock_total_range",
-        ),
         doc=ProductEntity.STOCK_TOTAL_DESCRIPTION.value,
         nullable=False,
     )
     stock_hand: Mapped[int] = mapped_column(
         Integer,
-        CheckConstraint(
-            sqltext=f"stock_hand >= {STOCK_HAND_MIN} AND stock_hand <= {STOCK_HAND_MAX}",
-            name="stock_hand_range",
-        ),
         doc=ProductEntity.STOCK_HAND_DESCRIPTION.value,
         nullable=False,
     )
     stock_sale: Mapped[int] = mapped_column(
         Integer,
-        CheckConstraint(
-            sqltext=f"stock_sale >= {STOCK_SALE_MIN} AND stock_sale <= {STOCK_SALE_MAX}",
-            name="stock_sale_range",
-        ),
         doc=ProductEntity.STOCK_SALE_DESCRIPTION.value,
         nullable=False,
     )

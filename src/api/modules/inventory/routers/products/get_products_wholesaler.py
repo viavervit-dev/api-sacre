@@ -163,7 +163,7 @@ async def get_products_by_wholesaler(
          DTO de lectura.
     """
 
-    products, total_items = await service.get_products_by_wholesaler(
+    products, total_items = await service.get_products(
         wholesaler_id=wholesaler_id,
         offset=offset,
         limit=limit,

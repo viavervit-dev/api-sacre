@@ -64,7 +64,7 @@ async def refresh_token(
     if not refresh_token:
         raise MissingJWT(message=ExceptionErrorMessages.REFRESH_JWT_MISSING.value)
 
-    new_access_token = await service.refresh_token(refresh_token=refresh_token)
+    new_access_token = await service.refresh(refresh_token=refresh_token)
     response.set_cookie(
         key="access_token",
         value=new_access_token,

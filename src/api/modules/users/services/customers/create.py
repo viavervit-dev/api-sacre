@@ -17,12 +17,12 @@ class CreateCustomerService:
         self.__customer_repo = customer_repo
         self.__user_repo = user_repo
 
-    async def create_customer(self, data: CreateCustomerDTO) -> ReadUserDTO:
+    async def create(self, data: CreateCustomerDTO) -> ReadUserDTO:
         """
         Registra un nuevo cliente tras validar las reglas de negocio del dominio.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         # Validaciones de negocio
@@ -62,7 +62,7 @@ class CreateCustomerService:
         Ejecuta las validaciones de negocio previas al registro del cliente.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         errors = []

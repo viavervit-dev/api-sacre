@@ -22,7 +22,7 @@ class UpdateCustomerWholesaleService:
         self.__customer_wholesale_repo = customer_wholesale_repo
         self.__user_repo = user_repo
 
-    async def update_customer_wholesale(
+    async def update(
         self,
         data: UpdateCustomerWholesaleDTO,
         id: UUID,
@@ -32,7 +32,7 @@ class UpdateCustomerWholesaleService:
 
         Raises:
             ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
-            RequestValidationError: Si falla alguna regla de validación de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         # Validar que el cliente mayorista exista en la base de datos
@@ -72,7 +72,7 @@ class UpdateCustomerWholesaleService:
         Ejecuta las validaciones de negocio previas a la actualización del cliente mayorista.
 
         Raises:
-            RequestValidationError: Si alguno de los campos únicos a actualizar ya está en uso.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         errors = []

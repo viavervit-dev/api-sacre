@@ -11,7 +11,7 @@ class AuthAdminService:
     def __init__(self, user_repo: IUserRepository) -> None:
         self.__user_repo = user_repo
 
-    async def authenticate_admin(self, credentials: AdminCredentialsDTO) -> tuple[str, str]:
+    async def authenticate(self, credentials: AdminCredentialsDTO) -> tuple[str, str]:
         """
         Autentica a un administrador y genera tokens de acceso y actualización.
 

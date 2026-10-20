@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator
+from typing import Any
 
 from sqlalchemy import MetaData, text
 from sqlalchemy.ext.asyncio import (
@@ -25,6 +26,11 @@ class ModelBase(DeclarativeBase):
             "pk": "pk_%(table_name)s",
         }
     )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convierte las columnas del modelo a un diccionario."""
+
+        return {col.name: getattr(self, col.name) for col in self.__table__.columns}
 
 
 # Instancia global del engine (inicializada en lifespan)

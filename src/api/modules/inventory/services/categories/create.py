@@ -8,38 +8,32 @@ from src.api.modules.inventory.repositories.interfaces import ICategoryRepositor
 
 
 class CreateCategoryService:
-    """Servicio encargado de la validación de negocio y persistencia para nuevas categorías."""
+    """Servicio encargado de la creación de categorías de productos."""
 
     def __init__(self, category_repo: ICategoryRepository) -> None:
         self.__category_repo = category_repo
 
-    async def create_category(self, data: CreateCategoryDTO) -> ReadCategoryPrivateDTO:
+    async def create(self, data: CreateCategoryDTO) -> ReadCategoryPrivateDTO:
         """
         Crea una nueva categoría aplicando valores iniciales y validaciones de negocio.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         category_data = data.model_dump()
         category_data["status"] = False
         await self.__run_business_validations(data=category_data)
-        category_instance = await self.__category_repo.create_category(data=category_data)
-        category = ReadCategoryPrivateDTO.model_construct(
-            id=category_instance.id,
-            name=category_instance.name,
-            description=category_instance.description,
-            status=category_instance.status,
-        )
+        category = await self.__category_repo.create_category(data=category_data)
 
-        return category
+        return ReadCategoryPrivateDTO.model_construct(**category.to_dict())
 
     async def __run_business_validations(self, data: dict[str, Any]) -> None:
         """
         Ejecuta las validaciones de reglas de negocio previas a la creación.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos

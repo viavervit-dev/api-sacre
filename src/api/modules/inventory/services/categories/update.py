@@ -10,12 +10,12 @@ from src.api.modules.inventory.repositories.interfaces import ICategoryRepositor
 
 
 class UpdateCategoryService:
-    """Servicio encargado de la validación de negocio y actualización de categorías."""
+    """Servicio encargado de la actualización de categorías de productos."""
 
     def __init__(self, category_repo: ICategoryRepository) -> None:
         self.__category_repo = category_repo
 
-    async def update_category(
+    async def update(
         self,
         data: UpdateCategoryDTO,
         category_id: UUID,
@@ -24,7 +24,7 @@ class UpdateCategoryService:
         Actualiza una categoría tras validar las reglas de negocio del dominio.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
             ResourceNotFound: Si la categoría no existe en la base de datos.
         """
 
@@ -37,25 +37,19 @@ class UpdateCategoryService:
         await self.__run_business_validations(data=category_data)
 
         # Actualizar el producto en la base de datos
-        instance = await self.__category_repo.update_category(
+        category = await self.__category_repo.update_category(
             data=category_data,
             instance=instance,
         )
-        category = ReadCategoryPrivateDTO.model_construct(
-            id=instance.id,
-            name=instance.name,
-            description=instance.description,
-            status=instance.status,
-        )
 
-        return category
+        return ReadCategoryPrivateDTO.model_construct(**category.to_dict())
 
     async def __run_business_validations(self, data: dict[str, Any]) -> None:
         """
         Ejecuta las validaciones de reglas de negocio previas a la actualización.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos

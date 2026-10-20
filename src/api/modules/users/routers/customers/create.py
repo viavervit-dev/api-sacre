@@ -51,7 +51,7 @@ async def create_customer(
         - Guarda el registro en la base de datos.
     """
 
-    customer = await service.create_customer(data=data)
+    customer = await service.create(data=data)
 
     return Response(
         success=True,

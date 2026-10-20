@@ -9,7 +9,7 @@ class GetListCustomerWholesaleService:
     def __init__(self, user_repo: IUserRepository) -> None:
         self.__user_repo = user_repo
 
-    async def get_customers_wholesale(
+    async def get_list(
         self,
         offset: int,
         limit: int,

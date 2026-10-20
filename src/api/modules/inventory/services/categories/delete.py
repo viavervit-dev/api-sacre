@@ -5,17 +5,17 @@ from src.api.modules.inventory.repositories.interfaces import ICategoryRepositor
 
 
 class DeleteCategoryService:
-    """Servicio encargado de la validación de negocio y eliminación de categorías."""
+    """Servicio encargado de la eliminación de categorías de productos."""
 
     def __init__(self, category_repo: ICategoryRepository) -> None:
         self.__category_repo = category_repo
 
-    async def delete_category(self, category_id: UUID) -> None:
+    async def delete(self, category_id: UUID) -> None:
         """
         Elimina una categoría tras validar las reglas de negocio del dominio.
 
         Raises:
-            DomainRuleViolation: Si la categoría tiene productos asociados.
+            DomainRuleViolation: Si falla alguna validación de las reglas de negocio.
             ResourceNotFound: Si la categoría no existe en la base de datos.
         """
 

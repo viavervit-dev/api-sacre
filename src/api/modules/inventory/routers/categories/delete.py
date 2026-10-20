@@ -80,7 +80,7 @@ async def delete_category(
         - Elimina el registro de la categoría de la base de datos.
     """
 
-    await service.delete_category(category_id=category_id)
+    await service.delete(category_id=category_id)
 
     return Response(
         success=True,

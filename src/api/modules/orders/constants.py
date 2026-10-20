@@ -17,56 +17,61 @@ class OrderStatus(StrEnum):
         return [item.value for item in cls]
 
 
-class Currency(StrEnum):
-    """Tipos de moneda admitidos para un pedido."""
-
-    USD = "USD"
-
-    @classmethod
-    def values(cls) -> list[str]:
-        """Devuelve una lista de los valores de la enumeración."""
-
-        return [item.value for item in cls]
-
-
 class OrderEntity(Enum):
     """Metadatos asociados a la entidad `Order`."""
 
     # Descripciones para los campos de la entidad
-    STATUS_DESCRIPTION = "Estado actual del pedido."
-    CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la compra."
-    PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en el pedido."
-    ORDER_NUMBER_DESCRIPTION = "Código de referencia."
-    CURRENCY_DESCRIPTION = "Código ISO de la moneda."
-    SUBTOTAL_DESCRIPTION = "Valor neto de todos los productos, sin cargo de impuestos ni envío."
-    TAX_AMOUNT_DESCRIPTION = "Total de impuestos / IVA aplicados."
-    SHIPING_COST_DESCRIPTION = "Costo de envío del pedido."
-    DISCOUNT_AMOUNT_DESCRIPTION = "Monto de descuento aplicado."
-    DISCOUNT_PERCENTAGE_DESCRIPTION = "Porcentaje de descuento aplicado."
-    TOTAL_AMOUNT_DESCRIPTION = "Monto total final a pagar."
+    STATUS_DESCRIPTION = "Estado actual de la orden."
+    CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la orden."
+    PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en la orden."
+    ORDER_NUMBER_DESCRIPTION = "Código de referencia creado por el cliente (navegador)."
+    UNITS_DESCRIPTION = "Cantidad total de unidades de productos de la orden."
+    SUBTOTAL_DESCRIPTION = "Valor neto de la orden."
+    TOTAL_DESCRIPTION = "Valor total final de la orden."
+    TAX_AMOUNT_DESCRIPTION = "Total de impuestos aplicados de la orden."
+    UNITS_PRODUCT_DESCRIPTION = "Cantidad de unidades del producto de un tipo."
+    SUBTOTAL_PRODUCT_DESCRIPTION = "Valor neto de los productos de un tipo."
+    TOTAL_PRODUCT_DESCRIPTION = "Valor total final de los productos de un tipo."
+    TAX_AMOUNT_PRODUCT_DESCRIPTION = "Total de impuestos aplicados a los productos de un tipo."
+
+    # Mensajes de error
+    ORDER_NUMBER_EXISTS = "Este número de orden ya está registrado."
+    PRODUCT_NOT_FOUND = "El producto no existe."
+    SUBTOTAL_INVALID = "El subtotal no coincide con la suma del subtotal de los productos."
+    UNITS_INVALID = "Las unidades no coinciden con la suma de las unidades de los productos."
+    TOTAL_INVALID = "El total de la orden no coincide con la suma del total de los productos."
+    TOTAL_PRODUCT_INVALID = (
+        "El total del producto no coincide con la suma del subtotal y el impuesto."
+    )
+    TAX_AMOUNT_INVALID = (
+        "El monto de impuestos no coincide con la suma de los impuestos de los productos."
+    )
+    TAX_AMOUNT_PRODUCT_INVALID = (
+        "El impuesto del producto no coincide con el cálculo aplicado a su subtotal."
+    )
 
     # Propiedades para los campos de la entidad
-    SUBTOTAL_MAX_DIGITS = 8
+    SUBTOTAL_MAX_DIGITS = 7
     SUBTOTAL_DECIMAL_PLACES = 2
-    SUBTOTAL_MAX_VALUE = Decimal(value="999999.99")
+    SUBTOTAL_MAX_VALUE = Decimal(value="99999.99")
     SUBTOTAL_MIN_VALUE = Decimal(value="0.00")
+    TOTAL_MAX_DIGITS = 8
+    TOTAL_DECIMAL_PLACES = 2
+    TOTAL_MAX_VALUE = Decimal(value="999999.99")
+    TOTAL_MIN_VALUE = Decimal(value="0.00")
     TAX_AMOUNT_MAX_DIGITS = 7
     TAX_AMOUNT_DECIMAL_PLACES = 2
     TAX_AMOUNT_MAX_VALUE = Decimal(value="99999.99")
     TAX_AMOUNT_MIN_VALUE = Decimal(value="0.00")
-    SHIPING_COST_MAX_DIGITS = 7
-    SHIPING_COST_DECIMAL_PLACES = 2
-    SHIPING_COST_MAX_VALUE = Decimal(value="99999.99")
-    SHIPING_COST_MIN_VALUE = Decimal(value="0.00")
-    DISCOUNT_AMOUNT_MAX_DIGITS = 7
-    DISCOUNT_AMOUNT_DECIMAL_PLACES = 2
-    DISCOUNT_AMOUNT_MAX_VALUE = Decimal(value="99999.99")
-    DISCOUNT_AMOUNT_MIN_VALUE = Decimal(value="0.00")
-    DISCOUNT_PERCENTAGE_MAX_DIGITS = 5
-    DISCOUNT_PERCENTAGE_DECIMAL_PLACES = 4
-    DISCOUNT_PERCENTAGE_MAX_VALUE = Decimal(value="1.0000")
-    DISCOUNT_PERCENTAGE_MIN_VALUE = Decimal(value="0.0000")
-    TOTAL_AMOUNT_MAX_DIGITS = 8
-    TOTAL_AMOUNT_DECIMAL_PLACES = 2
-    TOTAL_AMOUNT_MAX_VALUE = Decimal(value="999999.99")
-    TOTAL_AMOUNT_MIN_VALUE = Decimal(value="0.00")
+    UNITS_MAX_VALUE = 99999
+    UNITS_MIN_VALUE = 0
+    UNITS_PRODUCT_MAX_VALUE = 9999
+    UNITS_PRODUCT_MIN_VALUE = 0
+    SUBTOTAL_PRODUCT_MAX_DIGITS = 7
+    SUBTOTAL_PRODUCT_DECIMAL_PLACES = 2
+    SUBTOTAL_PRODUCT_MAX_VALUE = Decimal(value="99999.99")
+    SUBTOTAL_PRODUCT_MIN_VALUE = Decimal(value="0.00")
+    TOTAL_PRODUCT_MAX_DIGITS = 8
+    TOTAL_PRODUCT_DECIMAL_PLACES = 2
+    TOTAL_PRODUCT_MAX_VALUE = Decimal(value="999999.99")
+    TOTAL_PRODUCT_MIN_VALUE = Decimal(value="0.00")

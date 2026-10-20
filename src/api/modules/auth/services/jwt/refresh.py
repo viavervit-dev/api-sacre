@@ -19,7 +19,7 @@ class RefreshTokenService:
     def __init__(self, user_repo: IUserRepository) -> None:
         self.__user_repo = user_repo
 
-    async def refresh_token(self, refresh_token: str) -> str:
+    async def refresh(self, refresh_token: str) -> str:
         """
         Renueva un token de acceso expirado utilizando un token de actualización válido.
 

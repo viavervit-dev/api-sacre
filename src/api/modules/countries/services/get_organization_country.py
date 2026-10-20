@@ -22,6 +22,4 @@ class RetrieveOrganizationCountryService:
         if not organization_country:
             raise ResourceNotFound()
 
-        return ReadAdministrativeStructureDTO.model_construct(
-            administrative_structure=organization_country.administrative_structure,
-        )
+        return ReadAdministrativeStructureDTO.model_construct(**organization_country.to_dict())

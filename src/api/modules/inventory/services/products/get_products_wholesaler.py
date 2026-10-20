@@ -14,7 +14,7 @@ class GetProductsWholesalerService:
         self.__product_repo = product_repo
         self.__user_repo = user_repo
 
-    async def get_products_by_wholesaler(
+    async def get_products(
         self,
         wholesaler_id: UUID,
         offset: int,
@@ -50,22 +50,7 @@ class GetProductsWholesalerService:
         result = []
 
         for product in products:
-            dto = ReadProductPrivateDTO.model_construct(
-                id=product.id,
-                name=product.name,
-                categories=product.categories,
-                description_short=product.description_short,
-                description_long=product.description_long,
-                images=product.images,
-                price_neto=product.price_neto,
-                price_sale=product.price_sale,
-                profit_margin=product.profit_margin,
-                tax_amount=product.tax_amount,
-                stock_total=product.stock_total,
-                stock_hand=product.stock_hand,
-                stock_sale=product.stock_sale,
-                status=product.status,
-            )
+            dto = ReadProductPrivateDTO.model_construct(**product.to_dict())
             result.append(dto)
 
         return result, total_items

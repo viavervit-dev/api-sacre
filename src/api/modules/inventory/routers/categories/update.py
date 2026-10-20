@@ -83,7 +83,7 @@ async def update_category(
         - Aplica las modificaciones del registro en la base de datos.
     """
 
-    updated_category = await service.update_category(category_id=category_id, data=data)
+    updated_category = await service.update(category_id=category_id, data=data)
 
     return Response(
         success=True,

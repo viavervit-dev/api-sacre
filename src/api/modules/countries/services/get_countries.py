@@ -3,7 +3,7 @@ from src.api.modules.countries.repositories.interfaces import ICountryRepository
 
 
 class RetrieveContriesService:
-    """Servicio encargado de la consulta y serialización del catálogo de países."""
+    """Servicio encargado de la consulta del catálogo de países."""
 
     def __init__(self, country_repo: ICountryRepository) -> None:
         self.__country_repo = country_repo
@@ -19,11 +19,6 @@ class RetrieveContriesService:
         result = []
 
         for country in countries:
-            result.append(
-                ReadCountryDTO.model_construct(
-                    name=country.name,
-                    code=country.code,
-                )
-            )
+            result.append(ReadCountryDTO.model_construct(**country.to_dict()))
 
         return result

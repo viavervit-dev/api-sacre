@@ -20,7 +20,7 @@ from src.api.modules.users.repositories.interfaces import ICustomerWholesaleRepo
 
 
 class AddProductWholesaleService(ProductPricingMixin):
-    """Servicio para la validación y creación de productos exclusivos para mayoristas."""
+    """Servicio encargado de la creación de productos exclusivos para mayoristas."""
 
     def __init__(
         self,
@@ -44,7 +44,7 @@ class AddProductWholesaleService(ProductPricingMixin):
 
         Raises:
             ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
-            RequestValidationError: Si alguna regla de validación de negocio falla.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         # Validar que el cliente mayorista exista en la base de datos
@@ -70,22 +70,7 @@ class AddProductWholesaleService(ProductPricingMixin):
             data={"products": products_wholesale},
         )
 
-        return ReadProductPrivateDTO.model_construct(
-            id=product.id,
-            name=product.name,
-            categories=product.categories,
-            description_short=product.description_short,
-            description_long=product.description_long,
-            images=product.images,
-            price_neto=product.price_neto,
-            price_sale=product.price_sale,
-            profit_margin=product.profit_margin,
-            tax_amount=product.tax_amount,
-            stock_total=product.stock_total,
-            stock_hand=product.stock_hand,
-            stock_sale=product.stock_sale,
-            status=product.status,
-        )
+        return ReadProductPrivateDTO.model_construct(**product.to_dict())
 
     async def __create_product(self, data: CreateProductWholesaleDTO) -> Product:
         """
@@ -130,7 +115,7 @@ class AddProductWholesaleService(ProductPricingMixin):
         Ejecuta las validaciones de negocio previas al registro del producto.
 
         Raises:
-            RequestValidationError: Si falla alguna regla de validación de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         errors = []

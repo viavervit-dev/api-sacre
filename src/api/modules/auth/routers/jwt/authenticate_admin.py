@@ -60,7 +60,7 @@ async def authenticate_admin(
          con flag `Secure` habilitado en entornos no-debug.
     """
 
-    access_token, refresh_token = await service.authenticate_admin(credentials=credentials)
+    access_token, refresh_token = await service.authenticate(credentials=credentials)
     response.set_cookie(
         key="access_token",
         value=access_token,

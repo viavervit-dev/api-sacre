@@ -21,18 +21,15 @@ class CreateCustomerWholesaleService:
         self.__customer_wholesale_repo = customer_wholesale_repo
         self.__user_repo = user_repo
 
-    async def create_customer_wholesale(
-        self,
-        data: CreateCustomerWholesaleDTO,
-    ) -> ReadCustomerWholesaleDTO:
+    async def create(self, data: CreateCustomerWholesaleDTO) -> ReadCustomerWholesaleDTO:
         """
         Registra un nuevo cliente mayorista tras validar las reglas de negocio del dominio.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
-        # Validaciones de negocio
+        # Ejecutar validaciones de las reglas de negocio
         wholesale_data = data.model_dump()
         await self.__run_business_validations(data=wholesale_data)
 
@@ -49,22 +46,17 @@ class CreateCustomerWholesaleService:
         )
         user_instance.customer_wholesale = profile_instance
 
-        return ReadCustomerWholesaleDTO.model_construct(
-            id=user_instance.id,
-            email=user_instance.email,
-            name_or_company_name=profile_instance.name_or_company_name,
-            ruc=profile_instance.ruc,
-            phone=profile_instance.phone,
-            location=profile_instance.location,
-            extra_contacts=profile_instance.extra_contacts,
-        )
+        # Instanciar el DTO de respuesta
+        wholesale_data["id"] = user_instance.id
+
+        return ReadCustomerWholesaleDTO.model_construct(**wholesale_data)
 
     async def __run_business_validations(self, data: dict[str, Any]) -> None:
         """
         Ejecuta las validaciones de negocio previas al registro del cliente mayorista.
 
         Raises:
-            RequestValidationError: Si falla alguna validacion de negocio.
+            RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         errors = []

@@ -88,7 +88,7 @@ async def update_customer_wholesale(
         - Aplica las modificaciones del registro en la base de datos.
     """
 
-    customer_wholesale = await service.update_customer_wholesale(data=data, id=wholesaler_id)
+    customer_wholesale = await service.update(data=data, id=wholesaler_id)
 
     return Response(
         success=True,

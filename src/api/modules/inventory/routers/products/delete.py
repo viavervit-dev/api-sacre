@@ -80,7 +80,7 @@ async def delete_product(
         - Elimina el registro del producto de la base de datos.
     """
 
-    await service.delete_product(product_id=product_id)
+    await service.delete(product_id=product_id)
 
     return Response(
         success=True,

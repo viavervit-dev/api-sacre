@@ -7,12 +7,12 @@ from src.api.modules.inventory.repositories.interfaces import ICategoryRepositor
 
 
 class GetListCategoryService:
-    """Servicio encargado de la consulta y serialización de categorías de productos."""
+    """Servicio encargado de la consulta de categorías de productos."""
 
     def __init__(self, category_repo: ICategoryRepository) -> None:
         self.__category_repo = category_repo
 
-    async def get_list_categories(
+    async def get_list(
         self,
         user: User | None,
         offset: int,
@@ -52,11 +52,7 @@ class GetListCategoryService:
             return [], 0
 
         for category in categories:
-            dto = ReadCategoryPublicDTO.model_construct(
-                id=category.id,
-                name=category.name,
-                description=category.description,
-            )
+            dto = ReadCategoryPublicDTO.model_construct(**category.to_dict())
             result.append(dto)
 
         return result, total_items
@@ -82,12 +78,7 @@ class GetListCategoryService:
             return [], 0
 
         for category in categories:
-            dto = ReadCategoryPrivateDTO.model_construct(
-                id=category.id,
-                name=category.name,
-                description=category.description,
-                status=category.status,
-            )
+            dto = ReadCategoryPrivateDTO.model_construct(**category.to_dict())
             result.append(dto)
 
         return result, total_items
