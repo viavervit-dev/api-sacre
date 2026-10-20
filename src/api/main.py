@@ -12,6 +12,7 @@ from src.api.common.response import Response
 from src.api.modules.auth.routers import router as auth_router
 from src.api.modules.countries.routers import router as countries_router
 from src.api.modules.inventory.routers import router as inventory_router
+from src.api.modules.orders.routers import router as orders_router
 from src.api.modules.users.routers import router as users_router
 from src.api.settings.database import check_db_connection, close_db_pool, create_db_pool
 from src.api.settings.exception_handlers import register_exception_handlers
@@ -95,6 +96,7 @@ v1_router.include_router(router=users_router)
 v1_router.include_router(router=auth_router)
 v1_router.include_router(router=inventory_router)
 v1_router.include_router(router=countries_router)
+v1_router.include_router(router=orders_router)
 app.include_router(router=v1_router)
 
 

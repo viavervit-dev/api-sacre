@@ -64,15 +64,15 @@ autenticación.
 OPENAPI_TAGS: list[dict[str, Any]] = [
     {
         "name": "Autenticación",
-        "description": ("Operaciones de autenticación y control de sesiones."),
+        "description": "Operaciones de autenticación y control de sesiones.",
     },
     {
         "name": "Usuarios",
-        "description": ("Administración y registro de los diferentes usuarios."),
+        "description": "Administración y registro de los diferentes usuarios.",
     },
     {
         "name": "Inventario",
-        "description": ("Gestión del catálogo comercial."),
+        "description": "Gestión de los productos del catálogo público y privado.",
     },
     {
         "name": "Países",
@@ -83,6 +83,10 @@ OPENAPI_TAGS: list[dict[str, Any]] = [
         "description": (
             "Monitoreo del sistema, sondas de disponibilidad y verificación de componentes."
         ),
+    },
+    {
+        "name": "Ordenes de Compra",
+        "description": "Gestión de las ordenes de compra.",
     },
 ]
 

@@ -8,7 +8,7 @@ from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
 
 class OrderRepository(IOrderRepository):
-    """Repositorio SQLAlchemy para la gestión de órdenes en `orders.orders`."""
+    """Repositorio SQLAlchemy para la gestión de órdenes de compra en `orders.orders`."""
 
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db

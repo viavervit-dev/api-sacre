@@ -23,7 +23,7 @@ UNITS_MIN_VALUE = OrderEntity.UNITS_MIN_VALUE.value
 
 
 class Order(ModelBase):
-    """Modelo ORM para la gestión de pedidos y transacciones de compra."""
+    """Modelo ORM para la gestión de ordenes de compra."""
 
     __tablename__ = "orders"
     __table_args__ = (

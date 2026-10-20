@@ -11,7 +11,7 @@ from src.api.modules.users.dto import ReadExtraContactsDTO
 
 
 class ReadCustomerDataDTO(BaseModel):
-    """DTO para la lectura de la información de los productos de una orden."""
+    """DTO para la lectura de la información de los productos de una orden de compra."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -54,7 +54,7 @@ class ReadCustomerDataDTO(BaseModel):
 
 
 class ProductDataDTO(BaseModel):
-    """DTO para la información del producto en la creación de una orden."""
+    """DTO para la información del producto en la creación de una orden de compra."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -143,7 +143,7 @@ class ProductDataDTO(BaseModel):
 
 
 class ReadProductDataDTO(BaseModel):
-    """DTO para la lectura de la información de los productos de una orden."""
+    """DTO para la lectura de la información de los productos de una orden de compra."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -180,7 +180,7 @@ class ReadProductDataDTO(BaseModel):
 
 
 class CreateOrderDTO(BaseModel):
-    """DTO para la creación de una orden."""
+    """DTO para la creación de una orden de compra."""
 
     order_number: UUID = Field(
         description=OrderEntity.ORDER_NUMBER_DESCRIPTION.value,
@@ -280,7 +280,7 @@ class CreateOrderDTO(BaseModel):
 
 
 class ReadOrderDTO(BaseModel):
-    """DTO para la lectura de la información de una orden."""
+    """DTO para la lectura de la información de una orden de compra."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",

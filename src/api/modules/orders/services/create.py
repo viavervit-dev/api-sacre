@@ -19,8 +19,8 @@ from src.api.modules.orders.repositories.interfaces import IOrderRepository
 from src.api.modules.orders.services.utils import OrderPricingMixin
 
 
-class CreateOrderService(OrderPricingMixin):
-    """Servicio encargado de la creación de órdenes para clientes mayoristas."""
+class CreateOrderCustomerWholesaleService(OrderPricingMixin):
+    """Servicio encargado de la creación de órdenes de compra para clientes mayoristas."""
 
     def __init__(
         self,
@@ -35,7 +35,7 @@ class CreateOrderService(OrderPricingMixin):
 
     async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
         """
-        Crea una nueva orden para un cliente mayorista.
+        Crea una nueva orden de compra para un cliente mayorista.
 
         Raises:
             ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
