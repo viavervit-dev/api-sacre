@@ -3,9 +3,9 @@ import asyncio
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config.database import close_db_pool, create_db_pool, get_db_session
-from src.modules.auth.models.permission import Group, Permission, PermissionGroup
-from src.modules.auth.permissions import GROUPS, PERMISSIONS
+from src.api.modules.auth.models.permission import Group, Permission, PermissionGroup
+from src.api.modules.auth.permissions import GROUPS, PERMISSIONS
+from src.api.settings.database import close_db_pool, create_db_pool, db_session
 
 
 async def run(db: AsyncSession) -> None:
@@ -85,7 +85,7 @@ async def main() -> None:
     await create_db_pool()
 
     try:
-        async for db in get_db_session():
+        async for db in db_session():
             await run(db=db)
     except Exception as e:
         raise e

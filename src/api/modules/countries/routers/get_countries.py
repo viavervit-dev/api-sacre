@@ -1,0 +1,49 @@
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, status
+
+from src.api.common.response import Response
+from src.api.common.schema import response_scheme_503
+from src.api.modules.countries.dependencies import get_contries_service
+from src.api.modules.countries.dto import ReadCountryDTO
+from src.api.modules.countries.services.get_countries import RetrieveContriesService
+
+countries_router = APIRouter(prefix="/countries", tags=["Países"])
+
+
+@countries_router.get(
+    path="/",
+    response_description="**(OK)** Lista de países obtenida exitosamente.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
+    },
+)
+async def get_countries(
+    service: Annotated[RetrieveContriesService, Depends(get_contries_service)],
+) -> Response[list[ReadCountryDTO]]:
+    """
+    Permite consultar una lista del catálogo general de países registrados con su nombre
+    oficial y código internacional (ISO). Proporciona a las aplicaciones cliente los datos
+    básicos necesarios para poblar selectores geográficos de registro, facturación
+    y direcciones de entrega sin cargar estructuras territoriales pesadas.
+
+    ### Requisitos de Acceso
+    - **Acceso Público:** Endpoint abierto. No requiere autenticación ni cookies de sesión.
+
+    ### Flujo de Ejecución
+    1. **Consulta en Base de Datos:**
+        - Realiza una consulta sobre la tabla `countries.country` ordenando los registros
+         alfabéticamente por el nombre del país.
+    2. **Serialización:**
+        - Mapea la lista de países al DTO de lectura.
+    """
+
+    countries = await service.get_countries()
+
+    return Response(
+        success=True,
+        pagination=False,
+        message="Lista de países obtenida exitosamente.",
+        data=countries,
+    )

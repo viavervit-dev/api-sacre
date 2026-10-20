@@ -27,17 +27,17 @@ En una arquitectura hexagonal estricta o purista, el núcleo de dominio debe ser
 
 ---
 
-### 2.2. Estructura del Proyecto (`src/`)
+### 2.2. Estructura del Proyecto (`api/`)
 
 ```txt
-src/
+api/
 ├── common/                             # Componentes y contratos transversales
 │   ├── constants.py                    # Constantes y mensajes de error globales
 │   ├── exceptions.py                   # Excepciones base de dominio y aplicación
 │   ├── response.py                     # Modelo unificado de respuesta API (Response[T])
 │   └── schema.py                       # Generadores dinámicos de esquemas OpenAPI para errores
 │
-├── config/                             # Configuración central del sistema
+├── settings/                           # Configuración central del sistema
 │   ├── database.py                     # Conexión asíncrona, pool asyncpg y gestión transaccional
 │   ├── exception_handlers.py           # Manejadores globales de excepciones (HTTP 400, 401, 403, 404, 409, 503)
 │   ├── models.py                       # Registro central de modelos ORM para migraciones Alembic
@@ -65,7 +65,7 @@ src/
 └── main.py                             # Punto de entrada de la API (Instancia FastAPI, lifespan y rutas)
 ```
 
-### 2.3. Anatomía Interna de un Módulo (`src/modules/<modulo>/`)
+### 2.3. Anatomía Interna de un Módulo (`api/modules/<modulo>/`)
 
 Cada módulo funciona como un dominio autocontenido y sigue un patrón de diseño uniforme:
 
@@ -117,7 +117,7 @@ Cada módulo funciona como un dominio autocontenido y sigue un patrón de diseñ
 ## 🔹 4. Instalación
 
 > [!IMPORTANT]
-> Necesitas tener instalado [Python 3.14](https://www.python.org/downloads/) y [Poetry](https://python-poetry.org/docs/#installation)
+> Necesitas tener instalado [Python 3.14](https://www.python.org/downloads/), [Poetry](https://python-poetry.org/docs/#installation) y [PostgreSQL](https://www.postgresql.org/download/) en tu sistema operativo.
 
 ### Paso 1: Clonar el repositorio
 
@@ -128,7 +128,7 @@ cd api-sacre
 
 ### Paso 2: Configurar variables de entorno
 
-Crea un archivo `.env` en la raíz del proyecto tomando como plantilla la siguiente estructura:
+Crea un archivo `.env` dentro de la carpeta `src` del proyecto tomando como plantilla la siguiente estructura:
 
 ```env
 # === Aplicación ===
@@ -169,8 +169,6 @@ WORKERS=4
 > - **Claves Asimétricas (`PRIVATE_KEY` y `PUBLIC_KEY`)**: Requieren un par de claves criptográficas asimétricas Ed25519 en formato PEM. Se generarán ejecutando el script del proyecto tras instalar las dependencias (ver **Paso 5**).
 
 ### Paso 3: Crear base de datos local
-> [!IMPORTANT]
-> Necesitas tener instalado [PostgreSQL](https://www.postgresql.org/download/) en tu sistema operativo
 
 Este proyecto utiliza **PostgreSQL** como motor de base de datos. Para la conexión se emplea SQLAlchemy de forma asíncrona (`asyncpg`) para el rendimiento de la API, y `psycopg2` como driver síncrono para la gestión de migraciones con Alembic. Asegúrate de tener el servicio de PostgreSQL corriendo. Si estás usando WSL o Linux, abre tu terminal y sigue estos pasos:
 
@@ -270,29 +268,29 @@ python3.14 -m src.scripts.create_admin
 Este comando iniciará el servidor utilizando el `HOST` y `PORT` definidos en el archivo `.env`. Si `DEBUG=true`, la recarga automática estará habilitada.
 
 ```txt
-python3.14 -m src.main
+python3.14 -m src.api.main
 ```
 
 ## 🔹 5. Base de Datos y Migraciones
 
-Este proyecto usa **Alembic** para gestionar las migraciones del esquema de base de datos. Los modelos ORM se definen en la carpeta `models/` de cada módulo y deben registrarse en `src/config/models.py` para que Alembic los detecte.
+Este proyecto usa **Alembic** para gestionar las migraciones del esquema de base de datos. Los modelos ORM se definen en la carpeta `models/` de cada módulo y deben registrarse en `api/settings/models.py` para que Alembic los detecte.
 
 ### Flujo de trabajo
 
 Cada vez que crees o modifiques un modelo ORM, sigue estos pasos:
 
-**1. Crear o modificar el modelo** en `src/modules/<modulo>/models/<modelo>.py`
+**1. Crear o modificar el modelo** en `api/modules/<modulo>/models/<modelo>.py`
 
-**2. Registrar el modelo** en `src/config/models.py` (solo si es un modelo nuevo):
+**2. Registrar el modelo** en `api/settings/models.py` (solo si es un modelo nuevo):
 
 ```python
-# src/config/models.py
-from src.modules.customers.models.customer import Customer
-from src.modules.products.models.product import Product
+# api/settings/models.py
+from src.api.modules.customers.models.customer import Customer
+from src.api.modules.products.models.product import Product
 ```
 
 > [!NOTE]
-> Alembic no descubre los modelos automáticamente. `src/config/models.py` es el registro central que le indica a Alembic qué tablas existen. `alembic/env.py` importa este archivo y nunca necesita modificarse al agregar nuevos modelos.
+> Alembic no descubre los modelos automáticamente. `api/settings/models.py` es el registro central que le indica a Alembic qué tablas existen. `alembic/env.py` importa este archivo y nunca necesita modificarse al agregar nuevos modelos.
 
 **3. Generar la migración** (Alembic compara el modelo con el estado actual de la BD):
 
