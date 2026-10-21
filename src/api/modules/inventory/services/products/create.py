@@ -41,13 +41,13 @@ class CreateProductPublicService(FinancialCalculationsMixin):
             product_data["status"] = False
 
         # Calcular el precio de venta
-        product_data["price_sale"] = self._calculate_sale_price_product(
+        product_data["price_sale"] = self.calculate_sale_price_product(
             price_neto=product_data["price_neto"],
             profit_margin=product_data["profit_margin"],
         )
 
         # Calcular el monto del IVA
-        product_data["tax_amount"] = self._calculate_tax_amount(amount=product_data["price_sale"])
+        product_data["tax_amount"] = self.calculate_tax_amount(amount=product_data["price_sale"])
 
         # Inicializar el stock en mano, el stock de venta y exclusividad
         product_data["stock_sale"] = product_data["stock_total"]

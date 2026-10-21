@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Annotated
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -6,12 +7,59 @@ from pydantic import BaseModel, Field
 from src.api.common.exceptions import DTOValidationErrorMessages
 from src.api.modules.countries.dto import ReadLocationEcuadorDTO
 from src.api.modules.inventory.constants import ProductEntity
-from src.api.modules.orders.constants import OrderEntity
+from src.api.modules.orders.constants import DecimalNumberEntity, OrderEntity
 from src.api.modules.users.dto import ReadExtraContactsDTO
 
 
+class ReadDecimalNumberDTO(BaseModel):
+    """DTO para la lectura y respuesta de un valor numérico decimal."""
+
+    value: Decimal = Field(
+        description=DecimalNumberEntity.DESCRIPTION.value,
+        examples=[Decimal(value="10.50"), Decimal(value="-10.50")],
+    )
+
+
+class ListDecimalNumberDTO(BaseModel):
+    """DTO para la entrada de una lista de valores numéricos decimales."""
+
+    value: list[
+        Annotated[
+            Decimal,
+            Field(
+                ge=DecimalNumberEntity.MIN_VALUE.value,
+                le=DecimalNumberEntity.MAX_VALUE.value,
+                max_digits=DecimalNumberEntity.MAX_DIGITS.value,
+                decimal_places=DecimalNumberEntity.DECIMAL_PLACES.value,
+                description=DecimalNumberEntity.DESCRIPTION.value,
+                json_schema_extra={
+                    "x-validation-errors": [
+                        DTOValidationErrorMessages.GREATER_THAN_EQUAL.value,
+                        DTOValidationErrorMessages.VALUE_ERROR.value,
+                        DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+                        DTOValidationErrorMessages.MISSING.value,
+                        DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
+                        DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
+                    ]
+                },
+            ),
+        ]
+    ] = Field(
+        min_length=DecimalNumberEntity.MIN_LENGTH.value,
+        max_length=DecimalNumberEntity.MAX_LENGTH.value,
+        description=DecimalNumberEntity.LIST_DESCRIPTION.value,
+        examples=[[Decimal(value="100.50"), Decimal(value="-10.50")]],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.MISSING.value,
+            ]
+        },
+    )
+
+
 class ReadCustomerDataDTO(BaseModel):
-    """DTO para la lectura de la información de los productos de una orden de compra."""
+    """DTO para la lectura de la información del cliente en una orden de compra."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -197,6 +245,8 @@ class CreateOrderDTO(BaseModel):
         },
     )
     product_data: list[ProductDataDTO] = Field(
+        min_length=OrderEntity.PRODUCTS_MIN_LENGTH.value,
+        max_length=OrderEntity.PRODUCTS_MAX_LENGTH.value,
         description=OrderEntity.PRODUCT_DATA_DESCRIPTION.value,
         json_schema_extra={
             "x-validation-errors": [

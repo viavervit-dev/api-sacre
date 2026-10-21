@@ -33,7 +33,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         self.__user_repo = user_repo
         self.__products: list[Product] = []
 
-    async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
+    async def create(self, data: CreateOrderDTO, customer_wholesale_id: UUID) -> ReadOrderDTO:
         """
         Crea una nueva orden de compra para un cliente mayorista.
 
@@ -45,7 +45,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         # Validar que el cliente mayorista exista
         user = await self.__user_repo.get_user(
             filters={
-                "id": wholesaler_id,
+                "id": customer_wholesale_id,
                 "role": UserRoles.CUSTOMER_WHOLESALE.value,
             },
             load_permissions=False,
@@ -144,7 +144,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
 
             # Guardar la instancia para enriquecer la orden sin volver a consultar la base de datos
             self.__products.append(instance)
-            expected_tax = self._calculate_tax_amount(amount=product.subtotal)
+            expected_tax = self.calculate_tax_amount(amount=product.subtotal)
             expected_total = product.subtotal + expected_tax
 
             if product.tax_amount != expected_tax:

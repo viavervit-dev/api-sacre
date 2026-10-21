@@ -58,13 +58,13 @@ class UpdateProductService(FinancialCalculationsMixin):
         # Calcular el precio de venta
         price_neto: Decimal | None = product_data.get("price_neto")
         profit_margin: Decimal | None = product_data.get("profit_margin")
-        product_data["price_sale"] = self._calculate_sale_price_product(
+        product_data["price_sale"] = self.calculate_sale_price_product(
             price_neto=price_neto or product.price_neto,
             profit_margin=profit_margin or product.profit_margin,
         )
 
         # Calcular el monto del IVA
-        product_data["tax_amount"] = self._calculate_tax_amount(amount=product_data["price_sale"])
+        product_data["tax_amount"] = self.calculate_tax_amount(amount=product_data["price_sale"])
 
         # Actualizar el producto en la base de datos
         updated_product = await self.__product_repo.update_product(

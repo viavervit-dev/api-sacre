@@ -8,7 +8,7 @@ class FinancialCalculationsMixin:
     """Clase que provee métodos auxiliares y cálculos matemáticos financieros."""
 
     @staticmethod
-    def _sum(values: Iterable[Decimal]) -> Decimal:
+    def sum(values: Iterable[Decimal]) -> Decimal:
         """
         Suma una secuencia o iterable de objetos Decimal y redondea el resultado a dos decimales.
         """
@@ -21,7 +21,7 @@ class FinancialCalculationsMixin:
         )
 
     @staticmethod
-    def _calculate_tax_amount(amount: Decimal) -> Decimal:
+    def calculate_tax_amount(amount: Decimal) -> Decimal:
         """Calcula el monto del impuesto sobre un valor base y lo redondea a dos decimales."""
 
         tax_amount = amount * TAX_PERCENTAGE
@@ -32,7 +32,7 @@ class FinancialCalculationsMixin:
         )
 
     @staticmethod
-    def _add_percentage(base_value: Decimal, percentage: Decimal) -> Decimal:
+    def add_percentage(base_value: Decimal, percentage: Decimal) -> Decimal:
         """Aplica un porcentaje adicional a un valor base y lo redondea a dos decimales."""
 
         total = base_value * (Decimal("1") + percentage)
@@ -43,7 +43,7 @@ class FinancialCalculationsMixin:
         )
 
     @staticmethod
-    def _calculate_sale_price_product(price_neto: Decimal, profit_margin: Decimal) -> Decimal:
+    def calculate_sale_price_product(price_neto: Decimal, profit_margin: Decimal) -> Decimal:
         """
         Calcula el precio de venta final de un producto aplicando margen de ganancia e IVA
         y lo redondea a dos decimales.

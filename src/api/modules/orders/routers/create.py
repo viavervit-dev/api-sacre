@@ -27,7 +27,7 @@ require_admin = UserPermissionChecker(
 
 
 @create_order_customer_wholesale_router.post(
-    path="/customer_wholesale/{wholesaler_id}/",
+    path="/customer_wholesale/{customer_wholesale_id}/",
     response_description="**(CREATED)** Orden de compra creada exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
@@ -48,7 +48,7 @@ require_admin = UserPermissionChecker(
 async def create_order_customer_wholesale(
     user: Annotated[User, Depends(require_admin)],
     data: CreateOrderDTO,
-    wholesaler_id: Annotated[
+    customer_wholesale_id: Annotated[
         UUID,
         Path(
             title="ID del cliente mayorista",
@@ -76,7 +76,7 @@ async def create_order_customer_wholesale(
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario posea rol de administrador y el permiso `orders.create`.
     2. **Validación Sintáctica y Parámetros:**
-        - Valida el identificador del mayorista (`wholesaler_id`) como un UUID en la ruta.
+        - Valida el identificador del mayorista (`customer_wholesale_id`) como un UUID en la ruta.
         - Valida tipos de datos, montos decimales y lista de artículos.
     3. **Verificación de Existencia del Mayorista:**
         - Consulta al usuario mayorista en la base de datos con rol `customer_wholesale`.
@@ -95,7 +95,7 @@ async def create_order_customer_wholesale(
         - Guarda el registro en la base de datos.
     """
 
-    order = await service.create(data=data, wholesaler_id=wholesaler_id)
+    order = await service.create(data=data, customer_wholesale_id=customer_wholesale_id)
 
     return Response(
         success=True,

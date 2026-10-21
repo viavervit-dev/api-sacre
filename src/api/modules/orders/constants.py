@@ -51,6 +51,8 @@ class OrderEntity(Enum):
     )
 
     # Propiedades para los campos de la entidad
+    PRODUCTS_MIN_LENGTH = 1
+    PRODUCTS_MAX_LENGTH = 9999
     SUBTOTAL_MAX_DIGITS = 7
     SUBTOTAL_DECIMAL_PLACES = 2
     SUBTOTAL_MAX_VALUE = Decimal(value="99999.99")
@@ -75,3 +77,19 @@ class OrderEntity(Enum):
     TOTAL_PRODUCT_DECIMAL_PLACES = 2
     TOTAL_PRODUCT_MAX_VALUE = Decimal(value="999999.99")
     TOTAL_PRODUCT_MIN_VALUE = Decimal(value="0.00")
+
+
+class DecimalNumberEntity(Enum):
+    """Metadatos y restricciones para operaciones con números decimales."""
+
+    # Descripciones para los campos de la entidad
+    DESCRIPTION = "Valor numérico decimal."
+    LIST_DESCRIPTION = "Lista de valores numéricos decimales."
+
+    # Propiedades
+    MIN_LENGTH = 1
+    MAX_LENGTH = 999
+    MAX_DIGITS = 8
+    DECIMAL_PLACES = 2
+    MAX_VALUE = Decimal(value="999999.99")
+    MIN_VALUE = Decimal(value="-999999.99")
