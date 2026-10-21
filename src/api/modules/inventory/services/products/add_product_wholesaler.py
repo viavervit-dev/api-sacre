@@ -1,11 +1,10 @@
-from typing import Any
 from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
 from pydantic import HttpUrl, TypeAdapter
 
-from src.api.common.constants import TAX_PERCENTAGE
 from src.api.common.exceptions import ResourceNotFound
+from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.inventory.constants import ProductEntity
@@ -15,11 +14,10 @@ from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
     IProductRepository,
 )
-from src.api.modules.inventory.services.products.utils import ProductPricingMixin
 from src.api.modules.users.repositories.interfaces import ICustomerWholesaleRepository
 
 
-class AddProductWholesaleService(ProductPricingMixin):
+class AddProductWholesaleService(FinancialCalculationsMixin):
     """Servicio encargado de la creación de productos exclusivos para mayoristas."""
 
     def __init__(
@@ -37,7 +35,7 @@ class AddProductWholesaleService(ProductPricingMixin):
     async def add_product(
         self,
         data: CreateProductWholesaleDTO,
-        wholesaler_id: UUID,
+        customer_wholesale_id: UUID,
     ) -> ReadProductPrivateDTO:
         """
         Crea un producto exclusivo asignado a un cliente mayorista.
@@ -50,7 +48,7 @@ class AddProductWholesaleService(ProductPricingMixin):
         # Validar que el cliente mayorista exista en la base de datos
         user = await self.__user_repo.get_user(
             filters={
-                "id": wholesaler_id,
+                "id": customer_wholesale_id,
                 "role": UserRoles.CUSTOMER_WHOLESALE.value,
             },
             load_permissions=False,
@@ -80,9 +78,10 @@ class AddProductWholesaleService(ProductPricingMixin):
             RequestValidationError: Si falla alguna validacion de negocio.
         """
 
-        # Validaciones de negocio
+        # Ejecutamos validaciones de las reglas de negocio
+        await self.__run_business_validations(data=data)
+
         product_data = data.model_dump()
-        await self.__run_business_validations(data=product_data)
 
         # Asignar el estado del producto según el stock total
         if product_data["stock_total"] > 0:
@@ -91,17 +90,13 @@ class AddProductWholesaleService(ProductPricingMixin):
             product_data["status"] = False
 
         # Calcular el precio de venta
-        product_data["price_sale"] = self._calculate_sale_price(
+        product_data["price_sale"] = self._calculate_sale_price_product(
             price_neto=product_data["price_neto"],
             profit_margin=product_data["profit_margin"],
-            iva=TAX_PERCENTAGE,
         )
 
         # Calcular el monto del IVA
-        product_data["tax_amount"] = self._calculate_tax_amount(
-            price_sale=product_data["price_sale"],
-            iva=TAX_PERCENTAGE,
-        )
+        product_data["tax_amount"] = self._calculate_tax_amount(amount=product_data["price_sale"])
 
         # Inicializar el stock en mano, el stock de venta y exclusividad
         product_data["stock_sale"] = product_data["stock_total"]
@@ -110,55 +105,58 @@ class AddProductWholesaleService(ProductPricingMixin):
 
         return await self.__product_repo.create_product(data=product_data)
 
-    async def __run_business_validations(self, data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: CreateProductWholesaleDTO) -> None:
         """
         Ejecuta las validaciones de negocio previas al registro del producto.
 
-        Raises:
+        Raises:s
             RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
         errors = []
 
         # Validar que el nombre del producto no esté registrado en la base de datos
-        exists = await self.__product_repo.exists_product(filters={"name": data["name"]})
+        if data.name:
+            exists = await self.__product_repo.exists_product(filters={"name": data.name})
 
-        if exists:
-            errors.append(
-                {
-                    "loc": ("body", "name"),
-                    "msg": ProductEntity.NAME_IN_USE.value,
-                    "type": "domain_validation",
-                }
-            )
+            if exists:
+                errors.append(
+                    {
+                        "loc": ("body", "name"),
+                        "msg": ProductEntity.NAME_IN_USE.value,
+                        "type": "domain_validation",
+                    }
+                )
 
         # Validar que cada elemento de la lista de imágenes sea una URL válida
-        adapter = TypeAdapter(HttpUrl)
+        if data.images:
+            adapter = TypeAdapter(HttpUrl)
 
-        for i, url in enumerate(data["images"]):
-            try:
-                adapter.validate_python(url)
-            except Exception:
-                errors.append(
-                    {
-                        "loc": ("body", "images", i),  # type: ignore
-                        "msg": ProductEntity.URL_INVALID.value,
-                        "type": "domain_validation",
-                    }
-                )
+            for i, url in enumerate(data.images):
+                try:
+                    adapter.validate_python(url)
+                except Exception:
+                    errors.append(
+                        {
+                            "loc": ("body", "images", i),  # type: ignore
+                            "msg": ProductEntity.URL_INVALID.value,
+                            "type": "domain_validation",
+                        }
+                    )
 
         # Validar que cada categoría exista en la base de datos
-        for i, category in enumerate(data["categories"]):
-            exists = await self.__category_repo.exists_category(filters={"name": category})
+        if data.categories:
+            for i, category in enumerate(data.categories):
+                exists = await self.__category_repo.exists_category(filters={"name": category})
 
-            if not exists:
-                errors.append(
-                    {
-                        "loc": ("body", "categories", i),  # type: ignore
-                        "msg": ProductEntity.CATEGORY_NOT_FOUND.value,
-                        "type": "domain_validation",
-                    }
-                )
+                if not exists:
+                    errors.append(
+                        {
+                            "loc": ("body", "categories", i),  # type: ignore
+                            "msg": ProductEntity.CATEGORY_NOT_FOUND.value,
+                            "type": "domain_validation",
+                        }
+                    )
 
         if errors:
             raise RequestValidationError(errors=errors)

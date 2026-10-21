@@ -20,13 +20,16 @@ class DeleteProductService:
             DomainRuleViolation: Si falla alguna validación de las reglas de negocio.
         """
 
-        instance = await self.__product_repo.get_product_by_id(id=product_id)
+        # Validar que el producto exista en la base de datos
+        product = await self.__product_repo.get_product_by_id(id=product_id)
 
-        if not instance:
+        if not product:
             raise ResourceNotFound()
 
-        await self.__run_business_validations(instance=instance)
-        await self.__product_repo.delete_product(instance=instance)
+        # Ejecutamos validaciones de las reglas de negocio
+        await self.__run_business_validations(instance=product)
+
+        await self.__product_repo.delete_product(instance=product)
 
     async def __run_business_validations(self, instance: Product) -> None:
         """

@@ -3,8 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.modules.auth.dependencies import user_repository
-from src.api.modules.auth.repositories.user import UserRepository
+from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.repositories.category import CategoryRepository
 from src.api.modules.inventory.repositories.product import ProductRepository
 from src.api.modules.inventory.services.categories.create import CreateCategoryService
@@ -21,8 +20,10 @@ from src.api.modules.inventory.services.products.get_products_wholesaler import 
     GetProductsWholesalerService,
 )
 from src.api.modules.inventory.services.products.update import UpdateProductService
-from src.api.modules.users.dependencies import customer_wholesale_repository
-from src.api.modules.users.repositories.customer_wholesale import CustomerWholesaleRepository
+from src.api.modules.users.dependencies import (
+    CustomerWholesaleRepository,
+    customer_wholesale_repository,
+)
 from src.api.settings.database import db_session
 
 

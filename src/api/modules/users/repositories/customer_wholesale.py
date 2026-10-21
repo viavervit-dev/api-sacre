@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,9 +17,13 @@ class CustomerWholesaleRepository(ICustomerWholesaleRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db
 
-    async def create_customer_wholesale(self, data: dict[str, Any]) -> CustomerWholesale:
+    async def create_customer_wholesale(
+        self,
+        user_id: UUID,
+        data: dict[str, Any],
+    ) -> CustomerWholesale:
 
-        instance = CustomerWholesale(**data)
+        instance = CustomerWholesale(user_id=user_id, **data)
         self.__db.add(instance)
         await self.__db.flush()
 

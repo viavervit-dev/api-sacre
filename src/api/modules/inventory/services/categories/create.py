@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastapi.exceptions import RequestValidationError
 
 from src.api.modules.inventory.constants import CategoryEntity
@@ -21,14 +19,19 @@ class CreateCategoryService:
             RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
+        # Ejecutamos validaciones de las reglas de negocio
+        await self.__run_business_validations(data=data)
+
         category_data = data.model_dump()
+
+        # Asignar el estado del producto según el stock total
         category_data["status"] = False
-        await self.__run_business_validations(data=category_data)
+
         category = await self.__category_repo.create_category(data=category_data)
 
         return ReadCategoryPrivateDTO.model_construct(**category.to_dict())
 
-    async def __run_business_validations(self, data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: CreateCategoryDTO) -> None:
         """
         Ejecuta las validaciones de reglas de negocio previas a la creación.
 
@@ -37,8 +40,8 @@ class CreateCategoryService:
         """
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos
-        if data.get("name"):
-            exists = await self.__category_repo.exists_category(filters={"name": data["name"]})
+        if data.name:
+            exists = await self.__category_repo.exists_category(filters={"name": data.name})
 
             if exists:
                 raise RequestValidationError(

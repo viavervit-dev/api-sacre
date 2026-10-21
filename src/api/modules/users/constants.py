@@ -54,13 +54,13 @@ class CustomerWholesaleEntity(Enum):
     """Metadatos asociados a la entidad `CustomerWholesale`."""
 
     # Descripciones para los campos de la entidad
-    NAME_OR_COMPANY_NAME_DESCRIPTION = "Nombre o razón social del mayorista."
-    PRODUCTS_DESCRIPTION = "Lista de productos del cliente."
-    EMAIL_DESCRIPTION = "Correo electrónico del mayorista."
-    RUC_DESCRIPTION = "Registro Único de Contribuyentes del mayorista."
-    PHONE_DESCRIPTION = "Número de teléfono del mayorista."
+    NAME_OR_COMPANY_NAME_DESCRIPTION = "Nombre o razón social del cliente mayorista."
+    PRODUCTS_DESCRIPTION = "Lista de productos del cliente mayorista."
+    EMAIL_DESCRIPTION = "Correo electrónico del cliente mayorista."
+    RUC_DESCRIPTION = "Registro Único de Contribuyentes del cliente mayorista."
+    PHONE_DESCRIPTION = "Número de teléfono del cliente mayorista."
     LOCATION_DESCRIPTION = "Datos de ubicación y dirección de entrega."
-    EXTRA_CONTACTS_DESCRIPTION = "Contactos adicionales del mayorista."
+    EXTRA_CONTACTS_DESCRIPTION = "Contactos adicionales del cliente mayorista."
     NAME_CONTACT_DESCRIPTION = "Nombre del contacto adicional."
     POSITION_CONTACT_DESCRIPTION = "Cargo del contacto adicional."
 

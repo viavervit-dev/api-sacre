@@ -1,4 +1,3 @@
-from typing import Any
 from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
@@ -28,23 +27,24 @@ class UpdateCategoryService:
             ResourceNotFound: Si la categoría no existe en la base de datos.
         """
 
-        category_data = data.model_dump(exclude_unset=True)
-        instance = await self.__category_repo.get_category_by_id(id=category_id)
+        # Validar que la categoría exista en la base de datos
+        category = await self.__category_repo.get_category_by_id(id=category_id)
 
-        if not instance:
+        if not category:
             raise ResourceNotFound()
 
-        await self.__run_business_validations(data=category_data)
+        # Ejecutamos validaciones de las reglas de negocio
+        await self.__run_business_validations(data=data)
 
         # Actualizar el producto en la base de datos
-        category = await self.__category_repo.update_category(
-            data=category_data,
-            instance=instance,
+        updated_category = await self.__category_repo.update_category(
+            data=data.model_dump(exclude_unset=True),
+            instance=category,
         )
 
-        return ReadCategoryPrivateDTO.model_construct(**category.to_dict())
+        return ReadCategoryPrivateDTO.model_construct(**updated_category.to_dict())
 
-    async def __run_business_validations(self, data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: UpdateCategoryDTO) -> None:
         """
         Ejecuta las validaciones de reglas de negocio previas a la actualización.
 
@@ -53,8 +53,8 @@ class UpdateCategoryService:
         """
 
         # Validar que el nombre de la categoría no esté registrado en la base de datos
-        if data.get("name"):
-            exists = await self.__category_repo.exists_category(filters={"name": data["name"]})
+        if data.name:
+            exists = await self.__category_repo.exists_category(filters={"name": data.name})
 
             if exists:
                 raise RequestValidationError(

@@ -29,7 +29,7 @@ require_admin = UserPermissionChecker(
 
 
 @add_product_wholesaler_router.post(
-    path="/product/{wholesaler_id}/",
+    path="/product/{customer_wholesale_id}/",
     response_description="**(CREATED)** Producto agregado exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
@@ -50,7 +50,7 @@ require_admin = UserPermissionChecker(
 async def add_product_wholesaler(
     user: Annotated[User, Depends(require_admin)],
     data: CreateProductWholesaleDTO,
-    wholesaler_id: Annotated[
+    customer_wholesale_id: Annotated[
         UUID,
         Path(
             title="ID del cliente mayorista",
@@ -76,7 +76,7 @@ async def add_product_wholesaler(
         - Verifica la vigencia de la sesión y la existencia del usuario.
         - Comprueba que el usuario tenga rol de administrador y el permiso `products.create`.
     2. **Validación Sintáctica y Parámetros:**
-        - Valida el identificador del mayorista (`wholesaler_id`) como un UUID en la ruta.
+        - Valida el identificador del mayorista (`customer_wholesale_id`) como un UUID en la ruta.
         - Valida tipos de datos, longitudes y rangos numéricos.
     3. **Verificación de Existencia del Mayorista:**
         - Comprueba que el cliente mayorista exista en la base de datos. Si no existe, levanta
@@ -92,7 +92,7 @@ async def add_product_wholesaler(
         - Guarda el registro en la base de datos.
     """
 
-    product = await service.add_product(data=data, wholesaler_id=wholesaler_id)
+    product = await service.add_product(data=data, customer_wholesale_id=customer_wholesale_id)
 
     return Response(
         success=True,

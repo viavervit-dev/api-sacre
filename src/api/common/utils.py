@@ -4,8 +4,8 @@ from decimal import ROUND_HALF_UP, Decimal
 from src.api.common.constants import TAX_PERCENTAGE, TWO_DECIMAL_PLACES
 
 
-class OrderPricingMixin:
-    """Clase que provee métodos auxiliares y cálculos matemáticos para órdenes."""
+class FinancialCalculationsMixin:
+    """Clase que provee métodos auxiliares y cálculos matemáticos financieros."""
 
     @staticmethod
     def _sum(values: Iterable[Decimal]) -> Decimal:
@@ -38,6 +38,22 @@ class OrderPricingMixin:
         total = base_value * (Decimal("1") + percentage)
 
         return total.quantize(
+            exp=TWO_DECIMAL_PLACES,
+            rounding=ROUND_HALF_UP,
+        )
+
+    @staticmethod
+    def _calculate_sale_price_product(price_neto: Decimal, profit_margin: Decimal) -> Decimal:
+        """
+        Calcula el precio de venta final de un producto aplicando margen de ganancia e IVA
+        y lo redondea a dos decimales.
+        """
+
+        raw_price_sale = (
+            price_neto * (Decimal("1") + profit_margin) * (Decimal("1") + TAX_PERCENTAGE)
+        )
+
+        return raw_price_sale.quantize(
             exp=TWO_DECIMAL_PLACES,
             rounding=ROUND_HALF_UP,
         )

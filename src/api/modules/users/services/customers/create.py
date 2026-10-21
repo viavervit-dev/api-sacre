@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastapi.exceptions import RequestValidationError
 
 from src.api.modules.auth.constants import UserEntity, UserRoles
@@ -26,38 +24,29 @@ class CreateCustomerService:
         """
 
         # Validaciones de negocio
-        await self.__run_business_validations(data=data.model_dump())
+        await self.__run_business_validations(data=data)
 
         # Creamos el usuario base con su rol y permisos
+        customer_data = data.model_dump()
         user_instance = await self.__user_repo.create_user(
-            email=data.email,
-            password=data.password,
+            email=customer_data.pop("email"),
+            password=customer_data.pop("password"),
             role=UserRoles.CUSTOMER.value,
         )
-
-        # Creamos el perfil de cliente con el ID del usuario
-        profile_data = {
-            "first_names": data.first_names,
-            "last_names": data.last_names,
-            "document_type": data.document_type,
-            "document_number": data.document_number,
-            "phone": data.phone,
-        }
         profile_instance = await self.__customer_repo.create_customer(
             user_id=user_instance.id,
-            data=profile_data,
+            data=customer_data,
         )
         user_instance.customer = profile_instance
 
-        return ReadUserDTO.model_construct(
-            id=user_instance.id,
-            first_names=profile_instance.first_names,
-            last_names=profile_instance.last_names,
-            email=user_instance.email,
-            role=user_instance.role,
-        )
+        # Instanciar el DTO de respuesta
+        customer_data = profile_instance.to_dict()
+        customer_data["id"] = user_instance.id
+        customer_data["role"] = user_instance.role
 
-    async def __run_business_validations(self, data: dict[str, Any]) -> None:
+        return ReadUserDTO.model_construct(**customer_data)
+
+    async def __run_business_validations(self, data: CreateCustomerDTO) -> None:
         """
         Ejecuta las validaciones de negocio previas al registro del cliente.
 
@@ -68,8 +57,8 @@ class CreateCustomerService:
         errors = []
 
         # Validar que el correo electrónico no esté registrado en la base de datos
-        if data.get("email"):
-            exists = await self.__user_repo.exists_user(filters={"email": data["email"]})
+        if data.email:
+            exists = await self.__user_repo.exists_user(filters={"email": data.email})
 
             if exists:
                 errors.append(
@@ -81,8 +70,8 @@ class CreateCustomerService:
                 )
 
         # Validar que el número de teléfono no esté registrado en la base de datos
-        if data.get("phone"):
-            exists = await self.__customer_repo.exists_customer(filters={"phone": data["phone"]})
+        if data.phone:
+            exists = await self.__customer_repo.exists_customer(filters={"phone": data.phone})
 
             if exists:
                 errors.append(
@@ -94,9 +83,9 @@ class CreateCustomerService:
                 )
 
         # Validar que el número de documento no esté registrado en la base de datos
-        if data.get("document_number"):
+        if data.document_number:
             exists = await self.__customer_repo.exists_customer(
-                filters={"document_number": data["document_number"]},
+                filters={"document_number": data.document_number},
             )
 
             if exists:

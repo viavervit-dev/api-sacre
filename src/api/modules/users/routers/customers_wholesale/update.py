@@ -29,7 +29,7 @@ require_admin = UserPermissionChecker(
 
 
 @update_customer_wholesale_router.patch(
-    path="/customer_wholesale/{wholesaler_id}/",
+    path="/customer_wholesale/{customer_wholesale_id}/",
     response_description="**(OK)** Cliente mayorista actualizado exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
@@ -50,7 +50,7 @@ require_admin = UserPermissionChecker(
 async def update_customer_wholesale(
     user: Annotated[User, Depends(require_admin)],
     data: UpdateCustomerWholesaleDTO,
-    wholesaler_id: Annotated[
+    customer_wholesale_id: Annotated[
         UUID,
         Path(
             title="ID del cliente mayorista",
@@ -88,7 +88,10 @@ async def update_customer_wholesale(
         - Aplica las modificaciones del registro en la base de datos.
     """
 
-    customer_wholesale = await service.update(data=data, id=wholesaler_id)
+    customer_wholesale = await service.update(
+        customer_wholesale_id=customer_wholesale_id,
+        data=data,
+    )
 
     return Response(
         success=True,

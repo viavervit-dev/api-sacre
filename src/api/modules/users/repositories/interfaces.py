@@ -27,7 +27,11 @@ class ICustomerWholesaleRepository(ABC):
     """Contrato de persistencia para el perfil de cliente mayorista `users.customer_wholesale`."""
 
     @abstractmethod
-    async def create_customer_wholesale(self, data: dict[str, Any]) -> CustomerWholesale:
+    async def create_customer_wholesale(
+        self,
+        user_id: UUID,
+        data: dict[str, Any],
+    ) -> CustomerWholesale:
         """Crea un nuevo cliente mayorista en la base de datos."""
 
         pass

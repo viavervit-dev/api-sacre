@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi.exceptions import RequestValidationError
 
 from src.api.common.exceptions import ResourceNotFound
+from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.inventory.models.product import Product
@@ -16,10 +17,9 @@ from src.api.modules.orders.dto import (
     ReadProductDataDTO,
 )
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
-from src.api.modules.orders.services.utils import OrderPricingMixin
 
 
-class CreateOrderCustomerWholesaleService(OrderPricingMixin):
+class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
     """Servicio encargado de la creación de órdenes de compra para clientes mayoristas."""
 
     def __init__(
