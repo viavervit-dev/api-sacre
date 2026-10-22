@@ -122,6 +122,43 @@ class GetTaxAmountDTO(BaseModel):
     )
 
 
+class MultiplyDecimalDTO(BaseModel):
+    """DTO para el cálculo de multiplicación de un valor decimal por un número entero."""
+
+    decimal: Decimal = Field(
+        gt=Decimal(value="0.00"),
+        le=Decimal(value="999999.99"),
+        max_digits=8,
+        decimal_places=2,
+        description="Valor decimal a multiplicar.",
+        examples=[Decimal("10.50")],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.GREATER_THAN.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
+            ]
+        },
+    )
+    multiplier: int = Field(
+        gt=0,
+        le=99999,
+        description="Factor multiplicador entero.",
+        examples=[150],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.GREATER_THAN.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+                DTOValidationErrorMessages.MISSING.value,
+            ]
+        },
+    )
+
+
 class ReadCustomerDataDTO(BaseModel):
     """DTO para la lectura de la información del cliente en una orden de compra."""
 

@@ -57,3 +57,16 @@ class FinancialCalculationsMixin:
             exp=TWO_DECIMAL_PLACES,
             rounding=ROUND_HALF_UP,
         )
+
+    @staticmethod
+    def multiply(value: Decimal, multiplier: int) -> Decimal:
+        """
+        Multiplica un valor Decimal por un número entero y redondea el resultado a dos decimales.
+        """
+
+        total = value * multiplier
+
+        return total.quantize(
+            exp=TWO_DECIMAL_PLACES,
+            rounding=ROUND_HALF_UP,
+        )
