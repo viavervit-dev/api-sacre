@@ -33,6 +33,8 @@ class OrderEntity(Enum):
     SUBTOTAL_PRODUCT_DESCRIPTION = "Valor neto de los productos de un tipo."
     TOTAL_PRODUCT_DESCRIPTION = "Valor total final de los productos de un tipo."
     TAX_AMOUNT_PRODUCT_DESCRIPTION = "Total de impuestos aplicados a los productos de un tipo."
+    PERCENTAGE_DESCRIPTION = "Porcentaje adicional para aplicar a un valor base."
+    AMOUNT_DESCRIPTION = "Monto base al que se le va a agregar un porcentaje."
 
     # Mensajes de error
     ORDER_NUMBER_EXISTS = "Este número de orden ya está registrado."
@@ -51,6 +53,14 @@ class OrderEntity(Enum):
     )
 
     # Propiedades para los campos de la entidad
+    AMOUNT_MAX_DIGITS = 8
+    AMOUNT_DECIMAL_PLACES = 2
+    AMOUNT_MAX_VALUE = Decimal(value="999999.99")
+    AMOUNT_MIN_VALUE = Decimal(value="0.00")
+    PERCENTAGE_MAX_DIGITS = 5
+    PERCENTAGE_DECIMAL_PLACES = 4
+    PERCENTAGE_MAX_VALUE = Decimal(value="2.0000")
+    PERCENTAGE_MIN_VALUE = Decimal(value="0.0000")
     PRODUCTS_MIN_LENGTH = 1
     PRODUCTS_MAX_LENGTH = 9999
     SUBTOTAL_MAX_DIGITS = 7

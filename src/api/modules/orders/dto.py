@@ -58,6 +58,70 @@ class ListDecimalNumberDTO(BaseModel):
     )
 
 
+class AddPercentageDTO(BaseModel):
+    """DTO para el cálculo de adición de un porcentaje a un monto base."""
+
+    amount: Decimal = Field(
+        gt=OrderEntity.AMOUNT_MIN_VALUE.value,
+        le=OrderEntity.AMOUNT_MAX_VALUE.value,
+        max_digits=OrderEntity.AMOUNT_MAX_DIGITS.value,
+        decimal_places=OrderEntity.AMOUNT_DECIMAL_PLACES.value,
+        description=OrderEntity.AMOUNT_DESCRIPTION.value,
+        examples=[Decimal("10.50")],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.GREATER_THAN.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
+            ]
+        },
+    )
+    percentage: Decimal = Field(
+        gt=OrderEntity.PERCENTAGE_MIN_VALUE.value,
+        le=OrderEntity.PERCENTAGE_MAX_VALUE.value,
+        max_digits=OrderEntity.PERCENTAGE_MAX_DIGITS.value,
+        decimal_places=OrderEntity.PERCENTAGE_DECIMAL_PLACES.value,
+        description=OrderEntity.PERCENTAGE_DESCRIPTION.value,
+        examples=[Decimal("0.1500")],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.GREATER_THAN.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
+            ]
+        },
+    )
+
+
+class GetTaxAmountDTO(BaseModel):
+    """DTO para el cálculo del monto de impuesto a partir de un monto base."""
+
+    amount: Decimal = Field(
+        gt=OrderEntity.AMOUNT_MIN_VALUE.value,
+        le=OrderEntity.AMOUNT_MAX_VALUE.value,
+        max_digits=OrderEntity.AMOUNT_MAX_DIGITS.value,
+        decimal_places=OrderEntity.AMOUNT_DECIMAL_PLACES.value,
+        description=OrderEntity.TAX_AMOUNT_DESCRIPTION.value,
+        examples=[Decimal("10.50")],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.GREATER_THAN.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
+                DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
+            ]
+        },
+    )
+
+
 class ReadCustomerDataDTO(BaseModel):
     """DTO para la lectura de la información del cliente en una orden de compra."""
 

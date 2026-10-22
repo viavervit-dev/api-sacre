@@ -12,7 +12,7 @@ sum_router = APIRouter(prefix="/orders", tags=["Ordenes de Compra"])
 
 
 @sum_router.post(
-    path="/financial_calculations/sum/",
+    path="/calculations/sum/",
     response_description="**(OK)** Suma de valores decimales calculada exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=ListDecimalNumberDTO)},
