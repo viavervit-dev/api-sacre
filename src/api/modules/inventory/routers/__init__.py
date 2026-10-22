@@ -1,12 +1,9 @@
 from fastapi import APIRouter
 
-# Importación de routers de categorías
 from src.api.modules.inventory.routers.categories.create import create_category_router
 from src.api.modules.inventory.routers.categories.delete import delete_category_router
 from src.api.modules.inventory.routers.categories.get_list import get_list_categories_router
 from src.api.modules.inventory.routers.categories.update import update_category_router
-
-# Importación de routers de productos
 from src.api.modules.inventory.routers.products.add_product_wholesaler import (
     add_product_wholesaler_router,
 )
@@ -18,16 +15,11 @@ from src.api.modules.inventory.routers.products.get_products_wholesaler import (
 )
 from src.api.modules.inventory.routers.products.update import update_product_router
 
-# Router raíz del módulo Inventory
 router = APIRouter()
-
-# Categorías
 router.include_router(router=create_category_router)
 router.include_router(router=get_list_categories_router)
 router.include_router(router=update_category_router)
 router.include_router(router=delete_category_router)
-
-# Productos
 router.include_router(router=create_product_router)
 router.include_router(router=get_list_products_router)
 router.include_router(router=get_products_wholesaler_router)
