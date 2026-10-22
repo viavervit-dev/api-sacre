@@ -259,20 +259,6 @@ class CreateCustomerWholesaleDTO(BaseModel):
 class UpdateCustomerWholesaleDTO(BaseModel):
     """DTO para la actualización de un cliente mayorista."""
 
-    email: EmailStr | None = Field(
-        max_length=UserEntity.EMAIL_MAX_LENGTH.value,
-        description=UserEntity.EMAIL_DESCRIPTION.value,
-        examples=["user@email.com"],
-        json_schema_extra={
-            "x-validation-errors": [
-                DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
-                DTOValidationErrorMessages.VALUE_ERROR_EMAIL.value,
-                UserEntity.EMAIL_IN_USE.value,
-            ]
-        },
-        default=None,
-    )
     name_or_company_name: str | None = Field(
         max_length=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_MAX_LENGTH.value,
         description=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
@@ -350,6 +336,10 @@ class ReadCustomerWholesaleDTO(BaseModel):
     name_or_company_name: str = Field(
         description=CustomerWholesaleEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
         examples=["Juan Pablo", "Parroquia San José de Chaltura"],
+    )
+    products: list[UUID] = Field(
+        description=CustomerWholesaleEntity.PRODUCTS_DESCRIPTION.value,
+        examples=[["3fa85f64-5717-4562-b3fc-2c963f66afa6"], []],
     )
     ruc: str | None = Field(
         description=CustomerWholesaleEntity.RUC_DESCRIPTION.value,

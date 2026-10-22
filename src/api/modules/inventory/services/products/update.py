@@ -1,12 +1,11 @@
 from decimal import Decimal
-from typing import Any
 from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
 from pydantic import HttpUrl, TypeAdapter
 
-from src.api.common.constants import TAX_PERCENTAGE
 from src.api.common.exceptions import ResourceNotFound
+from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.inventory.constants import ProductEntity
 from src.api.modules.inventory.dto import ReadProductPrivateDTO, UpdateProductPublicDTO
 from src.api.modules.inventory.models.product import Product
@@ -14,10 +13,9 @@ from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
     IProductRepository,
 )
-from src.api.modules.inventory.services.products.utils import ProductPricingMixin
 
 
-class UpdateProductService(ProductPricingMixin):
+class UpdateProductService(FinancialCalculationsMixin):
     """Servicio encargado de la actualización de productos."""
 
     def __init__(
@@ -41,32 +39,32 @@ class UpdateProductService(ProductPricingMixin):
             ResourceNotFound: Si el producto no existe en la base de datos.
         """
 
-        product_data = data.model_dump(exclude_unset=True)
+        # Validar que el producto exista en la base de datos
         product = await self.__product_repo.get_product_by_id(id=product_id)
 
         if not product:
             raise ResourceNotFound()
 
-        await self.__run_business_validations(data=product_data, instance=product)
-        stock_total: int | None = product_data.get("stock_total")
+        # Ejecutamos validaciones de las reglas de negocio
+        await self.__run_business_validations(data=data, instance=product)
 
+        product_data = data.model_dump(exclude_unset=True)
+
+        # Asignar el estado del producto
+        stock_total: int | None = product_data.get("stock_total")
         if stock_total and stock_total == 0 and product.stock_hand == 0:
             product_data["status"] = False
 
         # Calcular el precio de venta
         price_neto: Decimal | None = product_data.get("price_neto")
         profit_margin: Decimal | None = product_data.get("profit_margin")
-        product_data["price_sale"] = self._calculate_sale_price(
+        product_data["price_sale"] = self.calculate_sale_price_product(
             price_neto=price_neto or product.price_neto,
             profit_margin=profit_margin or product.profit_margin,
-            iva=TAX_PERCENTAGE,
         )
 
         # Calcular el monto del IVA
-        product_data["tax_amount"] = self._calculate_tax_amount(
-            price_sale=product_data["price_sale"],
-            iva=TAX_PERCENTAGE,
-        )
+        product_data["tax_amount"] = self.calculate_tax_amount(amount=product_data["price_sale"])
 
         # Actualizar el producto en la base de datos
         updated_product = await self.__product_repo.update_product(
@@ -76,7 +74,11 @@ class UpdateProductService(ProductPricingMixin):
 
         return ReadProductPrivateDTO.model_construct(**updated_product.to_dict())
 
-    async def __run_business_validations(self, data: dict[str, Any], instance: Product) -> None:
+    async def __run_business_validations(
+        self,
+        data: UpdateProductPublicDTO,
+        instance: Product,
+    ) -> None:
         """
         Ejecuta las validaciones de negocio previas a la actualización del producto.
 
@@ -87,8 +89,8 @@ class UpdateProductService(ProductPricingMixin):
         errors = []
 
         # Validar que el stock_total no sea menor al stock_hand
-        if data.get("stock_total"):
-            stock_total: int | None = data.get("stock_total")
+        if data.stock_total:
+            stock_total = data.stock_total
 
             if stock_total and stock_total < instance.stock_hand:
                 errors.append(
@@ -100,8 +102,8 @@ class UpdateProductService(ProductPricingMixin):
                 )
 
         # Validar que el nombre del producto no esté registrado en la base de datos
-        if data.get("name"):
-            exists = await self.__product_repo.exists_product(filters={"name": data["name"]})
+        if data.name:
+            exists = await self.__product_repo.exists_product(filters={"name": data.name})
 
             if exists:
                 errors.append(
@@ -113,10 +115,10 @@ class UpdateProductService(ProductPricingMixin):
                 )
 
         # Validar que cada elemento de la lista de imágenes sea una URL válida
-        if data.get("images"):
+        if data.images:
             adapter = TypeAdapter(HttpUrl)
 
-            for i, url in enumerate(data["images"]):
+            for i, url in enumerate(data.images):
                 try:
                     adapter.validate_python(url)
                 except Exception:
@@ -129,8 +131,8 @@ class UpdateProductService(ProductPricingMixin):
                     )
 
         # Validar que cada categoría exista en la base de datos
-        if data.get("categories"):
-            for i, category in enumerate(data["categories"]):
+        if data.categories:
+            for i, category in enumerate(data.categories):
                 exists = await self.__category_repo.exists_category(filters={"name": category})
 
                 if not exists:

@@ -29,7 +29,7 @@ require_admin = UserPermissionChecker(
 
 
 @get_products_wholesaler_router.get(
-    path="/product/{wholesaler_id}/",
+    path="/product/{customer_wholesale_id}/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -113,7 +113,7 @@ require_admin = UserPermissionChecker(
 )
 async def get_products_by_wholesaler(
     user: Annotated[User, Depends(require_admin)],
-    wholesaler_id: Annotated[
+    customer_wholesale_id: Annotated[
         UUID,
         Path(
             title="ID del cliente mayorista",
@@ -164,7 +164,7 @@ async def get_products_by_wholesaler(
     """
 
     products, total_items = await service.get_products(
-        wholesaler_id=wholesaler_id,
+        customer_wholesale_id=customer_wholesale_id,
         offset=offset,
         limit=limit,
     )

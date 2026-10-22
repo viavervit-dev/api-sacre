@@ -1,19 +1,16 @@
-from typing import Any
-
 from fastapi.exceptions import RequestValidationError
 from pydantic import HttpUrl, TypeAdapter
 
-from src.api.common.constants import TAX_PERCENTAGE
+from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.inventory.constants import ProductEntity
 from src.api.modules.inventory.dto import CreateProductPublicDTO, ReadProductPrivateDTO
 from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
     IProductRepository,
 )
-from src.api.modules.inventory.services.products.utils import ProductPricingMixin
 
 
-class CreateProductPublicService(ProductPricingMixin):
+class CreateProductPublicService(FinancialCalculationsMixin):
     """Servicio encargado de la creación de productos para el catálogo público."""
 
     def __init__(
@@ -32,28 +29,25 @@ class CreateProductPublicService(ProductPricingMixin):
             RequestValidationError: Si falla alguna validación de las reglas de negocio.
         """
 
-        # Validaciones de negocio
-        product_data = data.model_dump()
-        await self.__run_business_validations(data=product_data)
+        # Ejecutamos validaciones de las reglas de negocio
+        await self.__run_business_validations(data=data)
 
         # Asignar el estado del producto según el stock total
+        product_data = data.model_dump()
+
         if product_data["stock_total"] > 0:
             product_data["status"] = True
         else:
             product_data["status"] = False
 
         # Calcular el precio de venta
-        product_data["price_sale"] = self._calculate_sale_price(
+        product_data["price_sale"] = self.calculate_sale_price_product(
             price_neto=product_data["price_neto"],
             profit_margin=product_data["profit_margin"],
-            iva=TAX_PERCENTAGE,
         )
 
         # Calcular el monto del IVA
-        product_data["tax_amount"] = self._calculate_tax_amount(
-            price_sale=product_data["price_sale"],
-            iva=TAX_PERCENTAGE,
-        )
+        product_data["tax_amount"] = self.calculate_tax_amount(amount=product_data["price_sale"])
 
         # Inicializar el stock en mano, el stock de venta y exclusividad
         product_data["stock_sale"] = product_data["stock_total"]
@@ -64,7 +58,7 @@ class CreateProductPublicService(ProductPricingMixin):
 
         return ReadProductPrivateDTO.model_construct(**product.to_dict())
 
-    async def __run_business_validations(self, data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: CreateProductPublicDTO) -> None:
         """
         Ejecuta las validaciones de negocio previas a la creación del producto.
 
@@ -75,8 +69,8 @@ class CreateProductPublicService(ProductPricingMixin):
         errors = []
 
         # Validar que el nombre del producto no esté registrado en la base de datos
-        if data.get("name"):
-            exists = await self.__product_repo.exists_product(filters={"name": data["name"]})
+        if data.name:
+            exists = await self.__product_repo.exists_product(filters={"name": data.name})
 
             if exists:
                 errors.append(
@@ -88,10 +82,10 @@ class CreateProductPublicService(ProductPricingMixin):
                 )
 
         # Validar que cada elemento de la lista de imágenes sea una URL válida
-        if data.get("images"):
+        if data.images:
             adapter = TypeAdapter(HttpUrl)
 
-            for i, url in enumerate(data["images"]):
+            for i, url in enumerate(data.images):
                 try:
                     adapter.validate_python(url)
                 except Exception:
@@ -104,8 +98,8 @@ class CreateProductPublicService(ProductPricingMixin):
                     )
 
         # Validar que cada categoría exista en la base de datos
-        if data.get("categories"):
-            for i, category in enumerate(data["categories"]):
+        if data.categories:
+            for i, category in enumerate(data.categories):
                 exists = await self.__category_repo.exists_category(filters={"name": category})
 
                 if not exists:

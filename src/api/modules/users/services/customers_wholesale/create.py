@@ -1,5 +1,4 @@
 import secrets
-from typing import Any
 
 from fastapi.exceptions import RequestValidationError
 
@@ -30,28 +29,30 @@ class CreateCustomerWholesaleService:
         """
 
         # Ejecutar validaciones de las reglas de negocio
-        wholesale_data = data.model_dump()
-        await self.__run_business_validations(data=wholesale_data)
+        await self.__run_business_validations(data=data)
 
         # Creamos el usuario base con su rol y permisos
+        customer_wholesale_data = data.model_dump()
+        customer_wholesale_data["products"] = []
         user_instance = await self.__user_repo.create_user(
-            email=wholesale_data.pop("email"),
+            email=customer_wholesale_data.pop("email"),
             password=secrets.token_urlsafe(nbytes=12),
             role=UserRoles.CUSTOMER_WHOLESALE.value,
         )
-
-        # Creamos el usuario
         profile_instance = await self.__customer_wholesale_repo.create_customer_wholesale(
-            data=wholesale_data
+            user_id=user_instance.id,
+            data=customer_wholesale_data,
         )
         user_instance.customer_wholesale = profile_instance
 
         # Instanciar el DTO de respuesta
-        wholesale_data["id"] = user_instance.id
+        customer_wholesale_data = profile_instance.to_dict()
+        customer_wholesale_data["id"] = user_instance.id
+        customer_wholesale_data["email"] = user_instance.email
 
-        return ReadCustomerWholesaleDTO.model_construct(**wholesale_data)
+        return ReadCustomerWholesaleDTO.model_construct(**customer_wholesale_data)
 
-    async def __run_business_validations(self, data: dict[str, Any]) -> None:
+    async def __run_business_validations(self, data: CreateCustomerWholesaleDTO) -> None:
         """
         Ejecuta las validaciones de negocio previas al registro del cliente mayorista.
 
@@ -62,8 +63,8 @@ class CreateCustomerWholesaleService:
         errors = []
 
         # Validar que el correo electrónico no esté registrado en la base de datos
-        if data.get("email"):
-            exists = await self.__user_repo.exists_user(filters={"email": data["email"]})
+        if data.email:
+            exists = await self.__user_repo.exists_user(filters={"email": data.email})
 
             if exists:
                 errors.append(
@@ -75,9 +76,9 @@ class CreateCustomerWholesaleService:
                 )
 
         # Validar que el nombre o razón social no esté registrado en la base de datos
-        if data.get("name_or_company_name"):
+        if data.name_or_company_name:
             exists = await self.__customer_wholesale_repo.exists_customer_wholesale(
-                filters={"name_or_company_name": data["name_or_company_name"]}
+                filters={"name_or_company_name": data.name_or_company_name},
             )
 
             if exists:
@@ -90,9 +91,9 @@ class CreateCustomerWholesaleService:
                 )
 
         # Validar que el número de teléfono no esté registrado en la base de datos
-        if data.get("phone"):
+        if data.phone:
             exists = await self.__customer_wholesale_repo.exists_customer_wholesale(
-                filters={"phone": data["phone"]}
+                filters={"phone": data.phone},
             )
 
             if exists:
@@ -105,9 +106,9 @@ class CreateCustomerWholesaleService:
                 )
 
         # Validar que el número de documento no esté registrado en la base de datos
-        if data.get("ruc"):
+        if data.ruc:
             exists = await self.__customer_wholesale_repo.exists_customer_wholesale(
-                filters={"ruc": data["ruc"]},
+                filters={"ruc": data.ruc},
             )
 
             if exists:

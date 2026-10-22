@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi.exceptions import RequestValidationError
 
 from src.api.common.exceptions import ResourceNotFound
+from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.inventory.models.product import Product
@@ -16,10 +17,9 @@ from src.api.modules.orders.dto import (
     ReadProductDataDTO,
 )
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
-from src.api.modules.orders.services.utils import OrderPricingMixin
 
 
-class CreateOrderCustomerWholesaleService(OrderPricingMixin):
+class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
     """Servicio encargado de la creación de órdenes de compra para clientes mayoristas."""
 
     def __init__(
@@ -33,7 +33,7 @@ class CreateOrderCustomerWholesaleService(OrderPricingMixin):
         self.__user_repo = user_repo
         self.__products: list[Product] = []
 
-    async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
+    async def create(self, data: CreateOrderDTO, customer_wholesale_id: UUID) -> ReadOrderDTO:
         """
         Crea una nueva orden de compra para un cliente mayorista.
 
@@ -45,7 +45,7 @@ class CreateOrderCustomerWholesaleService(OrderPricingMixin):
         # Validar que el cliente mayorista exista
         user = await self.__user_repo.get_user(
             filters={
-                "id": wholesaler_id,
+                "id": customer_wholesale_id,
                 "role": UserRoles.CUSTOMER_WHOLESALE.value,
             },
             load_permissions=False,
@@ -144,7 +144,7 @@ class CreateOrderCustomerWholesaleService(OrderPricingMixin):
 
             # Guardar la instancia para enriquecer la orden sin volver a consultar la base de datos
             self.__products.append(instance)
-            expected_tax = self._calculate_tax_amount(amount=product.subtotal)
+            expected_tax = self.calculate_tax_amount(amount=product.subtotal)
             expected_total = product.subtotal + expected_tax
 
             if product.tax_amount != expected_tax:

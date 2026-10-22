@@ -29,15 +29,12 @@ class GetListCustomerWholesaleService:
         result = []
 
         for user in users:
-            dto = ReadCustomerWholesaleDTO.model_construct(
-                id=user.id,
-                email=user.email,
-                name_or_company_name=user.customer_wholesale.name_or_company_name,
-                ruc=user.customer_wholesale.ruc,
-                phone=user.customer_wholesale.phone,
-                location=user.customer_wholesale.location,
-                extra_contacts=user.customer_wholesale.extra_contacts,
-            )
+            user_data = user.to_dict()
+            user_data.pop("date_joined")
+            profile_data = user.customer_wholesale.to_dict()
+            profile_data.pop("id")
+            profile_data.pop("date_joined")
+            dto = ReadCustomerWholesaleDTO.model_construct(**user_data, **profile_data)
             result.append(dto)
 
         return result, total_items

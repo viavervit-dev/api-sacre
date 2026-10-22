@@ -19,9 +19,10 @@ class DeleteCategoryService:
             ResourceNotFound: Si la categoría no existe en la base de datos.
         """
 
-        instance = await self.__category_repo.get_category_by_id(id=category_id)
+        # Validar que la categoría exista en la base de datos
+        category = await self.__category_repo.get_category_by_id(id=category_id)
 
-        if not instance:
+        if not category:
             raise ResourceNotFound()
 
-        await self.__category_repo.delete_category(instance=instance)
+        await self.__category_repo.delete_category(instance=category)
