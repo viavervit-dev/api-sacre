@@ -3,7 +3,7 @@ from typing import TypedDict
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.models.product import Product
-from src.api.modules.orders.models.order import Order
+from src.api.modules.orders.models.order import ShoppingOrder
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
 from src.api.modules.users.models.customer_wholesale import CustomerWholesale
@@ -49,8 +49,8 @@ GROUPS: list[RoleGroupConfig] = [
             f"{CustomerWholesale.__tablename__}.read",
             f"{CustomerWholesale.__tablename__}.update",
             f"{CustomerWholesale.__tablename__}.delete",
-            f"{Order.__tablename__}.read",
-            f"{Order.__tablename__}.create",
+            f"{ShoppingOrder.__tablename__}.read",
+            f"{ShoppingOrder.__tablename__}.create",
             "authentication.jwt",
         ],
     },
@@ -82,8 +82,8 @@ PERMISSIONS = [
     f"{Product.__tablename__}.update",
     f"{Product.__tablename__}.delete",
     # Permisos para los modelos del módulo orders
-    f"{Order.__tablename__}.read",
-    f"{Order.__tablename__}.create",
+    f"{ShoppingOrder.__tablename__}.read",
+    f"{ShoppingOrder.__tablename__}.create",
     # Permisos generales
     "authentication.jwt",
 ]

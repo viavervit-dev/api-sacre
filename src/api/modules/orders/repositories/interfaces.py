@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from src.api.modules.orders.models.order import Order
+from src.api.modules.orders.models.order import ShoppingOrder
 
 
-class IOrderRepository(ABC):
+class IShoppingOrderRepository(ABC):
     """Contrato de persistencia para operaciones sobre órdenes (`orders.orders`)."""
 
     @abstractmethod
-    async def create_order(self, data: dict[str, Any]) -> Order:
+    async def create_order(self, data: dict[str, Any]) -> ShoppingOrder:
         """Crea una nueva orden de compra en la base de datos."""
 
         pass
