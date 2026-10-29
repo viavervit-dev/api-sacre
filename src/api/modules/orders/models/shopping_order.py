@@ -4,7 +4,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import UUID as SQLAlchemyUUID
-from sqlalchemy import CheckConstraint, DateTime, Integer, Numeric, String
+from sqlalchemy import CheckConstraint, DateTime, Integer, Numeric, Sequence, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -20,6 +20,15 @@ TOTAL_MAX_VALUE = ShoppingOrderEntity.TOTAL_MAX_VALUE.value
 TOTAL_MIN_VALUE = ShoppingOrderEntity.TOTAL_MIN_VALUE.value
 UNITS_MAX_VALUE = ShoppingOrderEntity.UNITS_MAX_VALUE.value
 UNITS_MIN_VALUE = ShoppingOrderEntity.UNITS_MIN_VALUE.value
+
+
+# Secuencia atómica para el número de ordenes de compra
+shopping_order_number_seq = Sequence(
+    name="shopping_order_number_seq",
+    schema="orders",
+    start=1,
+    metadata=ModelBase.metadata,
+)
 
 
 class ShoppingOrder(ModelBase):
@@ -52,12 +61,18 @@ class ShoppingOrder(ModelBase):
         primary_key=True,
         nullable=False,
     )
-    order_number: Mapped[UUID] = mapped_column(
+    idempotency_key: Mapped[UUID] = mapped_column(
         SQLAlchemyUUID(as_uuid=True),
-        doc=ShoppingOrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+        doc=ShoppingOrderEntity.IDEMPOTENCY_KEY_DESCRIPTION.value,
         unique=True,
         nullable=False,
         index=True,
+    )
+    order_number: Mapped[str] = mapped_column(
+        String(length=15),
+        doc=ShoppingOrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+        unique=True,
+        nullable=False,
     )
     customer_data: Mapped[dict[str, Any]] = mapped_column(
         JSONB,

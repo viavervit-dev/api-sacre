@@ -22,9 +22,14 @@ class Payment(ModelBase):
     )
     shopping_order_id: Mapped[UUID] = mapped_column(
         ForeignKey(column="orders.shopping_orders.id"),
-        doc="Identificador único de la cuenta de la orden de compra.",
+        doc=PaymentEntity.SHOPPING_ORDER_ID_DESCRIPTION.value,
         nullable=False,
         unique=True,
+    )
+    description: Mapped[str] = mapped_column(
+        String(length=200),
+        doc=PaymentEntity.PAYMENT_DESCRIPTION.value,
+        nullable=False,
     )
     type: Mapped[str] = mapped_column(
         String(length=20),

@@ -84,10 +84,10 @@ async def user(
             key=api_parameters.public_key,
             algorithms=[api_parameters.jwt_algorithm],
         )
-    except jwt.ExpiredSignatureError:
-        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value)  # noqa
-    except jwt.InvalidTokenError:
-        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value)  # noqa
+    except jwt.ExpiredSignatureError as exc:
+        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value) from exc
+    except jwt.InvalidTokenError as exc:
+        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value) from exc
 
     user_id = UUID(payload["sub"])
 
@@ -127,10 +127,10 @@ async def user_optional(
             key=api_parameters.public_key,
             algorithms=[api_parameters.jwt_algorithm],
         )
-    except jwt.ExpiredSignatureError:
-        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value)  # noqa
-    except jwt.InvalidTokenError:
-        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value)  # noqa
+    except jwt.ExpiredSignatureError as exc:
+        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value) from exc
+    except jwt.InvalidTokenError as exc:
+        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value) from exc
 
     user_id = UUID(payload["sub"])
 

@@ -8,9 +8,13 @@ from src.api.common.exceptions import (
     AuthenticationFailed,
     DomainRuleViolation,
     DTOValidationErrorMessages,
+    EmailConfigurationError,
+    EmailDeliveryError,
     ExceptionErrorMessages,
     InvalidJWT,
     MissingJWT,
+    PaymentGatewayCommunicationError,
+    PaymentGatewayError,
     PermissionDenied,
     ResourceNotFound,
     UserNotFound,
@@ -250,6 +254,74 @@ def register_exception_handlers(app: FastAPI) -> None:
 
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
+            content=Response(
+                success=False,
+                pagination=False,
+                message=exc.message,
+                data=exc.data,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(PaymentGatewayCommunicationError)
+    async def payment_gateway_communication_error(
+        request: Request,
+        exc: PaymentGatewayCommunicationError,
+    ) -> JSONResponse:
+        """Manejador para errores de red o timeout con la pasarela externa."""
+
+        return JSONResponse(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            content=Response(
+                success=False,
+                pagination=False,
+                message=exc.message,
+                data=exc.data,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(PaymentGatewayError)
+    async def payment_gateway_error(
+        request: Request,
+        exc: PaymentGatewayError,
+    ) -> JSONResponse:
+        """Manejador para errores HTTP devueltos por la pasarela externa."""
+
+        return JSONResponse(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            content=Response(
+                success=False,
+                pagination=False,
+                message=exc.message,
+                data=exc.data,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(EmailConfigurationError)
+    async def email_configuration_error(
+        request: Request,
+        exc: EmailConfigurationError,
+    ) -> JSONResponse:
+        """Manejador para errores de configuración del servidor de correo."""
+
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=Response(
+                success=False,
+                pagination=False,
+                message=exc.message,
+                data=exc.data,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(EmailDeliveryError)
+    async def email_delivery_error(
+        request: Request,
+        exc: EmailDeliveryError,
+    ) -> JSONResponse:
+        """Manejador para fallos en la entrega o conectividad del correo electrónico."""
+
+        return JSONResponse(
+            status_code=status.HTTP_502_BAD_GATEWAY,
             content=Response(
                 success=False,
                 pagination=False,

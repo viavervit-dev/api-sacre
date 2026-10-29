@@ -85,7 +85,11 @@ async def run(db: AsyncSession, fixtures_dir: Path) -> None:
 async def main() -> None:
 
     fixtures_dir = (
-        (await Path(__file__).resolve()).parent.parent / "modules" / "countries" / "fixtures"
+        (await Path(__file__).resolve()).parent.parent
+        / "api"
+        / "modules"
+        / "countries"
+        / "fixtures"
     )
 
     await create_db_pool()

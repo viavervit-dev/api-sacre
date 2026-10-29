@@ -87,14 +87,16 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                     break
 
         # Establecer el estado inicial de algunos campos
+        order_data["order_number"] = await self.__shopping_order_repo.get_next_order_number()
         order_data["description"] = ShoppingOrderDescription.SHOPPING_ORDER.value
         order_data["status"] = ShoppingOrderStatus.PENDING_PAYMENT.value
         order_data["status_changed_at"] = None
 
         # Guardar información en la base de datos
-        _ = await self.__shopping_order_repo.create_order(data=order_data)
+        order = await self.__shopping_order_repo.create_order(data=order_data)
 
         # Extraer estructuras anidadas para instanciar el DTO de respuesta
+        order_data = order.to_dict()
         customer_data = order_data.pop("customer_data")
         product_data = order_data.pop("product_data")
 
@@ -114,15 +116,15 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
 
         # Validar que el número de orden no haya sido registrado previamente
         exists = await self.__shopping_order_repo.exists_order(
-            filters={"order_number": data.order_number},
+            filters={"idempotency_key": data.idempotency_key},
         )
 
         if exists:
             raise RequestValidationError(
                 errors=[
                     {
-                        "loc": ("body", "order_number"),
-                        "msg": ShoppingOrderEntity.ORDER_NUMBER_EXISTS.value,
+                        "loc": ("body", "idempotency_key"),
+                        "msg": ShoppingOrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
                         "type": "domain_validation",
                     }
                 ]

@@ -2,6 +2,7 @@ import asyncio
 from collections.abc import AsyncGenerator
 from typing import Any
 
+import pydantic_core
 from sqlalchemy import MetaData, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -12,6 +13,15 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase
 
 from src.api.settings.parameters import api_parameters
+
+
+def json_serializer(obj: Any) -> str:
+    """
+    Serializador JSON para columnas JSON/JSONB de SQLAlchemy compatible con UUID, Decimal y
+    Pydantic.
+    """
+
+    return pydantic_core.to_json(obj, fallback=str).decode("utf-8")
 
 
 class ModelBase(DeclarativeBase):
@@ -68,6 +78,7 @@ async def create_db_pool() -> None:
         connect_args=connect_args,
         echo=api_parameters.db_echo,
         pool_pre_ping=True,
+        json_serializer=json_serializer,
     )
     _async_session_factory = async_sessionmaker(
         bind=_engine,

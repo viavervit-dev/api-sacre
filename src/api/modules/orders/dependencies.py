@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.dependencies import ProductRepository, product_repository
-from src.api.modules.orders.repositories.order import ShoppingOrderRepository
-from src.api.modules.orders.services.create import CreateOrderCustomerWholesaleService
+from src.api.modules.orders.repositories.shopping_order import ShoppingOrderRepository
+from src.api.modules.orders.services.shopping.create import CreateOrderCustomerWholesaleService
 from src.api.settings.database import db_session
 
 

@@ -336,8 +336,8 @@ class ReadProductDataDTO(BaseModel):
 class CreateOrderDTO(BaseModel):
     """DTO para la creación de una orden de compra."""
 
-    order_number: UUID = Field(
-        description=ShoppingOrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+    idempotency_key: UUID = Field(
+        description=ShoppingOrderEntity.IDEMPOTENCY_KEY_DESCRIPTION.value,
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
         json_schema_extra={
             "x-validation-errors": [
@@ -346,7 +346,7 @@ class CreateOrderDTO(BaseModel):
                 DTOValidationErrorMessages.UUID_TYPE.value,
                 DTOValidationErrorMessages.UUID_PARSING.value,
                 DTOValidationErrorMessages.UUID_VERSION.value,
-                ShoppingOrderEntity.ORDER_NUMBER_EXISTS.value,
+                ShoppingOrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
             ]
         },
     )
@@ -442,9 +442,9 @@ class ReadOrderDTO(BaseModel):
         description="Identificador único (UUID v4).",
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
     )
-    order_number: UUID = Field(
+    order_number: str = Field(
         description=ShoppingOrderEntity.ORDER_NUMBER_DESCRIPTION.value,
-        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+        examples=["ORD-2026-000001"],
     )
     customer_data: ReadCustomerDataDTO = Field(
         description=ShoppingOrderEntity.CUSTOMER_DATA_DESCRIPTION.value,

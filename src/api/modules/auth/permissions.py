@@ -1,9 +1,11 @@
 from typing import TypedDict
 
+from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.models.product import Product
-from src.api.modules.orders.models.order import ShoppingOrder
+from src.api.modules.orders.models.shopping_order import ShoppingOrder
+from src.api.modules.payments.models.payment import Payment
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
 from src.api.modules.users.models.customer_wholesale import CustomerWholesale
@@ -21,7 +23,7 @@ class RoleGroupConfig(TypedDict):
 
 GROUPS: list[RoleGroupConfig] = [
     {
-        "name": "customer",
+        "name": UserRoles.CUSTOMER.value,
         "permissions": [
             f"{User.__tablename__}.update_password",
             f"{User.__tablename__}.delete",
@@ -34,7 +36,15 @@ GROUPS: list[RoleGroupConfig] = [
         ],
     },
     {
-        "name": "admin",
+        "name": UserRoles.CUSTOMER_WHOLESALE.value,
+        "permissions": [
+            f"{Product.__tablename__}.read.public",
+            f"{ShoppingOrder.__tablename__}.read",
+            "authentication.jwt",
+        ],
+    },
+    {
+        "name": UserRoles.ADMINISTRATOR.value,
         "permissions": [
             f"{Admin.__tablename__}.read",
             f"{Category.__tablename__}.read.private",
@@ -51,6 +61,8 @@ GROUPS: list[RoleGroupConfig] = [
             f"{CustomerWholesale.__tablename__}.delete",
             f"{ShoppingOrder.__tablename__}.read",
             f"{ShoppingOrder.__tablename__}.create",
+            f"{Payment.__tablename__}.read",
+            f"{Payment.__tablename__}.create",
             "authentication.jwt",
         ],
     },
@@ -84,6 +96,9 @@ PERMISSIONS = [
     # Permisos para los modelos del módulo orders
     f"{ShoppingOrder.__tablename__}.read",
     f"{ShoppingOrder.__tablename__}.create",
+    # Permisos para los modelos del módulo orders
+    f"{Payment.__tablename__}.read",
+    f"{Payment.__tablename__}.create",
     # Permisos generales
     "authentication.jwt",
 ]

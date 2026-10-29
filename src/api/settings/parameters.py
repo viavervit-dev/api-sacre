@@ -60,9 +60,24 @@ class ApiParameters(BaseSettings):
     # Seguridad
     private_key: str
     public_key: str
-    jwt_algorithm: str = "EdDSA"
-    access_token_expire: int = 15  # 15 minutos
-    refresh_token_expire: int = 5760  # 4 días
+    jwt_algorithm: str
+    access_token_expire: int
+    refresh_token_expire: int
+
+    # Gestor de pagos
+    api_payment_links: str
+    api_payment_key: str
+    api_payment_store_id: str
+
+    # Correo Electrónico (SMTP)
+    mail_username: str
+    mail_password: str
+    mail_from_address: str
+    mail_server: str
+    mail_port: int
+    mail_use_ssl: bool
+    mail_starttls: bool
+    mail_timeout: int
 
     # Servidor
     host: str

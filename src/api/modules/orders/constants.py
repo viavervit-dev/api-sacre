@@ -38,7 +38,8 @@ class ShoppingOrderEntity(Enum):
     ORDER_DESCRIPTION = "Breve descripción del propósito de la transacción."
     CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la orden de compra."
     PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en la orden de compra."
-    ORDER_NUMBER_DESCRIPTION = "Código de referencia creado por el cliente (navegador)."
+    IDEMPOTENCY_KEY_DESCRIPTION = "Clave de idempotencia creada por el cliente (navegador)."
+    ORDER_NUMBER_DESCRIPTION = "Número de referencia de la orden de compra."
     UNITS_DESCRIPTION = "Cantidad total de unidades de productos de la orden de compra."
     SUBTOTAL_DESCRIPTION = "Valor neto de la orden de compra."
     TOTAL_DESCRIPTION = "Valor total final de la orden de compra."
@@ -51,7 +52,7 @@ class ShoppingOrderEntity(Enum):
     AMOUNT_DESCRIPTION = "Monto base al que se le va a agregar un porcentaje."
 
     # Mensajes de error
-    ORDER_NUMBER_EXISTS = "Este número de orden ya está registrado."
+    IDEMPOTENCY_KEY_EXISTS = "Esta clave de idempotencia ya está registrado."
     PRODUCT_NOT_FOUND = "El producto no existe."
     SUBTOTAL_INVALID = "El subtotal no coincide con la suma del subtotal de los productos."
     UNITS_INVALID = "Las unidades no coinciden con la suma de las unidades de los productos."

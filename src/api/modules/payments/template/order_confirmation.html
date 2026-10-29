@@ -1,0 +1,326 @@
+{#-
+Order confirmation email body.
+
+Expected context:
+order_number str | int
+product_data list of objects/dicts with: name, tax_amount, subtotal, total, units
+customer_data object/dict with: name_or_company_name
+subtotal Decimal | float
+tax_amount Decimal | float
+total Decimal | float
+units int
+payment_link str (absolute URL)
+-#}
+{%- set currency_symbol = "$" -%}
+{%- macro money(value) -%}{{ currency_symbol }}{{ "{:,.2f}".format(value | float) }}{%- endmacro -%}
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>Orden {{ order_number }} procesada | Sacré</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100% !important;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      border: 0;
+      outline: none;
+      text-decoration: none;
+      -ms-interpolation-mode: bicubic;
+    }
+
+    a {
+      color: #8f2333;
+    }
+
+    @media only screen and (max-width: 620px) {
+      .container {
+        width: 100% !important;
+      }
+
+      .px {
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+      }
+
+      .stack {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      .stack-gap {
+        padding-top: 12px !important;
+        padding-left: 0 !important;
+      }
+
+      .h1 {
+        font-size: 22px !important;
+      }
+
+      .btn a {
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+
+<body style="margin:0; padding:0; background-color:#f6f4f0;">
+
+  <!-- Preheader (inbox preview text) -->
+  <div
+    style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#f6f4f0; opacity:0;">
+    Su orden #{{ order_number }} fue procesada correctamente. Total: {{ money(total) }}.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f6f4f0;">
+    <tr>
+      <td align="center" style="padding:32px 12px;">
+
+        <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+        <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0"
+          style="width:600px; max-width:600px; background-color:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 18px 45px rgba(6,12,24,0.08);">
+
+          <!-- Accent stripe -->
+          <tr>
+            <td height="4" style="height:4px; line-height:4px; font-size:4px; background-color:#8f2333;">&nbsp;</td>
+          </tr>
+
+          <!-- Header -->
+          <tr>
+            <td class="px" bgcolor="#12233d"
+              style="background-color:#12233d; background-image:linear-gradient(160deg,#12233d 0%,#1f3555 100%); padding:32px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td
+                    style="font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:24px; font-weight:600; letter-spacing:5px; color:#ffffff;">
+                    SACRÉ
+                  </td>
+                  <td align="right"
+                    style="font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; letter-spacing:0.4px; color:#e8efff;">
+                    Confirmación de orden
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Intro -->
+          <tr>
+            <td class="px"
+              style="padding:40px 40px 8px 40px; font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td
+                    style="background-color:#f4e9ea; border:1px solid #e9d3d6; border-radius:999px; padding:6px 14px; font-size:12px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:#641825;">
+                    &#10003;&nbsp; Orden procesada
+                  </td>
+                </tr>
+              </table>
+              <h1 class="h1"
+                style="margin:20px 0 12px 0; font-size:26px; line-height:1.25; font-weight:500; letter-spacing:-0.5px; color:#12233d;">
+                Su orden fue procesada correctamente
+              </h1>
+              <p style="margin:0; font-size:15px; line-height:1.6; color:#334058;">
+                Hola, <strong style="color:#12233d;">{{ customer_data.name_or_company_name }}</strong>. Recibimos su
+                orden de compra y ya fue procesada. A continuación encontrará el detalle.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Order number + units -->
+          <tr>
+            <td class="px"
+              style="padding:24px 40px 8px 40px; font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td class="stack" width="50%" valign="top"
+                    style="background-color:#f4f3ec; border-radius:12px; padding:16px 20px;">
+                    <p
+                      style="margin:0 0 4px 0; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:#667793;">
+                      Número de orden</p>
+                    <p
+                      style="margin:0; font-size:20px; font-weight:600; color:#12233d; font-family:ui-monospace,Consolas,'Courier New',monospace;">
+                      #{{ order_number }}</p>
+                  </td>
+                  <td class="stack stack-gap" width="50%" valign="top" style="padding-left:12px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background-color:#f4f3ec; border-radius:12px; padding:16px 20px;">
+                          <p
+                            style="margin:0 0 4px 0; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:#667793;">
+                            Unidades totales</p>
+                          <p style="margin:0; font-size:20px; font-weight:600; color:#12233d;">{{ units }}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Products -->
+          <tr>
+            <td class="px"
+              style="padding:32px 40px 0 40px; font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+              <h2
+                style="margin:0 0 12px 0; font-size:18px; line-height:1.2; font-weight:500; letter-spacing:-0.2px; color:#12233d;">
+                Detalle de la compra
+              </h2>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td
+                    style="padding:8px 0; border-bottom:1px solid #ccd3df; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:#667793;">
+                    Producto</td>
+                  <td align="right"
+                    style="padding:8px 0; border-bottom:1px solid #ccd3df; font-size:12px; letter-spacing:0.6px; text-transform:uppercase; color:#667793;">
+                    Total</td>
+                </tr>
+                {%- for product in product_data %}
+                <tr>
+                  <td valign="top"
+                    style="padding:16px 12px 16px 0;{% if not loop.last %} border-bottom:1px solid #e5e4e7;{% endif %}">
+                    <p style="margin:0 0 4px 0; font-size:15px; font-weight:600; line-height:1.4; color:#12233d;">{{
+                      product.name }}</p>
+                    <p style="margin:0; font-size:13px; line-height:1.5; color:#4d5562;">
+                      {{ product.units }} {{ "unidad" if product.units == 1 else "unidades" }}
+                      &nbsp;&middot;&nbsp; Subtotal {{ money(product.subtotal) }}
+                      &nbsp;&middot;&nbsp; Impuesto {{ money(product.tax_amount) }}
+                    </p>
+                  </td>
+                  <td align="right" valign="top"
+                    style="padding:16px 0; white-space:nowrap; font-size:15px; font-weight:600; color:#12233d;{% if not loop.last %} border-bottom:1px solid #e5e4e7;{% endif %}">
+                    {{ money(product.total) }}
+                  </td>
+                </tr>
+                {%- endfor %}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Summary -->
+          <tr>
+            <td class="px"
+              style="padding:16px 40px 0 40px; font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                style="background-color:#f6f4f0; border-radius:12px;">
+                <tr>
+                  <td style="padding:20px 24px 6px 24px; font-size:14px; color:#4d5562;">Subtotal</td>
+                  <td align="right" style="padding:20px 24px 6px 24px; font-size:14px; color:#334058;">{{
+                    money(subtotal) }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 24px 16px 24px; font-size:14px; color:#4d5562;">Impuestos</td>
+                  <td align="right" style="padding:6px 24px 16px 24px; font-size:14px; color:#334058;">{{
+                    money(tax_amount) }}</td>
+                </tr>
+                <tr>
+                  <td
+                    style="padding:16px 24px 20px 24px; border-top:1px solid #ccd3df; font-size:16px; font-weight:600; color:#12233d;">
+                    Total</td>
+                  <td align="right"
+                    style="padding:16px 24px 20px 24px; border-top:1px solid #ccd3df; font-size:22px; font-weight:700; color:#12233d; white-space:nowrap;">
+                    {{ money(total) }}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Payment CTA -->
+          <tr>
+            <td class="px" align="center"
+              style="padding:36px 40px 8px 40px; font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+              <p style="margin:0 0 20px 0; font-size:15px; line-height:1.6; color:#334058;">
+                Para completar su compra, realice el pago a través del siguiente enlace.
+              </p>
+              <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ payment_link }}" style="height:50px; v-text-anchor:middle; width:260px;" arcsize="24%" stroke="f" fillcolor="#1f3555">
+                <w:anchorlock/>
+                <center style="color:#ffffff; font-family:Segoe UI,Arial,sans-serif; font-size:16px; font-weight:bold;">Realizar pago</center>
+              </v:roundrect>
+              <![endif]-->
+              <!--[if !mso]><!-->
+              <table role="presentation" class="btn" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" bgcolor="#1f3555"
+                    style="border-radius:12px; background-color:#1f3555; background-image:linear-gradient(135deg,#1f3555,#2b466b);">
+                    <a href="{{ payment_link }}" target="_blank" rel="noopener"
+                      style="display:inline-block; padding:15px 44px; font-size:16px; font-weight:600; letter-spacing:0.2px; color:#ffffff; text-decoration:none; border-radius:12px;">
+                      Realizar pago
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <!--<![endif]-->
+              <p style="margin:24px 0 0 0; font-size:12px; line-height:1.6; color:#667793;">
+                Si el botón no funciona, copie y pegue este enlace en su navegador:<br>
+                <a href="{{ payment_link }}" target="_blank" rel="noopener"
+                  style="color:#8f2333; word-break:break-all;">{{ payment_link }}</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Closing -->
+          <tr>
+            <td class="px"
+              style="padding:32px 40px 40px 40px; font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td
+                    style="border-top:1px solid #e5e4e7; padding-top:24px; font-size:14px; line-height:1.6; color:#334058;">
+                    Gracias por confiar en nosotros.<br>
+                    <strong style="color:#12233d;">Equipo Sacré</strong>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <!--[if mso]></td></tr></table><![endif]-->
+
+        <!-- Footer -->
+        <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0"
+          style="width:600px; max-width:600px;">
+          <tr>
+            <td class="px" align="center"
+              style="padding:24px 40px 0 40px; font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:12px; line-height:1.6; color:#667793;">
+              Si tiene alguna consulta sobre su compra, indique el número de orden <strong style="color:#4d5562;">#{{
+                order_number }}</strong> al comunicarse con nosotros.<br>
+              &copy; Sacré
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+
+</html>

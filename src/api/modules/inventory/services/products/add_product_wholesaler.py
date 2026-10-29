@@ -83,12 +83,6 @@ class AddProductWholesaleService(FinancialCalculationsMixin):
 
         product_data = data.model_dump()
 
-        # Asignar el estado del producto según el stock total
-        if product_data["stock_total"] > 0:
-            product_data["status"] = True
-        else:
-            product_data["status"] = False
-
         # Calcular el precio de venta
         product_data["price_sale"] = self.calculate_sale_price_product(
             price_neto=product_data["price_neto"],
@@ -98,8 +92,9 @@ class AddProductWholesaleService(FinancialCalculationsMixin):
         # Calcular el monto del IVA
         product_data["tax_amount"] = self.calculate_tax_amount(amount=product_data["price_sale"])
 
-        # Inicializar el stock en mano, el stock de venta y exclusividad
+        # Inicializar algunos valores por defecto
         product_data["stock_sale"] = product_data["stock_total"]
+        product_data["status"] = True
         product_data["exclusive"] = True
         product_data["stock_hand"] = 0
 
