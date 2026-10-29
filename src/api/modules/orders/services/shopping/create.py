@@ -9,14 +9,18 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.repositories.interfaces import IProductRepository
-from src.api.modules.orders.constants import OrderEntity, OrderStatus
+from src.api.modules.orders.constants import (
+    ShoppingOrderDescription,
+    ShoppingOrderEntity,
+    ShoppingOrderStatus,
+)
 from src.api.modules.orders.dto import (
     CreateOrderDTO,
     ReadCustomerDataDTO,
     ReadOrderDTO,
     ReadProductDataDTO,
 )
-from src.api.modules.orders.repositories.interfaces import IOrderRepository
+from src.api.modules.orders.repositories.interfaces import IShoppingOrderRepository
 
 
 class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
@@ -25,11 +29,11 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
     def __init__(
         self,
         product_repo: IProductRepository,
-        order_repo: IOrderRepository,
+        shopping_order_repo: IShoppingOrderRepository,
         user_repo: IUserRepository,
     ) -> None:
         self.__product_repo = product_repo
-        self.__order_repo = order_repo
+        self.__shopping_order_repo = shopping_order_repo
         self.__user_repo = user_repo
         self.__products: list[Product] = []
 
@@ -82,13 +86,17 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                     )
                     break
 
-        # Establecer el estado inicial y persistir la orden en la base de datos
-        order_data["status"] = OrderStatus.PENDING_PAYMENT.value
+        # Establecer el estado inicial de algunos campos
+        order_data["order_number"] = await self.__shopping_order_repo.get_next_order_number()
+        order_data["description"] = ShoppingOrderDescription.SHOPPING_ORDER.value
+        order_data["status"] = ShoppingOrderStatus.PENDING_PAYMENT.value
+        order_data["status_changed_at"] = None
 
         # Guardar información en la base de datos
-        _ = await self.__order_repo.create_order(data=order_data)
+        order = await self.__shopping_order_repo.create_order(data=order_data)
 
         # Extraer estructuras anidadas para instanciar el DTO de respuesta
+        order_data = order.to_dict()
         customer_data = order_data.pop("customer_data")
         product_data = order_data.pop("product_data")
 
@@ -107,14 +115,16 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         """
 
         # Validar que el número de orden no haya sido registrado previamente
-        exists = await self.__order_repo.exists_order(filters={"order_number": data.order_number})
+        exists = await self.__shopping_order_repo.exists_order(
+            filters={"idempotency_key": data.idempotency_key},
+        )
 
         if exists:
             raise RequestValidationError(
                 errors=[
                     {
-                        "loc": ("body", "order_number"),
-                        "msg": OrderEntity.ORDER_NUMBER_EXISTS.value,
+                        "loc": ("body", "idempotency_key"),
+                        "msg": ShoppingOrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
                         "type": "domain_validation",
                     }
                 ]
@@ -136,7 +146,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                     errors=[
                         {
                             "loc": ("body", "product_data", i, "id"),
-                            "msg": OrderEntity.PRODUCT_NOT_FOUND.value,
+                            "msg": ShoppingOrderEntity.PRODUCT_NOT_FOUND.value,
                             "type": "domain_validation",
                         }
                     ]
@@ -151,7 +161,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                 errors.append(
                     {
                         "loc": ("body", "product_data", i, "tax_amount"),
-                        "msg": OrderEntity.TAX_AMOUNT_PRODUCT_INVALID.value,
+                        "msg": ShoppingOrderEntity.TAX_AMOUNT_PRODUCT_INVALID.value,
                         "type": "domain_validation",
                     }
                 )
@@ -159,7 +169,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                 errors.append(
                     {
                         "loc": ("body", "product_data", i, "total"),
-                        "msg": OrderEntity.TOTAL_PRODUCT_INVALID.value,
+                        "msg": ShoppingOrderEntity.TOTAL_PRODUCT_INVALID.value,
                         "type": "domain_validation",
                     }
                 )
@@ -177,7 +187,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "subtotal"),
-                    "msg": OrderEntity.SUBTOTAL_INVALID.value,
+                    "msg": ShoppingOrderEntity.SUBTOTAL_INVALID.value,
                     "type": "domain_validation",
                 }
             )
@@ -185,7 +195,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "tax_amount"),
-                    "msg": OrderEntity.TAX_AMOUNT_INVALID.value,
+                    "msg": ShoppingOrderEntity.TAX_AMOUNT_INVALID.value,
                     "type": "domain_validation",
                 }
             )
@@ -193,7 +203,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "units"),
-                    "msg": OrderEntity.UNITS_INVALID.value,
+                    "msg": ShoppingOrderEntity.UNITS_INVALID.value,
                     "type": "domain_validation",
                 }
             )
@@ -201,7 +211,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "total"),
-                    "msg": OrderEntity.TOTAL_INVALID.value,
+                    "msg": ShoppingOrderEntity.TOTAL_INVALID.value,
                     "type": "domain_validation",
                 }
             )

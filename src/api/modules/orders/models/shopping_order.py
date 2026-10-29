@@ -4,28 +4,37 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import UUID as SQLAlchemyUUID
-from sqlalchemy import CheckConstraint, DateTime, Integer, Numeric, String
+from sqlalchemy import CheckConstraint, DateTime, Integer, Numeric, Sequence, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.api.modules.orders.constants import OrderEntity, OrderStatus
+from src.api.modules.orders.constants import ShoppingOrderEntity
 from src.api.settings.database import ModelBase
 
 # Constantes para validaciones de campos numéricos
-SUBTOTAL_MAX_VALUE = OrderEntity.SUBTOTAL_MAX_VALUE.value
-SUBTOTAL_MIN_VALUE = OrderEntity.SUBTOTAL_MIN_VALUE.value
-TAX_AMOUNT_MAX_VALUE = OrderEntity.TAX_AMOUNT_MAX_VALUE.value
-TAX_AMOUNT_MIN_VALUE = OrderEntity.TAX_AMOUNT_MIN_VALUE.value
-TOTAL_MAX_VALUE = OrderEntity.TOTAL_MAX_VALUE.value
-TOTAL_MIN_VALUE = OrderEntity.TOTAL_MIN_VALUE.value
-UNITS_MAX_VALUE = OrderEntity.UNITS_MAX_VALUE.value
-UNITS_MIN_VALUE = OrderEntity.UNITS_MIN_VALUE.value
+SUBTOTAL_MAX_VALUE = ShoppingOrderEntity.SUBTOTAL_MAX_VALUE.value
+SUBTOTAL_MIN_VALUE = ShoppingOrderEntity.SUBTOTAL_MIN_VALUE.value
+TAX_AMOUNT_MAX_VALUE = ShoppingOrderEntity.TAX_AMOUNT_MAX_VALUE.value
+TAX_AMOUNT_MIN_VALUE = ShoppingOrderEntity.TAX_AMOUNT_MIN_VALUE.value
+TOTAL_MAX_VALUE = ShoppingOrderEntity.TOTAL_MAX_VALUE.value
+TOTAL_MIN_VALUE = ShoppingOrderEntity.TOTAL_MIN_VALUE.value
+UNITS_MAX_VALUE = ShoppingOrderEntity.UNITS_MAX_VALUE.value
+UNITS_MIN_VALUE = ShoppingOrderEntity.UNITS_MIN_VALUE.value
 
 
-class Order(ModelBase):
+# Secuencia atómica para el número de ordenes de compra
+shopping_order_number_seq = Sequence(
+    name="shopping_order_number_seq",
+    schema="orders",
+    start=1,
+    metadata=ModelBase.metadata,
+)
+
+
+class ShoppingOrder(ModelBase):
     """Modelo ORM para la gestión de ordenes de compra."""
 
-    __tablename__ = "orders"
+    __tablename__ = "shopping_orders"
     __table_args__ = (
         CheckConstraint(
             sqltext=f"subtotal > {SUBTOTAL_MIN_VALUE} AND subtotal <= {SUBTOTAL_MAX_VALUE}",
@@ -52,60 +61,75 @@ class Order(ModelBase):
         primary_key=True,
         nullable=False,
     )
-    order_number: Mapped[UUID] = mapped_column(
+    idempotency_key: Mapped[UUID] = mapped_column(
         SQLAlchemyUUID(as_uuid=True),
-        doc=OrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+        doc=ShoppingOrderEntity.IDEMPOTENCY_KEY_DESCRIPTION.value,
         unique=True,
         nullable=False,
         index=True,
     )
+    order_number: Mapped[str] = mapped_column(
+        String(length=15),
+        doc=ShoppingOrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+        unique=True,
+        nullable=False,
+    )
     customer_data: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
-        doc=OrderEntity.CUSTOMER_DATA_DESCRIPTION.value,
+        doc=ShoppingOrderEntity.CUSTOMER_DATA_DESCRIPTION.value,
         nullable=False,
     )
     product_data: Mapped[list[dict[str, Any]]] = mapped_column(
         JSONB,
-        doc=OrderEntity.PRODUCT_DATA_DESCRIPTION.value,
+        doc=ShoppingOrderEntity.PRODUCT_DATA_DESCRIPTION.value,
+        nullable=False,
+    )
+    description: Mapped[str] = mapped_column(
+        String(length=200),
+        doc=ShoppingOrderEntity.ORDER_DESCRIPTION.value,
         nullable=False,
     )
     status: Mapped[str] = mapped_column(
         String(length=100),
-        doc=OrderEntity.STATUS_DESCRIPTION.value,
-        default=OrderStatus.PENDING_PAYMENT,
+        doc=ShoppingOrderEntity.STATUS_DESCRIPTION.value,
         nullable=False,
         index=True,
     )
+    status_changed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        doc="Fecha y hora de la última modificación de estado.",
+        nullable=True,
+    )
     subtotal: Mapped[Decimal] = mapped_column(
         Numeric(
-            precision=OrderEntity.SUBTOTAL_MAX_DIGITS.value,
-            scale=OrderEntity.SUBTOTAL_DECIMAL_PLACES.value,
+            precision=ShoppingOrderEntity.SUBTOTAL_MAX_DIGITS.value,
+            scale=ShoppingOrderEntity.SUBTOTAL_DECIMAL_PLACES.value,
             asdecimal=True,
         ),
-        doc=OrderEntity.SUBTOTAL_DESCRIPTION.value,
+        doc=ShoppingOrderEntity.SUBTOTAL_DESCRIPTION.value,
         nullable=False,
     )
     total: Mapped[Decimal] = mapped_column(
         Numeric(
-            precision=OrderEntity.TOTAL_MAX_DIGITS.value,
-            scale=OrderEntity.TOTAL_DECIMAL_PLACES.value,
+            precision=ShoppingOrderEntity.TOTAL_MAX_DIGITS.value,
+            scale=ShoppingOrderEntity.TOTAL_DECIMAL_PLACES.value,
             asdecimal=True,
         ),
-        doc=OrderEntity.TOTAL_DESCRIPTION.value,
+        doc=ShoppingOrderEntity.TOTAL_DESCRIPTION.value,
         nullable=False,
     )
     tax_amount: Mapped[Decimal] = mapped_column(
         Numeric(
-            precision=OrderEntity.TAX_AMOUNT_MAX_DIGITS.value,
-            scale=OrderEntity.TAX_AMOUNT_DECIMAL_PLACES.value,
+            precision=ShoppingOrderEntity.TAX_AMOUNT_MAX_DIGITS.value,
+            scale=ShoppingOrderEntity.TAX_AMOUNT_DECIMAL_PLACES.value,
             asdecimal=True,
         ),
-        doc=OrderEntity.TAX_AMOUNT_DESCRIPTION.value,
+        doc=ShoppingOrderEntity.TAX_AMOUNT_DESCRIPTION.value,
         nullable=False,
     )
     units: Mapped[int] = mapped_column(
         Integer,
-        doc=OrderEntity.UNITS_DESCRIPTION.value,
+        doc=ShoppingOrderEntity.UNITS_DESCRIPTION.value,
         nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(

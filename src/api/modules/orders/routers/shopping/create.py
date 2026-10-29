@@ -16,18 +16,18 @@ from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.orders.dependencies import create_order_customer_wholesale_service
 from src.api.modules.orders.dto import CreateOrderDTO, ReadOrderDTO
-from src.api.modules.orders.models.order import Order
-from src.api.modules.orders.services.create import CreateOrderCustomerWholesaleService
+from src.api.modules.orders.models.shopping_order import ShoppingOrder
+from src.api.modules.orders.services.shopping.create import CreateOrderCustomerWholesaleService
 
 create_order_customer_wholesale_router = APIRouter(prefix="/orders", tags=["Ordenes de Compra"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
-    permissions={UserRoles.ADMINISTRATOR.value: f"{Order.__tablename__}.create"},
+    permissions={UserRoles.ADMINISTRATOR.value: f"{ShoppingOrder.__tablename__}.create"},
 )
 
 
 @create_order_customer_wholesale_router.post(
-    path="/customer_wholesale/{customer_wholesale_id}/",
+    path="/shopping/customer_wholesale/{customer_wholesale_id}/",
     response_description="**(CREATED)** Orden de compra creada exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={

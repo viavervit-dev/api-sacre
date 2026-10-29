@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
@@ -7,7 +8,11 @@ from pydantic import BaseModel, Field
 from src.api.common.exceptions import DTOValidationErrorMessages
 from src.api.modules.countries.dto import ReadLocationEcuadorDTO
 from src.api.modules.inventory.constants import ProductEntity
-from src.api.modules.orders.constants import DecimalNumberEntity, OrderEntity
+from src.api.modules.orders.constants import (
+    DecimalNumberEntity,
+    ShoppingOrderEntity,
+    ShoppingOrderStatus,
+)
 from src.api.modules.users.dto import ReadExtraContactsDTO
 
 
@@ -62,11 +67,11 @@ class AddPercentageDTO(BaseModel):
     """DTO para el cálculo de adición de un porcentaje a un monto base."""
 
     amount: Decimal = Field(
-        gt=OrderEntity.AMOUNT_MIN_VALUE.value,
-        le=OrderEntity.AMOUNT_MAX_VALUE.value,
-        max_digits=OrderEntity.AMOUNT_MAX_DIGITS.value,
-        decimal_places=OrderEntity.AMOUNT_DECIMAL_PLACES.value,
-        description=OrderEntity.AMOUNT_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.AMOUNT_MIN_VALUE.value,
+        le=ShoppingOrderEntity.AMOUNT_MAX_VALUE.value,
+        max_digits=ShoppingOrderEntity.AMOUNT_MAX_DIGITS.value,
+        decimal_places=ShoppingOrderEntity.AMOUNT_DECIMAL_PLACES.value,
+        description=ShoppingOrderEntity.AMOUNT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
         json_schema_extra={
             "x-validation-errors": [
@@ -80,11 +85,11 @@ class AddPercentageDTO(BaseModel):
         },
     )
     percentage: Decimal = Field(
-        gt=OrderEntity.PERCENTAGE_MIN_VALUE.value,
-        le=OrderEntity.PERCENTAGE_MAX_VALUE.value,
-        max_digits=OrderEntity.PERCENTAGE_MAX_DIGITS.value,
-        decimal_places=OrderEntity.PERCENTAGE_DECIMAL_PLACES.value,
-        description=OrderEntity.PERCENTAGE_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.PERCENTAGE_MIN_VALUE.value,
+        le=ShoppingOrderEntity.PERCENTAGE_MAX_VALUE.value,
+        max_digits=ShoppingOrderEntity.PERCENTAGE_MAX_DIGITS.value,
+        decimal_places=ShoppingOrderEntity.PERCENTAGE_DECIMAL_PLACES.value,
+        description=ShoppingOrderEntity.PERCENTAGE_DESCRIPTION.value,
         examples=[Decimal("0.1500")],
         json_schema_extra={
             "x-validation-errors": [
@@ -103,11 +108,11 @@ class GetTaxAmountDTO(BaseModel):
     """DTO para el cálculo del monto de impuesto a partir de un monto base."""
 
     amount: Decimal = Field(
-        gt=OrderEntity.AMOUNT_MIN_VALUE.value,
-        le=OrderEntity.AMOUNT_MAX_VALUE.value,
-        max_digits=OrderEntity.AMOUNT_MAX_DIGITS.value,
-        decimal_places=OrderEntity.AMOUNT_DECIMAL_PLACES.value,
-        description=OrderEntity.TAX_AMOUNT_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.AMOUNT_MIN_VALUE.value,
+        le=ShoppingOrderEntity.AMOUNT_MAX_VALUE.value,
+        max_digits=ShoppingOrderEntity.AMOUNT_MAX_DIGITS.value,
+        decimal_places=ShoppingOrderEntity.AMOUNT_DECIMAL_PLACES.value,
+        description=ShoppingOrderEntity.TAX_AMOUNT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
         json_schema_extra={
             "x-validation-errors": [
@@ -215,7 +220,7 @@ class ProductDataDTO(BaseModel):
                 DTOValidationErrorMessages.UUID_TYPE.value,
                 DTOValidationErrorMessages.UUID_PARSING.value,
                 DTOValidationErrorMessages.UUID_VERSION.value,
-                OrderEntity.PRODUCT_NOT_FOUND.value,
+                ShoppingOrderEntity.PRODUCT_NOT_FOUND.value,
             ]
         },
     )
@@ -224,7 +229,7 @@ class ProductDataDTO(BaseModel):
         le=ProductEntity.TAX_AMOUNT_MAX_VALUE.value,
         max_digits=ProductEntity.TAX_AMOUNT_MAX_DIGITS.value,
         decimal_places=ProductEntity.TAX_AMOUNT_DECIMAL_PLACES.value,
-        description=OrderEntity.TAX_AMOUNT_PRODUCT_DESCRIPTION.value,
+        description=ShoppingOrderEntity.TAX_AMOUNT_PRODUCT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
         json_schema_extra={
             "x-validation-errors": [
@@ -234,16 +239,16 @@ class ProductDataDTO(BaseModel):
                 DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
-                OrderEntity.TAX_AMOUNT_PRODUCT_INVALID.value,
+                ShoppingOrderEntity.TAX_AMOUNT_PRODUCT_INVALID.value,
             ]
         },
     )
     subtotal: Decimal = Field(
-        gt=OrderEntity.SUBTOTAL_PRODUCT_MIN_VALUE.value,
-        le=OrderEntity.SUBTOTAL_PRODUCT_MAX_VALUE.value,
-        max_digits=OrderEntity.SUBTOTAL_PRODUCT_MAX_DIGITS.value,
-        decimal_places=OrderEntity.SUBTOTAL_PRODUCT_DECIMAL_PLACES.value,
-        description=OrderEntity.SUBTOTAL_PRODUCT_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.SUBTOTAL_PRODUCT_MIN_VALUE.value,
+        le=ShoppingOrderEntity.SUBTOTAL_PRODUCT_MAX_VALUE.value,
+        max_digits=ShoppingOrderEntity.SUBTOTAL_PRODUCT_MAX_DIGITS.value,
+        decimal_places=ShoppingOrderEntity.SUBTOTAL_PRODUCT_DECIMAL_PLACES.value,
+        description=ShoppingOrderEntity.SUBTOTAL_PRODUCT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
         json_schema_extra={
             "x-validation-errors": [
@@ -257,11 +262,11 @@ class ProductDataDTO(BaseModel):
         },
     )
     total: Decimal = Field(
-        gt=OrderEntity.TOTAL_PRODUCT_MIN_VALUE.value,
-        le=OrderEntity.TOTAL_PRODUCT_MAX_VALUE.value,
-        max_digits=OrderEntity.TOTAL_PRODUCT_MAX_DIGITS.value,
-        decimal_places=OrderEntity.TOTAL_PRODUCT_DECIMAL_PLACES.value,
-        description=OrderEntity.TOTAL_PRODUCT_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.TOTAL_PRODUCT_MIN_VALUE.value,
+        le=ShoppingOrderEntity.TOTAL_PRODUCT_MAX_VALUE.value,
+        max_digits=ShoppingOrderEntity.TOTAL_PRODUCT_MAX_DIGITS.value,
+        decimal_places=ShoppingOrderEntity.TOTAL_PRODUCT_DECIMAL_PLACES.value,
+        description=ShoppingOrderEntity.TOTAL_PRODUCT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
         json_schema_extra={
             "x-validation-errors": [
@@ -271,14 +276,14 @@ class ProductDataDTO(BaseModel):
                 DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
-                OrderEntity.TOTAL_PRODUCT_INVALID.value,
+                ShoppingOrderEntity.TOTAL_PRODUCT_INVALID.value,
             ]
         },
     )
     units: int = Field(
-        gt=OrderEntity.UNITS_PRODUCT_MIN_VALUE.value,
-        le=OrderEntity.UNITS_PRODUCT_MAX_VALUE.value,
-        description=OrderEntity.UNITS_PRODUCT_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.UNITS_PRODUCT_MIN_VALUE.value,
+        le=ShoppingOrderEntity.UNITS_PRODUCT_MAX_VALUE.value,
+        description=ShoppingOrderEntity.UNITS_PRODUCT_DESCRIPTION.value,
         examples=[100],
         json_schema_extra={
             "x-validation-errors": [
@@ -311,19 +316,19 @@ class ReadProductDataDTO(BaseModel):
         examples=["Rosario hecho a mano con cuentas de madera."],
     )
     tax_amount: Decimal = Field(
-        description=OrderEntity.TAX_AMOUNT_PRODUCT_DESCRIPTION.value,
+        description=ShoppingOrderEntity.TAX_AMOUNT_PRODUCT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
     )
     subtotal: Decimal = Field(
-        description=OrderEntity.SUBTOTAL_PRODUCT_DESCRIPTION.value,
+        description=ShoppingOrderEntity.SUBTOTAL_PRODUCT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
     )
     total: Decimal = Field(
-        description=OrderEntity.TOTAL_PRODUCT_DESCRIPTION.value,
+        description=ShoppingOrderEntity.TOTAL_PRODUCT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
     )
     units: int = Field(
-        description=OrderEntity.UNITS_PRODUCT_DESCRIPTION.value,
+        description=ShoppingOrderEntity.UNITS_PRODUCT_DESCRIPTION.value,
         examples=[100],
     )
 
@@ -331,8 +336,8 @@ class ReadProductDataDTO(BaseModel):
 class CreateOrderDTO(BaseModel):
     """DTO para la creación de una orden de compra."""
 
-    order_number: UUID = Field(
-        description=OrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+    idempotency_key: UUID = Field(
+        description=ShoppingOrderEntity.IDEMPOTENCY_KEY_DESCRIPTION.value,
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
         json_schema_extra={
             "x-validation-errors": [
@@ -341,14 +346,14 @@ class CreateOrderDTO(BaseModel):
                 DTOValidationErrorMessages.UUID_TYPE.value,
                 DTOValidationErrorMessages.UUID_PARSING.value,
                 DTOValidationErrorMessages.UUID_VERSION.value,
-                OrderEntity.ORDER_NUMBER_EXISTS.value,
+                ShoppingOrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
             ]
         },
     )
     product_data: list[ProductDataDTO] = Field(
-        min_length=OrderEntity.PRODUCTS_MIN_LENGTH.value,
-        max_length=OrderEntity.PRODUCTS_MAX_LENGTH.value,
-        description=OrderEntity.PRODUCT_DATA_DESCRIPTION.value,
+        min_length=ShoppingOrderEntity.PRODUCTS_MIN_LENGTH.value,
+        max_length=ShoppingOrderEntity.PRODUCTS_MAX_LENGTH.value,
+        description=ShoppingOrderEntity.PRODUCT_DATA_DESCRIPTION.value,
         json_schema_extra={
             "x-validation-errors": [
                 DTOValidationErrorMessages.MISSING.value,
@@ -357,9 +362,9 @@ class CreateOrderDTO(BaseModel):
         },
     )
     units: int = Field(
-        gt=OrderEntity.UNITS_MIN_VALUE.value,
-        le=OrderEntity.UNITS_MAX_VALUE.value,
-        description=OrderEntity.UNITS_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.UNITS_MIN_VALUE.value,
+        le=ShoppingOrderEntity.UNITS_MAX_VALUE.value,
+        description=ShoppingOrderEntity.UNITS_DESCRIPTION.value,
         examples=[100],
         json_schema_extra={
             "x-validation-errors": [
@@ -367,16 +372,16 @@ class CreateOrderDTO(BaseModel):
                 DTOValidationErrorMessages.VALUE_ERROR.value,
                 DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
                 DTOValidationErrorMessages.MISSING.value,
-                OrderEntity.UNITS_INVALID.value,
+                ShoppingOrderEntity.UNITS_INVALID.value,
             ]
         },
     )
     tax_amount: Decimal = Field(
-        gt=OrderEntity.TAX_AMOUNT_MIN_VALUE.value,
-        le=OrderEntity.TAX_AMOUNT_MAX_VALUE.value,
-        max_digits=OrderEntity.TAX_AMOUNT_MAX_DIGITS.value,
-        decimal_places=OrderEntity.TAX_AMOUNT_DECIMAL_PLACES.value,
-        description=OrderEntity.TAX_AMOUNT_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.TAX_AMOUNT_MIN_VALUE.value,
+        le=ShoppingOrderEntity.TAX_AMOUNT_MAX_VALUE.value,
+        max_digits=ShoppingOrderEntity.TAX_AMOUNT_MAX_DIGITS.value,
+        decimal_places=ShoppingOrderEntity.TAX_AMOUNT_DECIMAL_PLACES.value,
+        description=ShoppingOrderEntity.TAX_AMOUNT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
         json_schema_extra={
             "x-validation-errors": [
@@ -386,16 +391,16 @@ class CreateOrderDTO(BaseModel):
                 DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
-                OrderEntity.TAX_AMOUNT_INVALID.value,
+                ShoppingOrderEntity.TAX_AMOUNT_INVALID.value,
             ]
         },
     )
     subtotal: Decimal = Field(
-        gt=OrderEntity.SUBTOTAL_MIN_VALUE.value,
-        le=OrderEntity.SUBTOTAL_MAX_VALUE.value,
-        max_digits=OrderEntity.SUBTOTAL_MAX_DIGITS.value,
-        decimal_places=OrderEntity.SUBTOTAL_DECIMAL_PLACES.value,
-        description=OrderEntity.SUBTOTAL_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.SUBTOTAL_MIN_VALUE.value,
+        le=ShoppingOrderEntity.SUBTOTAL_MAX_VALUE.value,
+        max_digits=ShoppingOrderEntity.SUBTOTAL_MAX_DIGITS.value,
+        decimal_places=ShoppingOrderEntity.SUBTOTAL_DECIMAL_PLACES.value,
+        description=ShoppingOrderEntity.SUBTOTAL_DESCRIPTION.value,
         examples=[Decimal("10.50")],
         json_schema_extra={
             "x-validation-errors": [
@@ -405,16 +410,16 @@ class CreateOrderDTO(BaseModel):
                 DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
-                OrderEntity.SUBTOTAL_INVALID.value,
+                ShoppingOrderEntity.SUBTOTAL_INVALID.value,
             ]
         },
     )
     total: Decimal = Field(
-        gt=OrderEntity.TOTAL_MIN_VALUE.value,
-        le=OrderEntity.TOTAL_MAX_VALUE.value,
-        max_digits=OrderEntity.TOTAL_MAX_DIGITS.value,
-        decimal_places=OrderEntity.TOTAL_DECIMAL_PLACES.value,
-        description=OrderEntity.TOTAL_DESCRIPTION.value,
+        gt=ShoppingOrderEntity.TOTAL_MIN_VALUE.value,
+        le=ShoppingOrderEntity.TOTAL_MAX_VALUE.value,
+        max_digits=ShoppingOrderEntity.TOTAL_MAX_DIGITS.value,
+        decimal_places=ShoppingOrderEntity.TOTAL_DECIMAL_PLACES.value,
+        description=ShoppingOrderEntity.TOTAL_DESCRIPTION.value,
         examples=[Decimal("10.50")],
         json_schema_extra={
             "x-validation-errors": [
@@ -424,7 +429,7 @@ class CreateOrderDTO(BaseModel):
                 DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
-                OrderEntity.TOTAL_INVALID.value,
+                ShoppingOrderEntity.TOTAL_INVALID.value,
             ]
         },
     )
@@ -437,29 +442,37 @@ class ReadOrderDTO(BaseModel):
         description="Identificador único (UUID v4).",
         examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
     )
-    order_number: UUID = Field(
-        description=OrderEntity.ORDER_NUMBER_DESCRIPTION.value,
-        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    order_number: str = Field(
+        description=ShoppingOrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+        examples=["ORD-2026-000001"],
     )
     customer_data: ReadCustomerDataDTO = Field(
-        description=OrderEntity.CUSTOMER_DATA_DESCRIPTION.value,
+        description=ShoppingOrderEntity.CUSTOMER_DATA_DESCRIPTION.value,
     )
     product_data: list[ReadProductDataDTO] = Field(
-        description=OrderEntity.PRODUCT_DATA_DESCRIPTION.value,
+        description=ShoppingOrderEntity.PRODUCT_DATA_DESCRIPTION.value,
     )
     units: int = Field(
-        description=OrderEntity.UNITS_DESCRIPTION.value,
+        description=ShoppingOrderEntity.UNITS_DESCRIPTION.value,
         examples=[100],
     )
     tax_amount: Decimal = Field(
-        description=OrderEntity.TAX_AMOUNT_DESCRIPTION.value,
+        description=ShoppingOrderEntity.TAX_AMOUNT_DESCRIPTION.value,
         examples=[Decimal("10.50")],
     )
     subtotal: Decimal = Field(
-        description=OrderEntity.SUBTOTAL_DESCRIPTION.value,
+        description=ShoppingOrderEntity.SUBTOTAL_DESCRIPTION.value,
         examples=[Decimal("10.50")],
     )
     total: Decimal = Field(
-        description=OrderEntity.TOTAL_DESCRIPTION.value,
+        description=ShoppingOrderEntity.TOTAL_DESCRIPTION.value,
         examples=[Decimal("10.50")],
+    )
+    status: str = Field(
+        description=ShoppingOrderEntity.STATUS_DESCRIPTION.value,
+        examples=ShoppingOrderStatus.values(),
+    )
+    status_changed_at: datetime | None = Field(
+        description=ShoppingOrderEntity.STATUS_DESCRIPTION.value,
+        examples=["2026-10-23T17:25:41.776689+00:00", None],
     )

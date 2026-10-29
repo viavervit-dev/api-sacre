@@ -127,3 +127,27 @@ class DomainRuleViolation(BaseAppException):
     """Cuando se viola una regla de dominio."""
 
     pass
+
+
+class PaymentGatewayCommunicationError(BaseAppException):
+    """Fallo de comunicación, conectividad o timeout con la pasarela de pagos."""
+
+    default_message = "No fue posible comunicarse con la pasarela de pagos. Intente más tarde."
+
+
+class PaymentGatewayError(BaseAppException):
+    """Error devuelto por la pasarela de pagos al procesar la solicitud."""
+
+    default_message = "La pasarela de pagos no pudo procesar la solicitud."
+
+
+class EmailConfigurationError(BaseAppException):
+    """Error de configuración en el servicio de correo electrónico."""
+
+    default_message = "El servicio de correo electrónico no está configurado adecuadamente."
+
+
+class EmailDeliveryError(BaseAppException):
+    """Fallo de conectividad o envío en el servicio de correo electrónico."""
+
+    default_message = "No fue posible enviar el correo electrónico. Intente más tarde."

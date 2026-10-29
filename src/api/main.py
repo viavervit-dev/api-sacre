@@ -13,9 +13,11 @@ from src.api.modules.auth.routers import router as auth_router
 from src.api.modules.countries.routers import router as countries_router
 from src.api.modules.inventory.routers import router as inventory_router
 from src.api.modules.orders.routers import router as orders_router
+from src.api.modules.payments.routers import router as payments_router
 from src.api.modules.users.routers import router as users_router
 from src.api.settings.database import check_db_connection, close_db_pool, create_db_pool
 from src.api.settings.exception_handlers import register_exception_handlers
+from src.api.settings.http_client import close_http_client, create_http_client
 from src.api.settings.openapi import API_DESCRIPTION, OPENAPI_TAGS, SWAGGER_UI_PARAMETERS
 from src.api.settings.parameters import api_parameters
 from src.api.settings.serialization import JSONResponse
@@ -31,10 +33,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
     # Inicio
     await create_db_pool()
+    await create_http_client()
 
     yield
 
     # Cierre
+    await close_http_client()
     await close_db_pool()
 
 
@@ -97,6 +101,7 @@ v1_router.include_router(router=auth_router)
 v1_router.include_router(router=inventory_router)
 v1_router.include_router(router=countries_router)
 v1_router.include_router(router=orders_router)
+v1_router.include_router(router=payments_router)
 app.include_router(router=v1_router)
 
 

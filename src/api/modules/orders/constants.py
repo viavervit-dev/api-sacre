@@ -2,8 +2,8 @@ from decimal import Decimal
 from enum import Enum, StrEnum
 
 
-class OrderStatus(StrEnum):
-    """Estados posibles de un pedido."""
+class ShoppingOrderStatus(StrEnum):
+    """Estados posibles de una orden de compra."""
 
     PENDING_PAYMENT = "Pendiente de pago"
     PAID = "Pago confirmado"
@@ -17,18 +17,33 @@ class OrderStatus(StrEnum):
         return [item.value for item in cls]
 
 
-class OrderEntity(Enum):
-    """Metadatos asociados a la entidad `Order`."""
+class ShoppingOrderDescription(StrEnum):
+    """Descripciones predefinidas para el propósito de una transacción."""
+
+    SHOPPING_ORDER = "Orden de compra"
+    DONATION = "Donación"
+
+    @classmethod
+    def values(cls) -> list[str]:
+        """Devuelve una lista de los valores de la enumeración."""
+
+        return [item.value for item in cls]
+
+
+class ShoppingOrderEntity(Enum):
+    """Metadatos asociados a la entidad `ShoppingOrder`."""
 
     # Descripciones para los campos de la entidad
-    STATUS_DESCRIPTION = "Estado actual de la orden."
-    CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la orden."
-    PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en la orden."
-    ORDER_NUMBER_DESCRIPTION = "Código de referencia creado por el cliente (navegador)."
-    UNITS_DESCRIPTION = "Cantidad total de unidades de productos de la orden."
-    SUBTOTAL_DESCRIPTION = "Valor neto de la orden."
-    TOTAL_DESCRIPTION = "Valor total final de la orden."
-    TAX_AMOUNT_DESCRIPTION = "Total de impuestos aplicados de la orden."
+    STATUS_DESCRIPTION = "Estado actual de la orden de compra."
+    ORDER_DESCRIPTION = "Breve descripción del propósito de la transacción."
+    CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la orden de compra."
+    PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en la orden de compra."
+    IDEMPOTENCY_KEY_DESCRIPTION = "Clave de idempotencia creada por el cliente (navegador)."
+    ORDER_NUMBER_DESCRIPTION = "Número de referencia de la orden de compra."
+    UNITS_DESCRIPTION = "Cantidad total de unidades de productos de la orden de compra."
+    SUBTOTAL_DESCRIPTION = "Valor neto de la orden de compra."
+    TOTAL_DESCRIPTION = "Valor total final de la orden de compra."
+    TAX_AMOUNT_DESCRIPTION = "Total de impuestos aplicados de la orden de compra."
     UNITS_PRODUCT_DESCRIPTION = "Cantidad de unidades del producto de un tipo."
     SUBTOTAL_PRODUCT_DESCRIPTION = "Valor neto de los productos de un tipo."
     TOTAL_PRODUCT_DESCRIPTION = "Valor total final de los productos de un tipo."
@@ -37,7 +52,7 @@ class OrderEntity(Enum):
     AMOUNT_DESCRIPTION = "Monto base al que se le va a agregar un porcentaje."
 
     # Mensajes de error
-    ORDER_NUMBER_EXISTS = "Este número de orden ya está registrado."
+    IDEMPOTENCY_KEY_EXISTS = "Esta clave de idempotencia ya está registrado."
     PRODUCT_NOT_FOUND = "El producto no existe."
     SUBTOTAL_INVALID = "El subtotal no coincide con la suma del subtotal de los productos."
     UNITS_INVALID = "Las unidades no coinciden con la suma de las unidades de los productos."

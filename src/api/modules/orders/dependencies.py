@@ -6,15 +6,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.dependencies import ProductRepository, product_repository
-from src.api.modules.orders.repositories.order import OrderRepository
-from src.api.modules.orders.services.create import CreateOrderCustomerWholesaleService
+from src.api.modules.orders.repositories.shopping_order import ShoppingOrderRepository
+from src.api.modules.orders.services.shopping.create import CreateOrderCustomerWholesaleService
 from src.api.settings.database import db_session
 
 
-def order_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> OrderRepository:
+def shopping_order_repository(
+    db: Annotated[AsyncSession, Depends(db_session)],
+) -> ShoppingOrderRepository:
     """Provee una instancia del repositorio de ordenes de compra."""
 
-    return OrderRepository(db=db)
+    return ShoppingOrderRepository(db=db)
 
 
 def financial_calculations_service() -> type[FinancialCalculationsMixin]:
@@ -28,7 +30,7 @@ def financial_calculations_service() -> type[FinancialCalculationsMixin]:
 
 def create_order_customer_wholesale_service(
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
-    order_repo: Annotated[OrderRepository, Depends(order_repository)],
+    shopping_order_repo: Annotated[ShoppingOrderRepository, Depends(shopping_order_repository)],
     user_repo: Annotated[UserRepository, Depends(user_repository)],
 ) -> CreateOrderCustomerWholesaleService:
     """
@@ -37,7 +39,7 @@ def create_order_customer_wholesale_service(
     """
 
     return CreateOrderCustomerWholesaleService(
+        shopping_order_repo=shopping_order_repo,
         product_repo=product_repo,
-        order_repo=order_repo,
         user_repo=user_repo,
     )
