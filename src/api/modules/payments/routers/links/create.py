@@ -7,6 +7,7 @@ from src.api.common.schema import (
     response_scheme_401,
     response_scheme_403,
     response_scheme_404,
+    response_scheme_409,
     response_scheme_500,
     response_scheme_502,
     response_scheme_503,
@@ -41,6 +42,7 @@ require_admin = UserPermissionChecker(
         ),
         status.HTTP_403_FORBIDDEN: response_scheme_403(),
         status.HTTP_404_NOT_FOUND: response_scheme_404(),
+        status.HTTP_409_CONFLICT: response_scheme_409(order_already_has_payment=True),
         status.HTTP_500_INTERNAL_SERVER_ERROR: response_scheme_500(
             smtp_credentials_not_configured=True,
             smtp_authentication_error=True,
@@ -90,6 +92,7 @@ async def create_payment_link(
     3. **Búsqueda y Verificación de la Orden de Compra:**
         - Consulta la orden de compra en la base de datos mediante su identificador.
         - Si no existe, interrumpe el flujo emitiendo (404 Not Found).
+        - Comprueba que la orden no posea ya un pago asociado; si ya existe, emite (409 Conflict).
     4. **Generación del Enlace en la Pasarela de Pagos:**
         - Convierte los importes financieros a centavos enteros exactos, garantizando que no
          existan más de dos decimales.

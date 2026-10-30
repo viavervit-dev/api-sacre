@@ -245,6 +245,7 @@ def response_scheme_403() -> dict[str, Any]:
 def response_scheme_409(
     product_has_reserved_stock: bool = False,
     category_has_dependencies: bool = False,
+    order_already_has_payment: bool = False,
 ) -> dict[str, Any]:
     """Genera el esquema OpenAPI de error 409 (Conflict) por violaciones de reglas de dominio."""
 
@@ -268,7 +269,7 @@ def response_scheme_409(
 
     if category_has_dependencies:
         scheme["content"]["application/json"]["examples"]["category_has_dependencies"] = {
-            "summary": "Violación de regla de dominio",
+            "summary": "Categoría con productos asociados",
             "value": {
                 "success": False,
                 "pagination": False,
@@ -278,11 +279,21 @@ def response_scheme_409(
         }
     if product_has_reserved_stock:
         scheme["content"]["application/json"]["examples"]["product_has_reserved_stock"] = {
-            "summary": "Violación de regla de dominio",
+            "summary": "Producto con stock reservado",
             "value": {
                 "success": False,
                 "pagination": False,
                 "message": InventoryException.PRODUCT_HAS_RESERVED_STOCK.value,
+                "data": {},
+            },
+        }
+    if order_already_has_payment:
+        scheme["content"]["application/json"]["examples"]["order_already_has_payment"] = {
+            "summary": "Orden de compra con pago asociado",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": PaymentException.ORDER_ALREADY_HAS_PAYMENT.value,
                 "data": {},
             },
         }

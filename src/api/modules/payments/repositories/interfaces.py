@@ -11,3 +11,9 @@ class IPaymentRepository(ABC):
         """Registra una transacción de pago asociada a una orden de compra."""
 
         pass
+
+    @abstractmethod
+    async def exists_payment(self, filters: dict[str, Any]) -> bool:
+        """Determina si existe un pago que cumpla con los filtros proporcionados."""
+
+        pass

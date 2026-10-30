@@ -42,3 +42,6 @@ class ExceptionErrorMessages(Enum):
     GATEWAY_REJECTED = "El servicio de pago rechazó la petición."
     GATEWAY_INVALID_RESPONSE = "Respuesta inválida de la pasarela."
     DELIVERY_ERROR = "Ocurrió un error al notificar al cliente de la transacción."
+    ORDER_ALREADY_HAS_PAYMENT = (
+        "La orden de compra ya tiene un enlace de pago o transacción asociada."
+    )

@@ -9,6 +9,7 @@ from fastapi import BackgroundTasks, status
 
 from src.api.common.email.interfaces import IEmailService
 from src.api.common.exceptions import (
+    DomainRuleViolation,
     EmailDeliveryError,
     PaymentGatewayCommunicationError,
     PaymentGatewayError,
@@ -49,6 +50,13 @@ class CreatePaymentLinkService:
         """
         Envía la solicitud de creación de link al servicio de pagos, almacena la transacción
         y despacha la notificación con el enlace de pago por correo electrónico.
+
+        Raises:
+            ResourceNotFound: Si la orden de compra no existe en la base de datos.
+            DomainRuleViolation: Si la orden de compra ya cuenta con un pago asociado.
+            PaymentGatewayCommunicationError: Si ocurre un timeout o error de red con la pasarela.
+            PaymentGatewayError: Si la pasarela de pagos rechaza la petición o responde con error.
+            EmailDeliveryError: Si ocurre un error al despachar el correo de confirmación.
         """
 
         # Validar que la orden de compra exista en la base de datos
@@ -56,6 +64,9 @@ class CreatePaymentLinkService:
 
         if not shopping_order:
             raise ResourceNotFound()
+
+        # Ejecutar validaciones de las reglas de negocio
+        await self.__run_business_validations(shopping_order_id=shopping_order_id)
 
         # Generamos link de pago
         payment_link = await self.__generate_payment_link(
@@ -110,6 +121,24 @@ class CreatePaymentLinkService:
                 html_body=html_body,
                 text_content=text_content,
                 order_number=shopping_order.order_number,
+            )
+
+    async def __run_business_validations(self, shopping_order_id: UUID) -> None:
+        """
+        Ejecuta las validaciones de las reglas de negocio previas a la creación del enlace de pago.
+
+        Raises:
+            DomainRuleViolation: Si la orden de compra ya cuenta con un pago asociado.
+        """
+
+        # Validar que la orden de compra no tenga ya un pago o enlace de pago asociado
+        has_payment = await self.__payment_repo.exists_payment(
+            filters={"shopping_order_id": shopping_order_id}
+        )
+
+        if has_payment:
+            raise DomainRuleViolation(
+                message=PaymentException.ORDER_ALREADY_HAS_PAYMENT.value,
             )
 
     async def __send_email(

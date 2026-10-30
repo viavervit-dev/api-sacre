@@ -2,8 +2,9 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from src.api.modules.orders.models.shopping_order import ShoppingOrder
 from src.api.modules.payments.constants import PaymentEntity
 from src.api.settings.database import ModelBase
 
@@ -52,4 +53,9 @@ class Payment(ModelBase):
         doc="Fecha y hora de la creación del registro.",
         default=lambda: datetime.now(tz=UTC),
         nullable=False,
+    )
+
+    shopping_order: Mapped[ShoppingOrder] = relationship(
+        argument="ShoppingOrder",
+        doc="Orden de compra asociada a la transacción.",
     )
