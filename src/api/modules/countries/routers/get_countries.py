@@ -34,7 +34,7 @@ async def get_countries(
     ### Flujo de Ejecución
     1. **Consulta en Base de Datos:**
         - Realiza una consulta sobre la tabla `countries.country` ordenando los registros
-         alfabéticamente por el nombre del país.
+            alfabéticamente por el nombre del país.
     2. **Serialización:**
         - Mapea la lista de países al DTO de lectura.
     """

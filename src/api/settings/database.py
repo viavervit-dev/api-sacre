@@ -3,7 +3,7 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 import pydantic_core
-from sqlalchemy import MetaData, text
+from sqlalchemy import MetaData, inspect, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -38,9 +38,14 @@ class ModelBase(DeclarativeBase):
     )
 
     def to_dict(self) -> dict[str, Any]:
-        """Convierte las columnas del modelo a un diccionario."""
+        """Convierte las columnas cargadas del modelo a un diccionario."""
 
-        return {col.name: getattr(self, col.name) for col in self.__table__.columns}
+        state = inspect(self)
+        return {
+            col.key: getattr(self, col.key)
+            for col in self.__table__.columns
+            if col.key not in state.unloaded
+        }
 
 
 # Instancia global del engine (inicializada en lifespan)

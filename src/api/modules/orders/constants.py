@@ -2,13 +2,12 @@ from decimal import Decimal
 from enum import Enum, StrEnum
 
 
-class ShoppingOrderStatus(StrEnum):
+class OrderStatus(StrEnum):
     """Estados posibles de una orden de compra."""
 
     PENDING_PAYMENT = "Pendiente de pago"
     PAID = "Pago confirmado"
     CANCELLED = "Cancelado"
-    FAILED = "Fallido"
 
     @classmethod
     def values(cls) -> list[str]:
@@ -17,11 +16,13 @@ class ShoppingOrderStatus(StrEnum):
         return [item.value for item in cls]
 
 
-class ShoppingOrderDescription(StrEnum):
-    """Descripciones predefinidas para el propósito de una transacción."""
+class OrderDescription(StrEnum):
+    """Descripciones predefinidas para el propósito de una órden/transacción."""
 
     SHOPPING_ORDER = "Orden de compra"
     DONATION = "Donación"
+    PAYMENT_LINK = "Link de pago"
+    PAYMENT_GATEWAY = "Pasarela de pago"
 
     @classmethod
     def values(cls) -> list[str]:
@@ -30,20 +31,23 @@ class ShoppingOrderDescription(StrEnum):
         return [item.value for item in cls]
 
 
-class ShoppingOrderEntity(Enum):
-    """Metadatos asociados a la entidad `ShoppingOrder`."""
+class OrderEntity(Enum):
+    """Metadatos asociados a la entidad `Order`."""
 
     # Descripciones para los campos de la entidad
-    STATUS_DESCRIPTION = "Estado actual de la orden de compra."
-    ORDER_DESCRIPTION = "Breve descripción del propósito de la transacción."
-    CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la orden de compra."
-    PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en la orden de compra."
+    STATUS_DESCRIPTION = "Estado actual de la órden/transacción."
+    CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la órden/transacción."
+    PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en la órden/transacción."
+    PAYMENT_DATA_DESCRIPTION = "Datos del pago de la órden/transacción."
     IDEMPOTENCY_KEY_DESCRIPTION = "Clave de idempotencia creada por el cliente (navegador)."
-    ORDER_NUMBER_DESCRIPTION = "Número de referencia de la orden de compra."
-    UNITS_DESCRIPTION = "Cantidad total de unidades de productos de la orden de compra."
-    SUBTOTAL_DESCRIPTION = "Valor neto de la orden de compra."
-    TOTAL_DESCRIPTION = "Valor total final de la orden de compra."
-    TAX_AMOUNT_DESCRIPTION = "Total de impuestos aplicados de la orden de compra."
+    STATUS_HISTORY_DESCRIPTION = (
+        "Historial y registro cronológico de cambios de estado de la órden/transacción."
+    )
+    ORDER_NUMBER_DESCRIPTION = "Número de referencia de la órden/transacción."
+    UNITS_DESCRIPTION = "Cantidad total de unidades de productos de la órden/transacción."
+    SUBTOTAL_DESCRIPTION = "Valor neto de la órden/transacción."
+    TOTAL_DESCRIPTION = "Valor total final de la órden/transacción."
+    TAX_AMOUNT_DESCRIPTION = "Total de impuestos aplicados de la órden/transacción."
     UNITS_PRODUCT_DESCRIPTION = "Cantidad de unidades del producto de un tipo."
     SUBTOTAL_PRODUCT_DESCRIPTION = "Valor neto de los productos de un tipo."
     TOTAL_PRODUCT_DESCRIPTION = "Valor total final de los productos de un tipo."

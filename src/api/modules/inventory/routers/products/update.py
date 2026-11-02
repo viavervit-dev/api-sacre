@@ -77,16 +77,16 @@ async def update_product(
     3. **Validación Sintáctica y de Reglas de Negocio:**
         - Valida el esquema y formatos de los campos enviados.
         - **Consistencia de Stock:** Si se envía `stock_total`, comprueba que no sea menor a las
-         unidades en reserva activa (`stock_hand`).
+            unidades en reserva activa (`stock_hand`).
         - **Unicidad:** Si se modifica el nombre, verifica que no esté registrado previamente.
         - **URLs de Imágenes:** Si se envían imágenes, valida que cada URL sea válida.
         - **Categorías:** Si se envían categorías, comprueba que todas existan en la base de datos.
     4. **Cálculos y Transformaciones:**
         - **Estado (`status`):** Si `stock_total == 0` y no hay reservas (`stock_hand == 0`), se
-         establece `status = False` automáticamente.
+            establece `status = False` automáticamente.
         - **Recálculo de Precio (`price_sale`):** Calcula el precio de venta final combinando los
-         nuevos valores provistos con los existentes en la base de datos:
-         `price_sale = round_half_up(price_neto * (1 + profit_margin) * (1 + iva), 2)`.
+            nuevos valores provistos con los existentes en la base de datos:
+            `price_sale = round_half_up(price_neto * (1 + profit_margin) * (1 + iva), 2)`.
     5. **Persistencia:**
         - Aplica las modificaciones del registro en la base de datos.
     """

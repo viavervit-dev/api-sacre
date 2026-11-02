@@ -148,19 +148,19 @@ async def get_products_by_wholesaler(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario cuente con rol de administrador y el permiso específico
-         `products.read.private`.
+            `products.read.private`.
     2. **Validación de Parámetros:**
         - Valida que `wholesaler_id` en la ruta corresponda a un UUID válido.
         - Valida los parámetros de paginación `offset` (>= 0) y `limit` (entre 1 y el valor
-         máximo configurado).
+            máximo configurado).
     3. **Consulta en Base de Datos y Paginación:**
         - Realiza el conteo total de productos vinculados al mayorista (`wholesaler_id`).
         - Si no existen coincidencias, retorna una colección vacía y total 0.
         - Si existen productos, consulta los registros ordenados descendentemente por fecha
-         de creación, aplicando `offset` y `limit`.
+            de creación, aplicando `offset` y `limit`.
     4. **Serialización Dinámica:**
         - Mapea los resultados a visión administrativa completa sensibles de negocio al
-         DTO de lectura.
+            DTO de lectura.
     """
 
     products, total_items = await service.get_products(

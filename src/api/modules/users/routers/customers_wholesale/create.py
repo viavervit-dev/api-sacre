@@ -63,11 +63,11 @@ async def create_customer_wholesale(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario posea rol de administrador y el permiso
-         `customer_wholesale.create`.
-    2. **Validación Sintáctica (DTO):**
+            `customer_wholesale.create`.
+    2. **Validación Sintáctica:**
         - Valida el formato de correo electrónico, límites de caracteres en campos
-         de texto y la estructura anidada de ubicación geográfica y contactos
-         adicionales opcionales.
+            de texto y la estructura anidada de ubicación geográfica y contactos
+            adicionales opcionales.
     3. **Validaciones de Reglas de Negocio:**
         - **Unicidad de Correo:** Verifica que el correo electrónico no esté registrado.
         - **Unicidad de Nombre / Razón Social:** Comprueba que la razón social no esté en uso.

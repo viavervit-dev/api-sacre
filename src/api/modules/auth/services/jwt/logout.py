@@ -28,7 +28,7 @@ class LogoutService:
             access_token_payload = jwt.decode(
                 jwt=access_token,
                 key=api_parameters.public_key,
-                algorithms=[api_parameters.jwt_algorithm],
+                algorithms=["EdDSA"],
             )
         except jwt.ExpiredSignatureError:
             raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value)  # noqa
@@ -40,7 +40,7 @@ class LogoutService:
             refresh_token_payload = jwt.decode(
                 jwt=refresh_token,
                 key=api_parameters.public_key,
-                algorithms=[api_parameters.jwt_algorithm],
+                algorithms=["EdDSA"],
             )
         except jwt.ExpiredSignatureError:
             raise InvalidJWT(message=ExceptionErrorMessages.REFRESH_JWT_EXPIRED.value)  # noqa

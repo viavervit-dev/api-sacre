@@ -1,32 +1,6 @@
-from enum import Enum, StrEnum
+from enum import Enum
 
 PAYMENT_LINK_EMAIL_SUBJECT = "Confirmación y enlace de pago para su orden #{order_number} | Sacré"
-
-
-class PaymentType(StrEnum):
-    """"""
-
-    PAYMENT_LINK = "Link de pago"
-    PAYMENT_GATEWAY = "Pasarela de pago"
-
-    @classmethod
-    def values(cls) -> list[str]:
-        """Devuelve una lista de los valores de la enumeración."""
-
-        return [item.value for item in cls]
-
-
-class PaymentEntity(Enum):
-    """Metadatos asociados a la entidad `Payment`."""
-
-    # Descripciones para los campos de la entidad
-    STATUS_DESCRIPTION = "Estado actual de la orden de compra."
-    TYPE_DESCRIPTION = "Medio de pago utilizado."
-    PAYMENT_DESCRIPTION = "Breve descripción del propósito de la transacción."
-    SHOPPING_ORDER_ID_DESCRIPTION = "Identificador único de la orden de compra."
-
-    # Mensajes de error
-    SHOPPING_ORDER_NOT_FOUND = "La orden de compra no existe."
 
 
 class ExceptionErrorMessages(Enum):

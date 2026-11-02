@@ -80,12 +80,12 @@ async def add_product_wholesaler(
         - Valida tipos de datos, longitudes y rangos numéricos.
     3. **Verificación de Existencia del Mayorista:**
         - Comprueba que el cliente mayorista exista en la base de datos. Si no existe, levanta
-         (código HTTP 404 Not Found).
+            (código HTTP 404 Not Found).
     4. **Validaciones de Reglas de Negocio:**
         - **Unicidad:** Verifica que el nombre del producto no esté previamente registrado.
         - **URLs de Imágenes:** Comprueba que cada URL de la lista sea válida.
         - **Categorías:** Comprueba que cada una de las categorías indicadas exista
-         previamente en la base de datos.
+            previamente en la base de datos.
     5. **Cálculos:**
         - Se calcula automáticamente `price_sale` y `tax_amount`.
     6. **Persistencia:**

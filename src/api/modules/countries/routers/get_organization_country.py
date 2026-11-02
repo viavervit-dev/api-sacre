@@ -45,10 +45,10 @@ async def get_organization_country(
 
     ### Flujo de Ejecución
     1. **Validación del Parámetro de Ruta (`country`):**
-        - Extrae el nombre del país desde la URL y valida su tipo sintáctico (`str`).
+        - Extrae el nombre del país desde la URL y valida su tipo sintáctico.
     2. **Consulta en Base de Datos:**
         - Busca el país en la tabla `countries.country` filtrando por el campo `name`
-         cargando únicamente la columna `administrative_structure`.
+            cargando únicamente la columna `administrative_structure`.
     3. **Manejo de Recurso No Encontrado:**
         - Si el país solicitado no existe en la base de datos, levanta código HTTP 404 Not Found.
     4. **Serialización Dinámica:**

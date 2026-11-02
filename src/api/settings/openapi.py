@@ -83,12 +83,8 @@ OPENAPI_TAGS: list[dict[str, Any]] = [
         "description": "Monitoreo de disponibilidad y verificación de componentes.",
     },
     {
-        "name": "Ordenes de Compra",
-        "description": "Gestión de las ordenes de compra.",
-    },
-    {
-        "name": "Pagos",
-        "description": "Gestión de las transacciones de pagos del sistema.",
+        "name": "Órdenes/Transacciones",
+        "description": "Gestión de las órdenes/transacciones.",
     },
 ]
 

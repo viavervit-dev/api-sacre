@@ -1,49 +1,53 @@
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
 
 from src.api.common.exceptions import ResourceNotFound
+from src.api.common.payment.services.create_link import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.repositories.interfaces import IProductRepository
-from src.api.modules.orders.constants import (
-    ShoppingOrderDescription,
-    ShoppingOrderEntity,
-    ShoppingOrderStatus,
-)
+from src.api.modules.orders.constants import OrderDescription, OrderEntity, OrderStatus
 from src.api.modules.orders.dto import (
     CreateOrderDTO,
     ReadCustomerDataDTO,
     ReadOrderDTO,
     ReadProductDataDTO,
 )
-from src.api.modules.orders.repositories.interfaces import IShoppingOrderRepository
+from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
 
 class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
-    """Servicio encargado de la creación de órdenes de compra para clientes mayoristas."""
+    """Servicio encargado de la creación de órdenes/transacciones para clientes mayoristas."""
 
     def __init__(
         self,
         product_repo: IProductRepository,
-        shopping_order_repo: IShoppingOrderRepository,
+        order_repo: IOrderRepository,
+        payment_service: CreatePaymentLinkService,
         user_repo: IUserRepository,
     ) -> None:
         self.__product_repo = product_repo
-        self.__shopping_order_repo = shopping_order_repo
+        self.__order_repo = order_repo
         self.__user_repo = user_repo
+        self.__payment_service = payment_service
         self.__products: list[Product] = []
 
     async def create(self, data: CreateOrderDTO, customer_wholesale_id: UUID) -> ReadOrderDTO:
         """
-        Crea una nueva orden de compra para un cliente mayorista.
+        Crea una nueva órden/transacción para un cliente mayorista.
 
         Raises:
             ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
             RequestValidationError: Si falla alguna validación de las reglas de negocio.
+            PaymentGatewayCommunicationError: Si ocurre un timeout o error de red con el
+                servicio de pagos.
+            PaymentGatewayError: Si el servicio de pagos rechaza la petición o responde con error.
+            EmailDeliveryError: Si ocurre un error al despachar el correo de confirmación.
         """
 
         # Validar que el cliente mayorista exista
@@ -62,7 +66,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         order_data = data.model_dump()
         await self.__run_business_validations(data=data)
 
-        # Capturar la instantánea (snapshot) de los datos del cliente al momento de la orden
+        # Capturar la instantánea (snapshot) de los datos del cliente
         order_data["customer_data"] = {
             "id": user.id,
             "name_or_company_name": user.customer_wholesale.name_or_company_name,
@@ -87,13 +91,22 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                     break
 
         # Establecer el estado inicial de algunos campos
-        order_data["order_number"] = await self.__shopping_order_repo.get_next_order_number()
-        order_data["description"] = ShoppingOrderDescription.SHOPPING_ORDER.value
-        order_data["status"] = ShoppingOrderStatus.PENDING_PAYMENT.value
-        order_data["status_changed_at"] = None
+        order_data["order_number"] = await self.__order_repo.get_next_order_number()
+        order_data["description"] = OrderDescription.SHOPPING_ORDER.value
+        order_data["status"] = OrderStatus.PENDING_PAYMENT.value
+        order_data["status_history"] = {
+            OrderStatus.PENDING_PAYMENT.value: datetime.now(tz=UTC).isoformat(),
+        }
+
+        # Creamos y enviamos el link de pago al cliente mayorista
+        payment_link = self.__payment_service.create_payment_link(order_data=order_data)
+        order_data["payment_data"] = {
+            "description": OrderDescription.SHOPPING_ORDER.value,
+            "link": payment_link,
+        }
 
         # Guardar información en la base de datos
-        order = await self.__shopping_order_repo.create_order(data=order_data)
+        order = await self.__order_repo.create_order(data=order_data)
 
         # Extraer estructuras anidadas para instanciar el DTO de respuesta
         order_data = order.to_dict()
@@ -115,7 +128,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         """
 
         # Validar que el número de orden no haya sido registrado previamente
-        exists = await self.__shopping_order_repo.exists_order(
+        exists = await self.__order_repo.exists_order(
             filters={"idempotency_key": data.idempotency_key},
         )
 
@@ -124,7 +137,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                 errors=[
                     {
                         "loc": ("body", "idempotency_key"),
-                        "msg": ShoppingOrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
+                        "msg": OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
                         "type": "domain_validation",
                     }
                 ]
@@ -146,7 +159,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                     errors=[
                         {
                             "loc": ("body", "product_data", i, "id"),
-                            "msg": ShoppingOrderEntity.PRODUCT_NOT_FOUND.value,
+                            "msg": OrderEntity.PRODUCT_NOT_FOUND.value,
                             "type": "domain_validation",
                         }
                     ]
@@ -161,7 +174,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                 errors.append(
                     {
                         "loc": ("body", "product_data", i, "tax_amount"),
-                        "msg": ShoppingOrderEntity.TAX_AMOUNT_PRODUCT_INVALID.value,
+                        "msg": OrderEntity.TAX_AMOUNT_PRODUCT_INVALID.value,
                         "type": "domain_validation",
                     }
                 )
@@ -169,7 +182,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
                 errors.append(
                     {
                         "loc": ("body", "product_data", i, "total"),
-                        "msg": ShoppingOrderEntity.TOTAL_PRODUCT_INVALID.value,
+                        "msg": OrderEntity.TOTAL_PRODUCT_INVALID.value,
                         "type": "domain_validation",
                     }
                 )
@@ -187,7 +200,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "subtotal"),
-                    "msg": ShoppingOrderEntity.SUBTOTAL_INVALID.value,
+                    "msg": OrderEntity.SUBTOTAL_INVALID.value,
                     "type": "domain_validation",
                 }
             )
@@ -195,7 +208,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "tax_amount"),
-                    "msg": ShoppingOrderEntity.TAX_AMOUNT_INVALID.value,
+                    "msg": OrderEntity.TAX_AMOUNT_INVALID.value,
                     "type": "domain_validation",
                 }
             )
@@ -203,7 +216,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "units"),
-                    "msg": ShoppingOrderEntity.UNITS_INVALID.value,
+                    "msg": OrderEntity.UNITS_INVALID.value,
                     "type": "domain_validation",
                 }
             )
@@ -211,7 +224,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "total"),
-                    "msg": ShoppingOrderEntity.TOTAL_INVALID.value,
+                    "msg": OrderEntity.TOTAL_INVALID.value,
                     "type": "domain_validation",
                 }
             )

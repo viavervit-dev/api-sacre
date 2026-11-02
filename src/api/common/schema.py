@@ -4,9 +4,9 @@ from pydantic import BaseModel
 
 from src.api.common.email.constants import ExceptionErrorMessages as EmailException
 from src.api.common.exceptions import ExceptionErrorMessages as CommonException
+from src.api.common.payment.constants import ExceptionErrorMessages as PaymentException
 from src.api.modules.auth.constants import ExceptionErrorMessages as AuthExceptionError
 from src.api.modules.inventory.constants import ExceptionErrorMessages as InventoryException
-from src.api.modules.payments.constants import ExceptionErrorMessages as PaymentException
 
 
 def response_scheme_400(dto_class: type[BaseModel]) -> dict[str, Any]:
