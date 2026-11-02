@@ -2,9 +2,16 @@
 
 import asyncio
 import os
+import sys
 from logging.config import fileConfig
+from pathlib import Path
 from typing import Any
 
+# Permite a Python encontrar módulos hermanos dentro de la carpeta alembic/
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import schemas  # noqa: E402
+import sequences  # noqa: E402
 from alembic import context
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, pool, text
@@ -20,19 +27,13 @@ config = context.config
 if (
     config.config_file_name is not None
     and config.config_file_name.endswith(".ini")
-    and os.path.exists(config.config_file_name)
+    and os.path.exists(path=config.config_file_name)
 ):
-    fileConfig(config.config_file_name)
+    fileConfig(fname=config.config_file_name)
 
 # Metadata de la Base declarativa. Alembic la compara contra el esquema real
 # de la BD para determinar qué cambios generar con --autogenerate.
 target_metadata = ModelBase.metadata
-
-
-def get_all_model_schemas() -> set[str]:
-    """Extrae dinámicamente todos los esquemas únicos definidos en los modelos."""
-
-    return {table.schema for table in target_metadata.tables.values() if table.schema is not None}
 
 
 def include_name(name: str | None, type_: Any, parent_names: Any) -> bool:
@@ -50,26 +51,6 @@ def include_name(name: str | None, type_: Any, parent_names: Any) -> bool:
             return False
 
     return True
-
-
-def cleanup_empty_schemas(connection: Connection) -> None:
-    """Elimina automáticamente esquemas de la app que hayan quedado sin tablas ni objetos."""
-
-    query = text("""
-        SELECT n.nspname AS schema_name
-        FROM pg_catalog.pg_namespace n
-        WHERE n.nspname NOT LIKE 'pg_%'
-            AND n.nspname NOT IN ('information_schema', 'public')
-            AND NOT EXISTS (
-                SELECT 1 FROM pg_catalog.pg_class c
-                WHERE c.relnamespace = n.oid
-            );
-    """)
-
-    empty_schemas = [row[0] for row in connection.execute(query).fetchall()]
-
-    for schema in empty_schemas:
-        connection.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" RESTRICT;'))
 
 
 def get_database_url() -> str:
@@ -96,12 +77,10 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         include_schemas=True,
+        include_name=include_name,
     )
 
     with context.begin_transaction():
-        for schema in get_all_model_schemas():
-            context.execute(f"CREATE SCHEMA IF NOT EXISTS {schema};")
-
         context.run_migrations()
 
 
@@ -114,12 +93,6 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        # Aseguramos la existencia previa de los esquemas de los modelos
-        for schema in get_all_model_schemas():
-            connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
-
-        connection.commit()
-
         # Configuramos el contexto con el filtro de esquemas del sistema
         context.configure(
             connection=connection,
@@ -130,10 +103,6 @@ def run_migrations_online() -> None:
 
         with context.begin_transaction():
             context.run_migrations()
-
-        # Eliminamos esquemas que hayan quedado vacíos
-        cleanup_empty_schemas(connection=connection)
-        connection.commit()
 
 
 if context.is_offline_mode():
