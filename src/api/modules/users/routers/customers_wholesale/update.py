@@ -73,15 +73,15 @@ async def update_customer_wholesale(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario cuente con rol de administrador y el permiso específico
-         `customer_wholesale.update`.
+            `customer_wholesale.update`.
     2. **Búsqueda del Recurso:**
         - Consulta el cliente mayorista en la base de datos por su `wholesaler_id`.
-        - Si no existe, interrumpe el flujo levantando `ResourceNotFound` (404 Not Found).
+        - Si no existe, interrumpe el flujo levantando (404 Not Found).
     3. **Validación Sintáctica y de Reglas de Negocio:**
         - Valida el esquema y formatos de los campos enviados.
         - **Unicidad de Correo:** Si se modifica `email`, verifica que no esté registrado.
         - **Unicidad de Razón Social:** Si se modifica `name_or_company_name`, comprueba su
-         disponibilidad.
+            disponibilidad.
         - **Unicidad de Teléfono:** Si se modifica `phone`, verifica que no esté asignado.
         - **Unicidad de RUC:** Si se envía `ruc`, comprueba que no pertenezca a otra entidad.
     4. **Persistencia:**

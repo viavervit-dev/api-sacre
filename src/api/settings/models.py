@@ -19,10 +19,7 @@ from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.models.product import Product
 
 # Modelos del módulo de órdenes
-from src.api.modules.orders.models.shopping_order import ShoppingOrder
-
-# Modelos del módulo de pagos
-from src.api.modules.payments.models.payment import Payment
+from src.api.modules.orders.models.order import Order
 
 # Modelos del módulo de usuarios
 from src.api.modules.users.models.admin import Admin

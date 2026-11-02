@@ -62,13 +62,13 @@ async def create_product(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Verifica la vigencia de la sesión y la existencia del usuario.
         - Comprueba que el usuario tenga rol de administrador y el permiso `products.create`.
-    2. **Validación Sintáctica (DTO):**
+    2. **Validación Sintáctica:**
         - Valida tipos de datos, longitudes y rangos numéricos mediante.
     3. **Validaciones de Reglas de Negocio:**
         - **Unicidad:** Verifica que el nombre del producto no esté registrado.
         - **URLs de Imágenes:** Comprueba que cada URL de la lista sea válida.
         - **Categorías:** Comprueba que cada una de las categorías indicadas exista
-         en la base de datos.
+            en la base de datos.
     4. **Cálculos:**
         - Se calcula automáticamente `price_sale` y `tax_amount`.
     5. **Persistencia:**

@@ -53,7 +53,7 @@ async def refresh_token(
     3. **Comprobación de Integridad y Sesión:**
         - Comprueba que ambos tokens pertenezcan al mismo usuario (`sub`).
         - Verifica que el usuario exista en la base de datos y que la versión de sesión
-         (`session_version`) coincida con la registrada en el token.
+            (`session_version`) coincida con la registrada en el token.
     4. **Emisión del Nuevo Token y Actualización de Cookie:**
         - Genera un nuevo `access_token` con una nueva fecha de expiración.
         - Configura la cookie `access_token` (`HttpOnly`, `SameSite=Lax`, `Secure`).

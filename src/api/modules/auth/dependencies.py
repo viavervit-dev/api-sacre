@@ -82,7 +82,7 @@ async def user(
         payload = jwt.decode(
             jwt=access_token,
             key=api_parameters.public_key,
-            algorithms=[api_parameters.jwt_algorithm],
+            algorithms=["EdDSA"],
         )
     except jwt.ExpiredSignatureError as exc:
         raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value) from exc
@@ -125,7 +125,7 @@ async def user_optional(
         payload = jwt.decode(
             jwt=access_token,
             key=api_parameters.public_key,
-            algorithms=[api_parameters.jwt_algorithm],
+            algorithms=["EdDSA"],
         )
     except jwt.ExpiredSignatureError as exc:
         raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value) from exc

@@ -75,7 +75,7 @@ async def delete_category(
     3. **Validación de Reglas de Negocio:**
         - Comprueba que la categoría no tenga productos vinculados (`product_count == 0`).
         - Si posee artículos asociados (`product_count > 0`), deniega la eliminación para evitar
-         inconsistencias en el catálogo.
+            inconsistencias en el catálogo.
     4. **Persistencia:**
         - Elimina el registro de la categoría de la base de datos.
     """

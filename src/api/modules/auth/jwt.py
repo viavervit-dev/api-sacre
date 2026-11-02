@@ -25,7 +25,7 @@ def create_access_token(user_id: UUID, user_role: str, session_version: int) -> 
     encoded_jwt = jwt.encode(
         payload=payload,
         key=api_parameters.private_key,
-        algorithm=api_parameters.jwt_algorithm,
+        algorithm="EdDSA",
     )
 
     return encoded_jwt
@@ -50,7 +50,7 @@ def create_refresh_token(user_id: UUID, user_role: str, session_version: int) ->
     encoded_jwt = jwt.encode(
         payload=payload,
         key=api_parameters.private_key,
-        algorithm=api_parameters.jwt_algorithm,
+        algorithm="EdDSA",
     )
 
     return encoded_jwt

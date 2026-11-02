@@ -75,7 +75,7 @@ async def delete_product(
     3. **Validación de Reglas de Negocio:**
         - Comprueba que el producto no posea stock en reserva (`stock_hand == 0`).
         - Si existen unidades reservadas en carritos activos (`stock_hand > 0`), deniega la
-         eliminación para preservar la integridad del proceso de compra.
+            eliminación para preservar la integridad del proceso de compra.
     4. **Persistencia:**
         - Elimina el registro del producto de la base de datos.
     """

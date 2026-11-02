@@ -78,7 +78,7 @@ async def update_category(
     3. **Validación Sintáctica y de Reglas de Negocio:**
         - Valida el esquema y límites de los campos enviados.
         - **Unicidad de Nombre:** Si se modifica el nombre, comprueba que no se encuentre
-         registrado previamente en otra categoría.
+            registrado previamente en otra categoría.
     4. **Persistencia:**
         - Aplica las modificaciones del registro en la base de datos.
     """

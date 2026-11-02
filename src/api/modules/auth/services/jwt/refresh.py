@@ -37,7 +37,7 @@ class RefreshTokenService:
             refresh_token_payload = jwt.decode(
                 jwt=refresh_token,
                 key=api_parameters.public_key,
-                algorithms=[api_parameters.jwt_algorithm],
+                algorithms=["EdDSA"],
             )
         except jwt.ExpiredSignatureError:
             raise InvalidJWT(message=ExceptionErrorMessages.REFRESH_JWT_EXPIRED.value)  # noqa

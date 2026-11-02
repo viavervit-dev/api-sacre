@@ -53,11 +53,11 @@ async def authenticate_admin(
         - Si cualquiera de estas comprobaciones falla, deniega el acceso con error 401.
     3. **Emisión de Tokens JWT:**
         - Genera un `access_token` firmado criptográficamente con la clave privada, conteniendo
-         el identificador del usuario, rol, versión de sesión y tiempo de expiración.
+            el identificador del usuario, rol, versión de sesión y tiempo de expiración.
         - Genera un `refresh_token` de mayor duración para renovación de sesiones.
     4. **Inyección de Cookies HTTP:**
         - Configura `access_token` y `refresh_token` como cookies `HttpOnly`, `SameSite=Lax` y
-         con flag `Secure` habilitado en entornos no-debug.
+            con flag `Secure` habilitado en entornos no-debug.
     """
 
     access_token, refresh_token = await service.authenticate(credentials=credentials)

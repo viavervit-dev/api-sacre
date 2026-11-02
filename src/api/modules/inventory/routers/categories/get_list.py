@@ -164,15 +164,15 @@ async def get_list_categories(
         - Si no se envían tokens, permite el acceso con rol público / anónimo.
     2. **Determinación de Visibilidad y Filtros:**
         - Si el usuario es administrador (`admin`): Puede leer los datos públicos y privados de
-         las categorías.
+            las categorías.
         - Si es anónimo o cliente (`customer`): Puede leer los datos públicos de las categorías.
     3. **Consulta en Base de Datos y Paginación:**
         - Realiza el conteo total de registros coincidentes para los metadatos de paginación.
         - Si existen registros, consulta las categorías ordenadas descendentemente por fecha de
-         creación, aplicando `offset` y `limit`.
+            creación, aplicando `offset` y `limit`.
     4. **Serialización Dinámica:**
         - Mapea los resultados a visión administrativa completa o visión pública segura sin estado
-         interno.
+            interno.
     """
 
     categories, total_items = await service.get_list(user=user, offset=offset, limit=limit)

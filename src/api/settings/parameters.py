@@ -60,7 +60,6 @@ class ApiParameters(BaseSettings):
     # Seguridad
     private_key: str
     public_key: str
-    jwt_algorithm: str
     access_token_expire: int
     refresh_token_expire: int
 

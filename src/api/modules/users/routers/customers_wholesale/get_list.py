@@ -140,12 +140,12 @@ async def get_customers_wholesale(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario cuente con rol de administrador y el permiso específico
-         `customer_wholesale.read`.
+            `customer_wholesale.read`.
     2. **Consulta en Base de Datos y Paginación:**
         - Realiza el conteo total de clientes mayoristas en `users.customer_wholesale`.
         - Si no existen registros registrados, retorna una lista vacía y total 0.
         - Si existen registros, consulta los clientes ordenados de forma descendente por fecha
-         de registro, aplicando `offset` y `limit`.
+            de registro, aplicando `offset` y `limit`.
     3. **Serialización:**
         - Mapea la lista de clientes mayoristas al DTO de lectura.
     """

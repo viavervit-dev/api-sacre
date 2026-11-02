@@ -55,14 +55,14 @@ async def logout(
     3. **Verificación de Coherencia de Sesión:**
         - Comprueba que el identificador de usuario (`sub`) coincida en ambos tokens.
         - Si los identificadores difieren (sesión corrupta o mezcla de tokens), incrementa las
-         versiones de sesión de ambos usuarios por seguridad y deniega la operación con 401.
+            versiones de sesión de ambos usuarios por seguridad y deniega la operación con 401.
     4. **Invalidación de Sesión en Base de Datos:**
         - Incrementa en `1` la columna `session_version` del usuario en el esquema `auth.users`.
         - Al alterarse la versión, cualquier token emitido previamente queda revocado para
-         todas las peticiones subsiguientes.
+            todas las peticiones subsiguientes.
     5. **Eliminación de Cookies en el Navegador:**
         - Configura la respuesta HTTP para eliminar las cookies `access_token` y `refresh_token`
-         del navegador.
+            del navegador.
     """
 
     access_token, refresh_token = tokens

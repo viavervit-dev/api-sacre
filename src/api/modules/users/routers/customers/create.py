@@ -33,7 +33,7 @@ async def create_customer(
     - **Acceso Público:** Endpoint abierto. No requiere autenticación previa.
 
     ### Flujo de Ejecución
-    1. **Validación Sintáctica (DTO):**
+    1. **Validación Sintáctica:**
         - Valida el formato de correo electrónico, longitud de contraseña, límites de texto y
          tipos de documento permitidos.
     2. **Validaciones de Reglas de Negocio:**
@@ -46,7 +46,7 @@ async def create_customer(
         - Asocia el grupo y los permisos correspondientes.
     4. **Creación del Perfil de Cliente:**
         - Registra los datos personales y de identificación, vinculándolos mediante clave foránea
-         (`user_id`) a la cuenta de usuario creada.
+            (`user_id`) a la cuenta de usuario creada.
     5. **Persistencia:**
         - Guarda el registro en la base de datos.
     """

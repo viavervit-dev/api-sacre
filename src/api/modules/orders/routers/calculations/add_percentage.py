@@ -8,7 +8,7 @@ from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.orders.dependencies import financial_calculations_service
 from src.api.modules.orders.dto import AddPercentageDTO, ReadDecimalNumberDTO
 
-add_percentage_router = APIRouter(prefix="/orders", tags=["Ordenes de Compra"])
+add_percentage_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
 
 
 @add_percentage_router.post(

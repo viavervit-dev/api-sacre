@@ -61,11 +61,11 @@ async def create_category(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Verifica la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Comprueba que el usuario tenga rol de administrador y el permiso `categories.create`.
-    2. **Validación Sintáctica (DTO):**
+    2. **Validación Sintáctica:**
         - Valida que el nombre y la descripción cumplan con los esquemas definidos.
     3. **Validación de Reglas de Negocio:**
         - **Unicidad de Nombre:** Consulta la base de datos para confirmar que no exista otra
-         categoría con el mismo nombre.
+            categoría con el mismo nombre.
     4. **Inicialización de Valores:**
         - Asigna `product_count = 0` (sin artículos asociados inicialmente).
         - Asigna `status = False` (inactiva por defecto hasta que disponga de productos).

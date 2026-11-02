@@ -35,20 +35,25 @@ api/
 │   ├── constants.py                    # Constantes y mensajes de error globales
 │   ├── exceptions.py                   # Excepciones base de dominio y aplicación
 │   ├── response.py                     # Modelo unificado de respuesta API (Response[T])
-│   └── schema.py                       # Generadores dinámicos de esquemas OpenAPI para errores
+│   ├── schema.py                       # Generadores dinámicos de esquemas OpenAPI para errores
+│   └── utils.py                        # Mixins y utilidades transversales
 │
 ├── settings/                           # Configuración central del sistema
 │   ├── database.py                     # Conexión asíncrona, pool asyncpg y gestión transaccional
 │   ├── exception_handlers.py           # Manejadores globales de excepciones (HTTP 400, 401, 403, 404, 409, 503)
+│   ├── http_client.py                  # Cliente HTTP asíncrono global (httpx) con pool de conexiones y timeouts
 │   ├── models.py                       # Registro central de modelos ORM para migraciones Alembic
+│   ├── openapi.py                      # Metadatos, etiquetas y configuración personalizada de Swagger UI / OpenAPI
 │   ├── parameters.py                   # Variables de entorno tipadas con Pydantic Settings
-│   └── serialization.py                # Serializador JSON personalizado optimizado
+│   ├── serialization.py                # Serializador JSON personalizado optimizado
+│   └── templates.py                    # Motor de plantillas Jinja2 para renderizado dinámico en módulos
 │
 ├── modules/                            # Módulos de negocio delimitados por dominio
 │   └── <nombre_del_modulo>/            # Estructura uniforme de cada módulo
 │       ├── constants.py                # Constantes, enums y textos de validación del módulo
 │       ├── dependencies.py             # Proveedores FastAPI Depends (Inyección de dependencias)
 │       ├── dto.py                      # Contratos de entrada y salida (Pydantic DTOs)
+│       ├── fixtures/                   # (Opcional) Datos semilla o catálogos estáticos en JSON
 │       ├── models/                     # Entidades de dominio y modelos SQLAlchemy
 │       ├── repositories/               # Capa de persistencia (Patrón Repositorio)
 │       │   ├── interfaces.py           # Contratos/Puertos de salida (Clases abstractas ABC)
@@ -108,6 +113,10 @@ Cada módulo funciona como un dominio autocontenido y sigue un patrón de diseñ
 - Separados en esquemas de creación (`Create...DTO`), actualización parcial (`Update...DTO`) y lectura (`Read...DTO`, `PrivateRead...DTO`).
 - Incluyen metadatos `json_schema_extra={"x-validation-errors": [...]}` para autodocumentar en OpenAPI los mensajes exactos de error que produce cada campo en caso de falla.
 
+#### Datos Semilla y Fixtures (`fixtures/`) [Opcional]
+- Directorio opcional presente en aquellos módulos que requieren precargar o disponer de información inicial estática o de referencia (por ejemplo, en `src/api/modules/countries/fixtures/` con archivos JSON para la división político-territorial).
+- Sirve como fuente desacoplada para scripts de mantenimiento y carga inicial (como `src/scripts/load_countries.py`) o tareas de sembrado de datos (*seeders*), evitando acoplar catálogos o estructuras masivas al código fuente.
+
 ## 🔹 3. Tecnologías
 
 <div>
@@ -138,7 +147,9 @@ ADMIN_PASSWORD=<value>
 ADMIN_FIRST_NAMES=<value>
 ADMIN_LAST_NAMES=<value>
 
+
 # === Base de Datos ===
+ALEMBIC_DATABASE_URL="postgresql+psycopg2://api_user:api_password@localhost:5432/fastapi_db"
 DATABASE_URL="postgresql+asyncpg://api_user:api_password@localhost:5432/fastapi_db"
 DB_STATEMENT_TIMEOUT=10000
 DB_POOL_MAX_OVERFLOW=5
@@ -149,12 +160,30 @@ DB_POOL_SIZE=10
 DB_ECHO=false
 DB_JIT=off
 
-# Para Alembic (SYNC/migraciones)
-ALEMBIC_DATABASE_URL="postgresql+psycopg2://api_user:api_password@localhost:5432/fastapi_db"
 
-# === Seguridad ===
-PRIVATE_KEY="<value>"
-PUBLIC_KEY="<value>"
+# === Seguridad y Autenticación ===
+ACCESS_TOKEN_EXPIRE=15
+REFRESH_TOKEN_EXPIRE=5760
+PRIVATE_KEY=<value>
+PUBLIC_KEY=<value>
+
+
+# === Gestor de Pagos ===
+API_PAYMENT_LINKS=<value>
+API_PAYMENT_STORE_ID=<value>
+API_PAYMENT_KEY=<value>
+
+
+# === Correo Electrónico (SMTP) ===
+MAIL_USERNAME=<value>
+MAIL_PASSWORD=<value>
+MAIL_FROM_ADDRESS=<value>
+MAIL_SERVER=<value>
+MAIL_PORT=465
+MAIL_USE_SSL=true
+MAIL_STARTTLS=false
+MAIL_TIMEOUT=15
+
 
 # === Servidor ===
 HOST="127.0.0.1"
@@ -163,22 +192,24 @@ WORKERS=4
 ```
 
 > [!IMPORTANT]
-> **Valores que debes reemplazar:**
-> - **Datos del Administrador (`ADMIN_*`)**: Reemplaza los marcadores `<value>` por el correo electrónico, contraseña segura, nombres y apellidos del administrador inicial. Estos datos serán utilizados posteriormente por el script `create_admin` para registrar el usuario en la base de datos.
-> - **Credenciales de Base de Datos**: Asegúrate de que el usuario (`api_user`), la contraseña (`api_password`) y el nombre de la base de datos (`fastapi_db`) en `DATABASE_URL` y `ALEMBIC_DATABASE_URL` coincidan exactamente con los que configures en el **Paso 3**.
+> **Valores esenciales que debes configurar antes de continuar:**
+> - **Datos del Administrador (`ADMIN_*`)**: Reemplaza los marcadores `<value>` por el correo electrónico, contraseña segura, nombres y apellidos del administrador inicial. Estos datos serán utilizados posteriormente por el script `src.scripts.create_admin` para registrar el usuario en la base de datos (ver **Paso 8**).
+> - **Credenciales de Base de Datos**: Asegúrate de que el usuario (`api_user`), la contraseña (`api_password`) y el nombre de la base de datos (`fastapi_db`) en `DATABASE_URL` y `ALEMBIC_DATABASE_URL` coincidan exactamente con los que configures en el **Paso 3**. Nota que `ALEMBIC_DATABASE_URL` utiliza el driver síncrono `postgresql+psycopg2://` para migraciones, mientras que `DATABASE_URL` utiliza el driver asíncrono `postgresql+asyncpg://` para la API.
 > - **Claves Asimétricas (`PRIVATE_KEY` y `PUBLIC_KEY`)**: Requieren un par de claves criptográficas asimétricas Ed25519 en formato PEM. Se generarán ejecutando el script del proyecto tras instalar las dependencias (ver **Paso 5**).
+> - **Gestor de Pagos y Correo SMTP**: Si estás en un entorno de desarrollo local y vas a probar flujos de checkout, compra o notificaciones, ingresa las credenciales provistas por la pasarela en `API_PAYMENT_*` y una contraseña de aplicación en `MAIL_*`.
+
 
 ### Paso 3: Crear base de datos local
 
 Este proyecto utiliza **PostgreSQL** como motor de base de datos. Para la conexión se emplea SQLAlchemy de forma asíncrona (`asyncpg`) para el rendimiento de la API, y `psycopg2` como driver síncrono para la gestión de migraciones con Alembic. Asegúrate de tener el servicio de PostgreSQL corriendo. Si estás usando WSL o Linux, abre tu terminal y sigue estos pasos:
 
 1. Accede a la consola de PostgreSQL usando el usuario administrador:
-   ```bash
+   ```txt
    sudo -u postgres psql
    ```
 
 2. Ejecuta los siguientes comandos SQL para crear el usuario, la base de datos y otorgar los permisos (puedes cambiar `api_user`, `api_password` y `fastapi_db` por los nombres que prefieras):
-   ```sql
+   ```txt
    -- 1. Crear el usuario con su contraseña
    CREATE USER api_user WITH PASSWORD 'api_password';
 
@@ -212,13 +243,13 @@ poetry install
 
 El sistema utiliza firmas criptográficas asimétricas (algoritmo Ed25519) para la emisión y verificación de tokens JWT. Para generar el par de claves, ejecuta el siguiente comando:
 
-```bash
+```txt
 python3.14 -m src.scripts.create_asymmetric_keys
 ```
 
 El script imprimirá por consola la **clave privada** y la **clave pública** en formato PEM. Copia cada bloque de texto y pégalo entre comillas en tu archivo `.env` dentro de las variables `PRIVATE_KEY` y `PUBLIC_KEY` respectivamente:
 
-```env
+```txt
 PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----"
@@ -241,7 +272,7 @@ pre-commit install --hook-type commit-msg
 
 Aplica las migraciones con Alembic para generar las tablas y esquemas en PostgreSQL:
 
-```bash
+```txt
 alembic upgrade head
 ```
 
@@ -249,7 +280,7 @@ alembic upgrade head
 
 Ejecuta los scripts necesarios para configurar roles y permisos, cargar el catálogo de países y registrar al usuario administrador inicial:
 
-```bash
+```txt
 # 1. Configurar roles y permisos
 python3.14 -m src.scripts.configure_roles
 
@@ -294,7 +325,7 @@ from src.api.modules.products.models.product import Product
 
 **3. Generar la migración** (Alembic compara el modelo con el estado actual de la BD):
 
-```bash
+```txt
 alembic revision --autogenerate -m "descripcion_del_cambio"
 ```
 
@@ -303,7 +334,7 @@ alembic revision --autogenerate -m "descripcion_del_cambio"
 
 **4. Aplicar la migración** a la base de datos:
 
-```bash
+```txt
 alembic upgrade head
 ```
 
@@ -326,7 +357,7 @@ El proyecto incluye scripts de mantenimiento y configuración inicial dentro del
 
 Para inicializar o actualizar los permisos y roles de los usuarios en la base de datos, ejecuta el siguiente comando en la raíz del proyecto:
 
-```bash
+```txt
 python3.14 -m src.scripts.configure_roles
 ```
 
@@ -342,24 +373,24 @@ python3.14 -m src.scripts.configure_roles
 
 Para inicializar o actualizar el catálogo de países y sus estructuras territoriales en la base de datos, ejecuta el siguiente comando en la raíz del proyecto:
 
-```bash
+```txt
 python3.14 -m src.scripts.load_countries
 ```
 
 **¿Qué hace este script?**
-- Lee los archivos de fixtures en formato JSON ubicados en `src/modules/countries/fixtures/`.
+- Lee los archivos de fixtures en formato JSON ubicados en `src/api/modules/countries/fixtures/`.
 - Extrae el nombre y código del país a partir del nombre de cada archivo, validando que cumpla con el formato `<Nombre>_<CODIGO>.json` (por ejemplo, `Ecuador_EC.json`).
 - Consulta la tabla `countries.country` para verificar si el país ya existe por código o por nombre.
 - Si el país existe, actualiza su nombre, código y estructura administrativa (`administrative_structure`).
 - Si el país no existe, crea un nuevo registro con la información y la estructura territorial proporcionada.
 
-*(Si deseas registrar un nuevo país o modificar su organización territorial, añade o actualiza el archivo JSON correspondiente en `src/modules/countries/fixtures/` asegurándote de seguir el formato de nombre `<Nombre>_<CODIGO>.json` antes de ejecutar el comando).*
+*(Si deseas registrar un nuevo país o modificar su organización territorial, añade o actualiza el archivo JSON correspondiente en `src/api/modules/countries/fixtures/` asegurándote de seguir el formato de nombre `<Nombre>_<CODIGO>.json` antes de ejecutar el comando).*
 
 ### Creación de Administrador
 
 Para crear un usuario administrador inicial en la base de datos, ejecuta el siguiente comando en la raíz del proyecto:
 
-```bash
+```txt
 python3.14 -m src.scripts.create_admin
 ```
 
@@ -376,7 +407,7 @@ python3.14 -m src.scripts.create_admin
 
 Para generar las claves asimétricas (Ed25519) necesarias para la autenticación JWT, ejecuta el siguiente comando en la raíz del proyecto:
 
-```bash
+```txt
 python3.14 -m src.scripts.create_asymmetric_keys
 ```
 
