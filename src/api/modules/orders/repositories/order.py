@@ -22,17 +22,31 @@ class OrderRepository(IOrderRepository):
 
         return instance
 
-    async def get_list_orders(self, offset: int, limit: int) -> tuple[Sequence[Order], int]:
+    async def get_list_orders(
+        self,
+        offset: int,
+        limit: int,
+        order_type: str,
+    ) -> tuple[Sequence[Order], int]:
+
+        # Condición de filtro por tipo de orden en el JSONB
+        order_type_filter = Order.payment_data["description"].astext == order_type
 
         # Total para metadatos de paginación
-        count_stmt = select(func.count(Order.id))
+        count_stmt = select(func.count(Order.id)).where(order_type_filter)
         total_items = await self.__db.scalar(count_stmt) or 0
 
         if total_items == 0:
             return [], 0
 
         # Paginación y ordenamiento
-        stmt = select(Order).order_by(Order.date_joined.desc()).offset(offset).limit(limit)
+        stmt = (
+            select(Order)
+            .where(order_type_filter)
+            .order_by(Order.date_joined.desc())
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.__db.scalars(stmt)
         items = result.all()
 

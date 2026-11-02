@@ -16,7 +16,12 @@ class IOrderRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_list_orders(self, offset: int, limit: int) -> tuple[Sequence[Order], int]:
+    async def get_list_orders(
+        self,
+        offset: int,
+        limit: int,
+        order_type: str,
+    ) -> tuple[Sequence[Order], int]:
         """Obtiene una lista de órdenes/transacciones y el total de registros encontrados."""
 
         pass

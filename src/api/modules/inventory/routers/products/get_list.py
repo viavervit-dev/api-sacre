@@ -15,9 +15,7 @@ from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import retrieve_list_products_service
 from src.api.modules.inventory.dto import ReadProductPrivateDTO, ReadProductPublicDTO
 from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.get_list import (
-    GetListProductsService,
-)
+from src.api.modules.inventory.services.products.get_list import GetListProductService
 from src.api.settings.parameters import api_parameters
 
 get_list_products_router = APIRouter(prefix="/inventory", tags=["Inventario"])
@@ -153,7 +151,7 @@ require_admin = UserOptionalPermissionChecker(
 )
 async def get_list_products(
     user: Annotated[User | None, Depends(require_admin)],
-    service: Annotated[GetListProductsService, Depends(retrieve_list_products_service)],
+    service: Annotated[GetListProductService, Depends(retrieve_list_products_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,

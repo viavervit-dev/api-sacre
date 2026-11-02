@@ -4,7 +4,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import UUID as SQLAlchemyUUID
-from sqlalchemy import CheckConstraint, DateTime, Integer, Numeric, Sequence, String
+from sqlalchemy import CheckConstraint, DateTime, Index, Integer, Numeric, Sequence, String, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -36,6 +36,11 @@ class Order(ModelBase):
 
     __tablename__ = "orders"
     __table_args__ = (
+        Index(
+            "ix_orders_payment_data_date_joined",
+            text("(payment_data ->> 'description')"),
+            "date_joined",
+        ),
         CheckConstraint(
             sqltext=f"subtotal > {SUBTOTAL_MIN_VALUE} AND subtotal <= {SUBTOTAL_MAX_VALUE}",
             name="subtotal_range",

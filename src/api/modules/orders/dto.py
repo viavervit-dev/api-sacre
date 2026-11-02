@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Annotated, Any
 from uuid import UUID
@@ -496,4 +497,56 @@ class ReadOrderDTO(BaseModel):
                 OrderStatus.PAID.value: "2026-10-24T17:25:41.776689+00:00",
             }
         ],
+    )
+
+
+class ReadCustomerDataSummaryDTO(BaseModel):
+    """DTO para la lectura resumida de la información del cliente en el listado de órdenes."""
+
+    id: UUID = Field(
+        description="Identificador único (UUID v4).",
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    )
+    name_or_company_name: str = Field(
+        description="Nombre o razón social del cliente.",
+        examples=["Juan Pablo", "Parroquia San José de Chaltura"],
+    )
+    ruc: str | None = Field(
+        description="Registro Único de Contribuyentes del cliente.",
+        examples=["1790011674001", None],
+    )
+
+
+class ReadOrderSummaryDTO(BaseModel):
+    """DTO para la lectura resumida de una órden/transacción en listados paginados."""
+
+    id: UUID = Field(
+        description="Identificador único (UUID v4).",
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    )
+    order_number: str = Field(
+        description=OrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+        examples=["ORD-2026-000001"],
+    )
+    customer_data: ReadCustomerDataSummaryDTO = Field(
+        description=OrderEntity.CUSTOMER_DATA_DESCRIPTION.value,
+    )
+    payment_data: ReadPaymentDataDTO = Field(
+        description=OrderEntity.PAYMENT_DATA_DESCRIPTION.value,
+    )
+    units: int = Field(
+        description=OrderEntity.UNITS_DESCRIPTION.value,
+        examples=[100],
+    )
+    total: Decimal = Field(
+        description=OrderEntity.TOTAL_DESCRIPTION.value,
+        examples=[Decimal("10.50")],
+    )
+    status: str = Field(
+        description=OrderEntity.STATUS_DESCRIPTION.value,
+        examples=OrderStatus.values(),
+    )
+    date_joined: datetime = Field(
+        description="Fecha y hora de creación de la órden/transacción.",
+        examples=[datetime.now(tz=UTC)],
     )
