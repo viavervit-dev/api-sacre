@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from decimal import Decimal
 from typing import Annotated, Any
 from uuid import UUID
@@ -548,5 +548,5 @@ class ReadOrderSummaryDTO(BaseModel):
     )
     date_joined: datetime = Field(
         description="Fecha y hora de creación de la órden/transacción.",
-        examples=[datetime.now(tz=UTC)],
+        examples=["2026-10-24T17:25:41.776689+00:00"],
     )

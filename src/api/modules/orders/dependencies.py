@@ -10,6 +10,7 @@ from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.dependencies import ProductRepository, product_repository
 from src.api.modules.orders.repositories.order import OrderRepository
 from src.api.modules.orders.services.shopping.create import CreateOrderCustomerWholesaleService
+from src.api.modules.orders.services.shopping.get_list import GetListOrderService
 from src.api.settings.database import db_session
 
 
@@ -26,6 +27,17 @@ def financial_calculations_service() -> type[FinancialCalculationsMixin]:
     """
 
     return FinancialCalculationsMixin
+
+
+def get_list_order_service(
+    order_repo: Annotated[OrderRepository, Depends(order_repository)],
+) -> GetListOrderService:
+    """
+    Provee una instancia del servicio encargado de la consulta y serialización de órdenes
+    de compra.
+    """
+
+    return GetListOrderService(order_repo=order_repo)
 
 
 def create_order_customer_wholesale_service(

@@ -8,7 +8,7 @@ from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.orders.dependencies import financial_calculations_service
 from src.api.modules.orders.dto import GetTaxAmountDTO, ReadDecimalNumberDTO
 
-get_tax_amount_router = APIRouter(prefix="/orders", tags=["Ordenes de Compra"])
+get_tax_amount_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
 
 
 @get_tax_amount_router.post(

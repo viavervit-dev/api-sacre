@@ -8,7 +8,7 @@ from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.orders.dependencies import financial_calculations_service
 from src.api.modules.orders.dto import ListDecimalNumberDTO, ReadDecimalNumberDTO
 
-sum_router = APIRouter(prefix="/orders", tags=["Ordenes de Compra"])
+sum_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
 
 
 @sum_router.post(
