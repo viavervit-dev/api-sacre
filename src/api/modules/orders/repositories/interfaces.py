@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
@@ -11,6 +12,12 @@ class IOrderRepository(ABC):
     @abstractmethod
     async def get_order_by_id(self, id: UUID) -> Order | None:
         """Obtiene una órden/transacción por su identificador único."""
+
+        pass
+
+    @abstractmethod
+    async def get_list_orders(self, offset: int, limit: int) -> tuple[Sequence[Order], int]:
+        """Obtiene una lista de órdenes/transacciones y el total de registros encontrados."""
 
         pass
 

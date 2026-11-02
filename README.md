@@ -198,64 +198,6 @@ WORKERS=4
 > - **Claves Asimétricas (`PRIVATE_KEY` y `PUBLIC_KEY`)**: Requieren un par de claves criptográficas asimétricas Ed25519 en formato PEM. Se generarán ejecutando el script del proyecto tras instalar las dependencias (ver **Paso 5**).
 > - **Gestor de Pagos y Correo SMTP**: Si estás en un entorno de desarrollo local y vas a probar flujos de checkout, compra o notificaciones, ingresa las credenciales provistas por la pasarela en `API_PAYMENT_*` y una contraseña de aplicación en `MAIL_*`.
 
-#### Detalle de Variables de Entorno
-
-##### 1. Aplicación y Administrador Inicial
-| Variable | Tipo | Descripción | Ejemplo / Valor Recomendado |
-| :--- | :--- | :--- | :--- |
-| `DEBUG` | Booleano | Activa el modo de depuración en FastAPI y el autoreload de Uvicorn ante cambios de código. | `true` (desarrollo) / `false` (producción) |
-| `ADMIN_EMAIL` | String | Correo electrónico asignado a la cuenta del administrador inicial del sistema. | `admin@ejemplo.com` |
-| `ADMIN_PASSWORD` | String | Contraseña en texto plano para el administrador inicial (el script la hashea con bcrypt antes de persistirla). | `<contraseña_segura>` |
-| `ADMIN_FIRST_NAMES` | String | Nombres del usuario administrador inicial. | `Admin` |
-| `ADMIN_LAST_NAMES` | String | Apellidos del usuario administrador inicial. | `Sistema` |
-
-##### 2. Base de Datos (PostgreSQL & Pool Asyncpg)
-| Variable | Tipo | Descripción | Ejemplo / Valor Recomendado |
-| :--- | :--- | :--- | :--- |
-| `ALEMBIC_DATABASE_URL` | String | URL de conexión síncrona exclusiva para migraciones con Alembic (requiere driver `psycopg2`). | `postgresql+psycopg2://api_user:api_password@localhost:5432/fastapi_db` |
-| `DATABASE_URL` | String | URL de conexión asíncrona principal de la API utilizada por SQLAlchemy (requiere driver `asyncpg`). | `postgresql+asyncpg://api_user:api_password@localhost:5432/fastapi_db` |
-| `DB_POOL_SIZE` | Entero | Cantidad base de conexiones persistentes mantenidas permanentemente en el pool de asyncpg. | `10` |
-| `DB_POOL_MAX_OVERFLOW` | Entero | Conexiones adicionales temporales permitidas por encima de `DB_POOL_SIZE` ante picos de demanda. | `5` |
-| `DB_POOL_TIMEOUT` | Entero | Tiempo máximo en segundos de espera para conseguir una conexión libre del pool antes de fallar. | `5` |
-| `DB_POOL_RECYCLE` | Entero | Intervalo en segundos tras el cual se cierran y renuevan conexiones inactivas para evitar caídas silenciosas (30 min). | `1800` |
-| `DB_COMMAND_TIMEOUT` | Entero | Tiempo límite en segundos para la ejecución de cualquier comando o query individual a nivel de asyncpg. | `15` |
-| `DB_STATEMENT_TIMEOUT` | String / Entero | Tiempo límite en milisegundos (`10000` = 10s) en PostgreSQL para cancelar transacciones colgadas. | `10000` |
-| `DB_ECHO` | Booleano | Si es `true`, imprime por consola cada consulta SQL generada por SQLAlchemy (útil para depuración puntual). | `false` |
-| `DB_JIT` | String | Control de compilación JIT en PostgreSQL (`off` / `on`). Se recomienda apagar para optimizar consultas cortas OLTP. | `off` |
-
-##### 3. Seguridad y Autenticación (JWT Ed25519)
-| Variable | Tipo | Descripción | Ejemplo / Valor Recomendado |
-| :--- | :--- | :--- | :--- |
-| `ACCESS_TOKEN_EXPIRE` | Entero | Tiempo de expiración del token de acceso (`access_token`) expresado en **minutos**. | `15` |
-| `REFRESH_TOKEN_EXPIRE` | Entero | Tiempo de expiración del token de refresco (`refresh_token`) expresado en **minutos** (ej. 5760 min = 4 días). | `5760` |
-| `PRIVATE_KEY` | String | Clave privada asimétrica Ed25519 multilínea en formato PEM para firmar tokens. | Generada en el **Paso 5** |
-| `PUBLIC_KEY` | String | Clave pública asimétrica Ed25519 multilínea en formato PEM para validar la firma de los tokens. | Generada en el **Paso 5** |
-
-##### 4. Gestor de Pagos (Pasarela)
-| Variable | Tipo | Descripción | Ejemplo / Valor Recomendado |
-| :--- | :--- | :--- | :--- |
-| `API_PAYMENT_LINKS` | String | URL del endpoint de la pasarela para la creación y despacho de enlaces de cobro/pago. | `https://api.pasarela.com/api/Links` |
-| `API_PAYMENT_STORE_ID` | String | Identificador UUID del comercio o establecimiento (*Store ID*) provisto por la pasarela de pagos. | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
-| `API_PAYMENT_KEY` | String | Token o API Key Bearer secreta autorizada para interactuar con los endpoints de la pasarela. | `<token_pasarela>` |
-
-##### 5. Correo Electrónico (SMTP)
-| Variable | Tipo | Descripción | Ejemplo / Valor Recomendado |
-| :--- | :--- | :--- | :--- |
-| `MAIL_USERNAME` | String | Usuario o cuenta de correo electrónico utilizada para autenticarse en el servidor SMTP. | `usuario@ejemplo.com` |
-| `MAIL_PASSWORD` | String | Contraseña de autenticación SMTP o contraseña de aplicación (*App Password*) del proveedor. | `<contraseña_o_app_password>` |
-| `MAIL_FROM_ADDRESS` | String | Dirección de correo del remitente que verán los clientes en las notificaciones recibidas. | `notificaciones@ejemplo.com` |
-| `MAIL_SERVER` | String | Nombre de dominio o host del servidor SMTP saliente. | `smtp.ejemplo.com` |
-| `MAIL_PORT` | Entero | Puerto TCP del servidor SMTP (`465` para conexión SSL o `587` para STARTTLS). | `465` |
-| `MAIL_USE_SSL` | Booleano | Establece conexión directa cifrada con SSL/TLS (utilizado normalmente en puerto 465). | `true` |
-| `MAIL_STARTTLS` | Booleano | Habilita negociación STARTTLS para conexiones en texto claro (usado en puerto 587, excluyente con `MAIL_USE_SSL`). | `false` |
-| `MAIL_TIMEOUT` | Entero | Tiempo límite en segundos para la conexión y transmisión de mensajes con el servidor SMTP. | `15` |
-
-##### 6. Servidor Web (ASGI)
-| Variable | Tipo | Descripción | Ejemplo / Valor Recomendado |
-| :--- | :--- | :--- | :--- |
-| `HOST` | String | Dirección IP de enlace donde el servidor web escuchará las solicitudes HTTP entrantes. | `"127.0.0.1"` (local) o `"0.0.0.0"` (red/Docker) |
-| `PORT` | Entero | Puerto de red TCP en el que se expondrá la aplicación. | `8080` |
-| `WORKERS` | Entero | Cantidad de procesos *worker* concurrentes para la ejecución en producción con Gunicorn/Uvicorn. | `4` |
 
 ### Paso 3: Crear base de datos local
 

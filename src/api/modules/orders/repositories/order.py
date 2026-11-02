@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.orders.models.order import Order, order_number_seq
@@ -20,6 +21,22 @@ class OrderRepository(IOrderRepository):
         instance = await self.__db.get(Order, id)
 
         return instance
+
+    async def get_list_orders(self, offset: int, limit: int) -> tuple[Sequence[Order], int]:
+
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Order.id))
+        total_items = await self.__db.scalar(count_stmt) or 0
+
+        if total_items == 0:
+            return [], 0
+
+        # Paginación y ordenamiento
+        stmt = select(Order).order_by(Order.date_joined.desc()).offset(offset).limit(limit)
+        result = await self.__db.scalars(stmt)
+        items = result.all()
+
+        return items, total_items
 
     async def create_order(self, data: dict[str, Any]) -> Order:
 
