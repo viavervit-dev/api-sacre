@@ -15,6 +15,7 @@ from src.api.modules.inventory.services.products.add_product_wholesaler import (
 )
 from src.api.modules.inventory.services.products.create import CreateProductPublicService
 from src.api.modules.inventory.services.products.delete import DeleteProductService
+from src.api.modules.inventory.services.products.get import GetProductService
 from src.api.modules.inventory.services.products.get_list import GetListProductService
 from src.api.modules.inventory.services.products.get_products_wholesaler import (
     GetProductsWholesalerService,
@@ -42,6 +43,14 @@ def get_list_products_service(
     """Provee una instancia del servicio de consulta de una lista de productos."""
 
     return GetListProductService(product_repo=product_repo)
+
+
+def get_product_service(
+    product_repo: Annotated[ProductRepository, Depends(product_repository)],
+) -> GetProductService:
+    """Provee una instancia del servicio de consulta de un producto."""
+
+    return GetProductService(product_repo=product_repo)
 
 
 def get_products_wholesaler_service(
