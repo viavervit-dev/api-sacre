@@ -15,7 +15,7 @@ from src.api.modules.auth.models.user import User
 from src.api.modules.orders.dependencies import get_list_purchase_order_service
 from src.api.modules.orders.dto import ReadOrderSummaryDTO
 from src.api.modules.orders.models.order import Order
-from src.api.modules.orders.services.shopping.get_list import GetListPurchaseOrderService
+from src.api.modules.orders.services.purchase.get_list import GetListPurchaseOrderService
 from src.api.settings.parameters import api_parameters
 
 get_list_purchase_orders_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])

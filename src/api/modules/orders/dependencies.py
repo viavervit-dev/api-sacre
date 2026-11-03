@@ -9,9 +9,9 @@ from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.dependencies import ProductRepository, product_repository
 from src.api.modules.orders.repositories.order import OrderRepository
-from src.api.modules.orders.services.shopping.create import CreatePurchaseOrderWholesalerService
-from src.api.modules.orders.services.shopping.get import GetPurchaseOrderService
-from src.api.modules.orders.services.shopping.get_list import GetListPurchaseOrderService
+from src.api.modules.orders.services.purchase.create import CreatePurchaseOrderWholesalerService
+from src.api.modules.orders.services.purchase.get import GetPurchaseOrderService
+from src.api.modules.orders.services.purchase.get_list import GetListPurchaseOrderService
 from src.api.settings.database import db_session
 
 
