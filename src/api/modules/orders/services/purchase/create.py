@@ -16,13 +16,14 @@ from src.api.modules.orders.dto import (
     CreateOrderDTO,
     ReadCustomerDataDTO,
     ReadOrderDTO,
+    ReadPaymentDataDTO,
     ReadProductDataDTO,
 )
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
 
-class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
-    """Servicio encargado de la creación de órdenes/transacciones para clientes mayoristas."""
+class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
+    """Servicio encargado de la creación de órdenes de compra para clientes mayoristas."""
 
     def __init__(
         self,
@@ -37,9 +38,9 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         self.__payment_service = payment_service
         self.__products: list[Product] = []
 
-    async def create(self, data: CreateOrderDTO, customer_wholesale_id: UUID) -> ReadOrderDTO:
+    async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
         """
-        Crea una nueva órden/transacción para un cliente mayorista.
+        Crea una nueva orden de compra para un cliente mayorista.
 
         Raises:
             ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
@@ -53,7 +54,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         # Validar que el cliente mayorista exista
         user = await self.__user_repo.get_user(
             filters={
-                "id": customer_wholesale_id,
+                "id": wholesaler_id,
                 "role": UserRoles.CUSTOMER_WHOLESALE.value,
             },
             load_permissions=False,
@@ -92,7 +93,6 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
 
         # Establecer el estado inicial de algunos campos
         order_data["order_number"] = await self.__order_repo.get_next_order_number()
-        order_data["description"] = OrderDescription.SHOPPING_ORDER.value
         order_data["status"] = OrderStatus.PENDING_PAYMENT.value
         order_data["status_history"] = {
             OrderStatus.PENDING_PAYMENT.value: datetime.now(tz=UTC).isoformat(),
@@ -101,7 +101,7 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         # Creamos y enviamos el link de pago al cliente mayorista
         payment_link = self.__payment_service.create_payment_link(order_data=order_data)
         order_data["payment_data"] = {
-            "description": OrderDescription.SHOPPING_ORDER.value,
+            "description": OrderDescription.PURCHASE_ORDER.value,
             "link": payment_link,
         }
 
@@ -112,11 +112,13 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         order_data = order.to_dict()
         customer_data = order_data.pop("customer_data")
         product_data = order_data.pop("product_data")
+        payment_data = order_data.pop("payment_data")
 
         return ReadOrderDTO.model_construct(
             **order_data,
             customer_data=ReadCustomerDataDTO.model_construct(**customer_data),
             product_data=[ReadProductDataDTO.model_construct(**p) for p in product_data],
+            payment_data=ReadPaymentDataDTO.model_construct(**payment_data),
         )
 
     async def __run_business_validations(self, data: CreateOrderDTO) -> None:

@@ -17,12 +17,12 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.orders.dependencies import create_order_customer_wholesale_service
+from src.api.modules.orders.dependencies import create_purchase_order_wholesaler_service
 from src.api.modules.orders.dto import CreateOrderDTO, ReadOrderDTO
 from src.api.modules.orders.models.order import Order
-from src.api.modules.orders.services.shopping.create import CreateOrderCustomerWholesaleService
+from src.api.modules.orders.services.purchase.create import CreatePurchaseOrderWholesalerService
 
-create_order_customer_wholesale_router = APIRouter(
+create_purchase_order_wholesaler_router = APIRouter(
     prefix="/orders",
     tags=["Órdenes/Transacciones"],
 )
@@ -32,9 +32,9 @@ require_admin = UserPermissionChecker(
 )
 
 
-@create_order_customer_wholesale_router.post(
-    path="/shopping/customer_wholesale/{customer_wholesale_id}/",
-    response_description="**(CREATED)** Órden/transacción creada exitosamente.",
+@create_purchase_order_wholesaler_router.post(
+    path="/purchase/wholesaler/{wholesaler_id}/",
+    response_description="**(CREATED)** Orden de compra creada exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateOrderDTO),
@@ -66,23 +66,22 @@ require_admin = UserPermissionChecker(
         status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
-async def create_order_customer_wholesale(
+async def create_purchase_order_wholesaler(
     user: Annotated[User, Depends(require_admin)],
     data: CreateOrderDTO,
-    customer_wholesale_id: Annotated[
+    wholesaler_id: Annotated[
         UUID,
         Path(
             title="ID del cliente mayorista",
-            description="El identificador único en formato UUID v4.",
-            examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+            description="El identificador único del cliente mayorista en formato UUID v4.",
         ),
     ],
     service: Annotated[
-        CreateOrderCustomerWholesaleService, Depends(create_order_customer_wholesale_service)
+        CreatePurchaseOrderWholesalerService, Depends(create_purchase_order_wholesaler_service)
     ],
 ) -> Response[ReadOrderDTO]:
     """
-    Permite crear una órden/transacción vinculada a un cliente mayorista a partir de los datos
+    Permite crear una orden de compra vinculada a un cliente mayorista a partir de los datos
     proporcionados y su identificador. Ejecuta validaciones sintácticas y comprobaciones de
     unicidad en la base de datos para prevenir duplicados.
 
@@ -97,11 +96,11 @@ async def create_order_customer_wholesale(
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario posea rol de administrador y el permiso `orders.create`.
     2. **Validación Sintáctica y Parámetros:**
-        - Valida el identificador del mayorista (`customer_wholesale_id`) como un UUID en la ruta.
+        - Valida el identificador del mayorista (`wholesaler_id`) como un UUID en la ruta.
         - Valida tipos de datos, montos decimales y lista de artículos.
     3. **Verificación de Existencia del Mayorista:**
         - Consulta al usuario mayorista en la base de datos.
-        - Si no existe, interrumpe el flujo levantando  (404 Not Found).
+        - Si no existe, interrumpe el flujo levantando (404 Not Found).
     4. **Validaciones de Reglas de Negocio:**
         - **Unicidad:** Comprueba que la clave de idempotencia (`idempotency_key`) no esté
             registrado.
@@ -122,11 +121,11 @@ async def create_order_customer_wholesale(
         - Guarda el registro en la base de datos.
     """
 
-    order = await service.create(data=data, customer_wholesale_id=customer_wholesale_id)
+    order = await service.create(data=data, wholesaler_id=wholesaler_id)
 
     return Response(
         success=True,
         pagination=False,
-        message="Órden/transacción creada exitosamente.",
+        message="Orden de compra creada exitosamente.",
         data=order,
     )

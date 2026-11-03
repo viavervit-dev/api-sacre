@@ -9,7 +9,7 @@ from src.api.modules.orders.dto import (
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
 
-class GetListOrderService:
+class GetListPurchaseOrderService:
     """Servicio encargado de la consulta y serialización de órdenes de compra."""
 
     def __init__(self, order_repo: IOrderRepository) -> None:
@@ -23,7 +23,7 @@ class GetListOrderService:
         """Obtiene una lista paginada de órdenes de compra y el total de registros."""
 
         orders, total_items = await self.__order_repo.get_list_orders(
-            order_type=OrderDescription.SHOPPING_ORDER.value,
+            order_type=OrderDescription.PURCHASE_ORDER.value,
             offset=offset,
             limit=limit,
         )

@@ -16,11 +16,14 @@ class OrderRepository(IOrderRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db
 
-    async def get_order_by_id(self, id: UUID) -> Order | None:
+    async def get_order_by_id(self, id: UUID, order_type: str) -> Order | None:
 
-        instance = await self.__db.get(Order, id)
+        stmt = select(Order).where(
+            Order.id == id,
+            Order.payment_data["description"].astext == order_type,
+        )
 
-        return instance
+        return await self.__db.scalar(stmt)
 
     async def get_list_orders(
         self,

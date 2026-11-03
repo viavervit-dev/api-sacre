@@ -166,7 +166,7 @@ class MultiplyDecimalDTO(BaseModel):
 
 
 class ReadCustomerDataDTO(BaseModel):
-    """DTO para la lectura de la información del cliente en una órden/transacción."""
+    """DTO para la lectura de la información del cliente en una orden/transacción."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -209,7 +209,7 @@ class ReadCustomerDataDTO(BaseModel):
 
 
 class ProductDataDTO(BaseModel):
-    """DTO para la información del producto en la creación de una órden/transacción."""
+    """DTO para la información del producto en la creación de una orden/transacción."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -298,7 +298,7 @@ class ProductDataDTO(BaseModel):
 
 
 class ReadProductDataDTO(BaseModel):
-    """DTO para la lectura de la información de los productos de una órden/transacción."""
+    """DTO para la lectura de la información de los productos de una orden/transacción."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -335,7 +335,7 @@ class ReadProductDataDTO(BaseModel):
 
 
 class CreateOrderDTO(BaseModel):
-    """DTO para la creación de una órden/transacción."""
+    """DTO para la creación de una orden/transacción."""
 
     idempotency_key: UUID = Field(
         description=OrderEntity.IDEMPOTENCY_KEY_DESCRIPTION.value,
@@ -450,7 +450,7 @@ class ReadPaymentDataDTO(BaseModel):
 
 
 class ReadOrderDTO(BaseModel):
-    """DTO para la lectura de la información de una órden/transacción."""
+    """DTO para la lectura de la información de una orden/transacción."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -498,6 +498,10 @@ class ReadOrderDTO(BaseModel):
             }
         ],
     )
+    date_joined: datetime = Field(
+        description="Fecha y hora de creación de la orden/transacción.",
+        examples=["2026-10-24T17:25:41.776689+00:00"],
+    )
 
 
 class ReadCustomerDataSummaryDTO(BaseModel):
@@ -518,7 +522,7 @@ class ReadCustomerDataSummaryDTO(BaseModel):
 
 
 class ReadOrderSummaryDTO(BaseModel):
-    """DTO para la lectura resumida de una órden/transacción en listados paginados."""
+    """DTO para la lectura resumida de una orden/transacción en listados paginados."""
 
     id: UUID = Field(
         description="Identificador único (UUID v4).",
@@ -547,6 +551,6 @@ class ReadOrderSummaryDTO(BaseModel):
         examples=OrderStatus.values(),
     )
     date_joined: datetime = Field(
-        description="Fecha y hora de creación de la órden/transacción.",
+        description="Fecha y hora de creación de la orden/transacción.",
         examples=["2026-10-24T17:25:41.776689+00:00"],
     )
