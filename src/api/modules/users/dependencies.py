@@ -8,6 +8,7 @@ from src.api.modules.users.repositories.customer import CustomerRepository
 from src.api.modules.users.repositories.wholesaler import WholesalerRepository
 from src.api.modules.users.services.customers.create import CreateCustomerService
 from src.api.modules.users.services.wholesaler.create import CreateWholesalerService
+from src.api.modules.users.services.wholesaler.get import GetWholesalerService
 from src.api.modules.users.services.wholesaler.get_list import GetListWholesalerService
 from src.api.modules.users.services.wholesaler.update import UpdateWholesalerService
 from src.api.settings.database import db_session
@@ -60,3 +61,11 @@ def get_list_wholesaler_service(
     """Provee una instancia del servicio de obtención de lista de clientes mayoristas."""
 
     return GetListWholesalerService(user_repo=user_repo)
+
+
+def get_wholesaler_service(
+    user_repo: Annotated[UserRepository, Depends(user_repository)],
+) -> GetWholesalerService:
+    """Provee una instancia del servicio de obtención de un cliente mayorista."""
+
+    return GetWholesalerService(user_repo=user_repo)
