@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dto import ReadProductPrivateDTO, ReadProductPublicDTO
+from src.api.modules.inventory.dto import ReadProductSummaryDTO
 from src.api.modules.inventory.repositories.interfaces import IProductRepository
 
 
@@ -17,7 +17,7 @@ class GetListProductService:
         user: User | None,
         offset: int,
         limit: int,
-    ) -> tuple[Sequence[ReadProductPublicDTO | ReadProductPrivateDTO], int]:
+    ) -> tuple[Sequence[ReadProductSummaryDTO], int]:
         """Obtiene una lista paginada de productos según filtros y nivel de visibilidad."""
 
         if user and user.role == UserRoles.ADMINISTRATOR.value:
@@ -36,7 +36,7 @@ class GetListProductService:
         self,
         offset: int,
         limit: int,
-    ) -> tuple[list[ReadProductPublicDTO], int]:
+    ) -> tuple[list[ReadProductSummaryDTO], int]:
         """Consulta y serializa los productos correspondientes del catálogo público."""
 
         result = []
@@ -50,7 +50,7 @@ class GetListProductService:
             return [], 0
 
         for product in products:
-            dto = ReadProductPublicDTO.model_construct(**product.to_dict())
+            dto = ReadProductSummaryDTO.model_construct(**product.to_dict())
             result.append(dto)
 
         return result, total_items
@@ -59,7 +59,7 @@ class GetListProductService:
         self,
         offset: int,
         limit: int,
-    ) -> tuple[list[ReadProductPrivateDTO], int]:
+    ) -> tuple[list[ReadProductSummaryDTO], int]:
         """Consulta y serializa los productos correspondientes del catálogo privado."""
 
         result = []
@@ -73,7 +73,7 @@ class GetListProductService:
             return [], 0
 
         for product in products:
-            dto = ReadProductPrivateDTO.model_construct(**product.to_dict())
+            dto = ReadProductSummaryDTO.model_construct(**product.to_dict())
             result.append(dto)
 
         return result, total_items

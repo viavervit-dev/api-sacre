@@ -582,3 +582,42 @@ class ReadProductPrivateDTO(ReadProductPublicDTO):
         description=ProductEntity.STATUS_DESCRIPTION.value,
         examples=[True, False],
     )
+
+
+class ReadProductSummaryDTO(BaseModel):
+    """DTO para la lectura resumida de un producto en listados paginados."""
+
+    id: UUID = Field(
+        description="Identificador único (UUID v4).",
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    )
+    name: str = Field(
+        description=ProductEntity.NAME_DESCRIPTION.value,
+        examples=["Rosario de madera"],
+    )
+    categories: list[str] = Field(
+        description=ProductEntity.CATEGORIES_DESCRIPTION.value,
+        examples=[["Rosarios", "Madera"]],
+    )
+    description_short: str = Field(
+        description=ProductEntity.DESCRIPTION_SHORT_DESCRIPTION.value,
+        examples=["Rosario hecho a mano con cuentas de madera."],
+    )
+    images: list[str] = Field(
+        description=ProductEntity.IMAGES_DESCRIPTION.value,
+        examples=[
+            [
+                "https://example.com/image1.jpg",
+                "https://example.com/image2.jpg",
+                "https://example.com/image3.jpg",
+            ]
+        ],
+    )
+    price_sale: Decimal = Field(
+        description=ProductEntity.PRICE_SALE_DESCRIPTION.value,
+        examples=[Decimal("15.00")],
+    )
+    status: bool = Field(
+        description=ProductEntity.STATUS_DESCRIPTION.value,
+        examples=[True, False],
+    )
