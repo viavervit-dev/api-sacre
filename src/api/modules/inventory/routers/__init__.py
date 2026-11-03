@@ -9,6 +9,7 @@ from src.api.modules.inventory.routers.products.add_product_wholesaler import (
 )
 from src.api.modules.inventory.routers.products.create import create_product_router
 from src.api.modules.inventory.routers.products.delete import delete_product_router
+from src.api.modules.inventory.routers.products.get import get_product_router
 from src.api.modules.inventory.routers.products.get_list import get_list_products_router
 from src.api.modules.inventory.routers.products.get_products_wholesaler import (
     get_products_wholesaler_router,
@@ -22,6 +23,7 @@ router.include_router(router=update_category_router)
 router.include_router(router=delete_category_router)
 router.include_router(router=create_product_router)
 router.include_router(router=get_list_products_router)
+router.include_router(router=get_product_router)
 router.include_router(router=get_products_wholesaler_router)
 router.include_router(router=update_product_router)
 router.include_router(router=delete_product_router)

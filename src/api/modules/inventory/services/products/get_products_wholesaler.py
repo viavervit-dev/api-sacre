@@ -27,6 +27,7 @@ class GetProductsWholesalerService:
             ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
         """
 
+        # Validamos que el mayorista exista en la base de datos
         user = await self.__user_repo.get_user(
             filters={"id": wholesaler_id, "role": UserRoles.WHOLESALER.value},
             load_permissions=False,
@@ -35,6 +36,7 @@ class GetProductsWholesalerService:
         if not user:
             raise ResourceNotFound()
 
+        # Consultamos los productos del mayorista en la base de datos
         products, total_items = await self.__product_repo.get_products_by_wholesaler(
             products_id=user.wholesaler.products,
             offset=offset,

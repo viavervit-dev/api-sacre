@@ -49,7 +49,7 @@ async def delete_product(
         UUID,
         Path(
             title="ID del producto",
-            description="El identificador único en formato UUID v4.",
+            description="El identificador único del producto en formato UUID v4.",
         ),
     ],
     service: Annotated[DeleteProductService, Depends(delete_product_service)],

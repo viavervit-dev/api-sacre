@@ -52,7 +52,7 @@ async def update_category(
         UUID,
         Path(
             title="ID de la categoria del producto.",
-            description="El identificador único en formato UUID v4.",
+            description="El identificador único de la categoría del producto en formato UUID v4.",
         ),
     ],
     service: Annotated[UpdateCategoryService, Depends(update_category_service)],

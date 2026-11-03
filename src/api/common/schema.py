@@ -244,6 +244,7 @@ def response_scheme_403() -> dict[str, Any]:
 
 def response_scheme_409(
     product_has_reserved_stock: bool = False,
+    product_not_available: bool = False,
     category_has_dependencies: bool = False,
     order_already_has_payment: bool = False,
 ) -> dict[str, Any]:
@@ -284,6 +285,16 @@ def response_scheme_409(
                 "success": False,
                 "pagination": False,
                 "message": InventoryException.PRODUCT_HAS_RESERVED_STOCK.value,
+                "data": {},
+            },
+        }
+    if product_not_available:
+        scheme["content"]["application/json"]["examples"]["product_not_available"] = {
+            "summary": "Producto no disponible",
+            "value": {
+                "success": False,
+                "pagination": False,
+                "message": InventoryException.PRODUCT_NOT_AVAILABLE.value,
                 "data": {},
             },
         }

@@ -34,7 +34,7 @@ class GetProductService:
             raise ResourceNotFound()
 
         # Validar que el producto sea visible para el usuario según su rol
-        if user and user.role != UserRoles.ADMINISTRATOR.value:
+        if not user or user.role != UserRoles.ADMINISTRATOR.value:
             product_status = product.status
             product_exclusive = product.exclusive
 
