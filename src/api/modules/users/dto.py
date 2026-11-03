@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
@@ -354,4 +355,24 @@ class ReadWholesalerDTO(BaseModel):
     )
     extra_contacts: list[ReadExtraContactsDTO] | None = Field(
         description=WholesalerEntity.EXTRA_CONTACTS_DESCRIPTION.value,
+    )
+
+
+class ReadWholesalerSummaryDTO(BaseModel):
+    """DTO de lectura resumida de un cliente mayorista en listados paginados."""
+
+    id: UUID = Field(
+        description="Identificador único (UUID v4).",
+        examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    )
+    name_or_company_name: str = Field(
+        description=WholesalerEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
+        examples=["Juan Pablo", "Parroquia San José de Chaltura"],
+    )
+    location: ReadLocationEcuadorDTO = Field(
+        description=WholesalerEntity.LOCATION_DESCRIPTION.value
+    )
+    date_joined: datetime = Field(
+        description="Fecha y hora de creación de la orden/transacción.",
+        examples=["2026-10-24T17:25:41.776689+00:00"],
     )

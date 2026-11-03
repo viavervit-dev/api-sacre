@@ -33,7 +33,7 @@ class CreateWholesalerService:
         user_instance = await self.__user_repo.create_user(
             email=wholesaler_data.pop("email"),
             password=secrets.token_urlsafe(nbytes=12),
-            role=UserRoles.CUSTOMER_WHOLESALE.value,
+            role=UserRoles.WHOLESALER.value,
         )
         profile_instance = await self.__wholesaler_repo.create_wholesaler(
             user_id=user_instance.id,

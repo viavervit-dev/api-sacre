@@ -28,10 +28,7 @@ class UpdateWholesalerService:
 
         # Validar que el cliente mayorista exista en la base de datos
         user_instance = await self.__user_repo.get_user(
-            filters={
-                "role": UserRoles.CUSTOMER_WHOLESALE.value,
-                "id": wholesaler_id,
-            },
+            filters={"role": UserRoles.WHOLESALER.value, "id": wholesaler_id},
             load_permissions=False,
         )
 

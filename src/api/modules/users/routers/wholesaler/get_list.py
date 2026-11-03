@@ -13,7 +13,7 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.users.dependencies import get_list_wholesaler_service
-from src.api.modules.users.dto import ReadWholesalerDTO
+from src.api.modules.users.dto import ReadWholesalerSummaryDTO
 from src.api.modules.users.models.wholesaler import Wholesaler
 from src.api.modules.users.services.wholesaler.get_list import GetListWholesalerService
 from src.api.settings.parameters import api_parameters
@@ -32,7 +32,7 @@ require_admin = UserPermissionChecker(
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de clientes mayoristas obtenida exitosamente.",
-            "model": Response[PaginatedData[ReadWholesalerDTO]],
+            "model": Response[PaginatedData[ReadWholesalerSummaryDTO]],
             "content": {
                 "application/json": {
                     "examples": {
@@ -46,10 +46,7 @@ require_admin = UserPermissionChecker(
                                     "items": [
                                         {
                                             "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                                            "email": "user@email.com",
                                             "name_or_company_name": "Juan Pablo",
-                                            "ruc": "1790011674001",
-                                            "phone": "+593 123456789",
                                             "location": {
                                                 "country": "Ecuador",
                                                 "province": "Pichincha",
@@ -57,14 +54,6 @@ require_admin = UserPermissionChecker(
                                                 "city": "Zámbiza",
                                                 "address": "Manuel Larrea y Av. 6 de Diciembre",
                                             },
-                                            "extra_contacts": [
-                                                {
-                                                    "position": "Secretaria",
-                                                    "name": "María Pérez",
-                                                    "email": "user@email.com",
-                                                    "phone": "+593 987654321",
-                                                },
-                                            ],
                                         },
                                     ],
                                     "meta": {
@@ -121,7 +110,7 @@ async def get_list_wholesaler(
         description=PAGINATION_LIMIT_DESCRIPTION,
         ge=1,
     ),
-) -> Response[PaginatedData[ReadWholesalerDTO]]:
+) -> Response[PaginatedData[ReadWholesalerSummaryDTO]]:
     """
     Permite consultar el listado de clientes mayoristas almacenados con soporte para
     paginación y ordenamiento cronológico descendente.

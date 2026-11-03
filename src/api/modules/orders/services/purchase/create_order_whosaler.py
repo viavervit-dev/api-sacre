@@ -53,10 +53,7 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         # Validar que el cliente mayorista exista
         user = await self.__user_repo.get_user(
-            filters={
-                "id": wholesaler_id,
-                "role": UserRoles.CUSTOMER_WHOLESALE.value,
-            },
+            filters={"id": wholesaler_id, "role": UserRoles.WHOLESALER.value},
             load_permissions=False,
         )
 

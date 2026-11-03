@@ -35,7 +35,7 @@ GROUPS: list[RoleGroupConfig] = [
         ],
     },
     {
-        "name": UserRoles.CUSTOMER_WHOLESALE.value,
+        "name": UserRoles.WHOLESALER.value,
         "permissions": [
             f"{Product.__tablename__}.read.public",
             f"{Order.__tablename__}.read",
