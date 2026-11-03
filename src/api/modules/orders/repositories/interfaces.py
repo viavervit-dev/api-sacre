@@ -10,7 +10,7 @@ class IOrderRepository(ABC):
     """Contrato de persistencia para operaciones sobre órdenes/transacciones (`orders.orders`)."""
 
     @abstractmethod
-    async def get_order_by_id(self, id: UUID) -> Order | None:
+    async def get_order_by_id(self, id: UUID, order_type: str) -> Order | None:
         """Obtiene una órden/transacción por su identificador único."""
 
         pass

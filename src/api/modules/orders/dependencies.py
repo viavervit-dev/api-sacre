@@ -9,8 +9,9 @@ from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.dependencies import ProductRepository, product_repository
 from src.api.modules.orders.repositories.order import OrderRepository
-from src.api.modules.orders.services.shopping.create import CreateOrderCustomerWholesaleService
-from src.api.modules.orders.services.shopping.get_list import GetListOrderService
+from src.api.modules.orders.services.shopping.create import CreatePurchaseOrderWholesalerService
+from src.api.modules.orders.services.shopping.get import GetPurchaseOrderService
+from src.api.modules.orders.services.shopping.get_list import GetListPurchaseOrderService
 from src.api.settings.database import db_session
 
 
@@ -29,29 +30,40 @@ def financial_calculations_service() -> type[FinancialCalculationsMixin]:
     return FinancialCalculationsMixin
 
 
-def get_list_order_service(
+def get_list_purchase_order_service(
     order_repo: Annotated[OrderRepository, Depends(order_repository)],
-) -> GetListOrderService:
+) -> GetListPurchaseOrderService:
     """
     Provee una instancia del servicio encargado de la consulta y serialización de órdenes
     de compra.
     """
 
-    return GetListOrderService(order_repo=order_repo)
+    return GetListPurchaseOrderService(order_repo=order_repo)
 
 
-def create_order_customer_wholesale_service(
+def get_purchase_order_service(
+    order_repo: Annotated[OrderRepository, Depends(order_repository)],
+) -> GetPurchaseOrderService:
+    """
+    Provee una instancia del servicio encargado de la consulta y serialización de órdenes
+    de compra.
+    """
+
+    return GetPurchaseOrderService(order_repo=order_repo)
+
+
+def create_purchase_order_wholesaler_service(
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
     order_repo: Annotated[OrderRepository, Depends(order_repository)],
     payment_service: Annotated[CreatePaymentLinkService, Depends(create_payment_link_service)],
     user_repo: Annotated[UserRepository, Depends(user_repository)],
-) -> CreateOrderCustomerWholesaleService:
+) -> CreatePurchaseOrderWholesalerService:
     """
-    Provee una instancia del servicio encargado de la creación de órdenes/transacciones
+    Provee una instancia del servicio encargado de la creación de órdenes de compra
     para clientes mayoristas.
     """
 
-    return CreateOrderCustomerWholesaleService(
+    return CreatePurchaseOrderWholesalerService(
         payment_service=payment_service,
         product_repo=product_repo,
         order_repo=order_repo,

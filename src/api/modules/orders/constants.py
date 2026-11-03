@@ -17,9 +17,9 @@ class OrderStatus(StrEnum):
 
 
 class OrderDescription(StrEnum):
-    """Descripciones predefinidas para el propósito de una órden/transacción."""
+    """Descripciones predefinidas para el propósito de una orden/transacción."""
 
-    SHOPPING_ORDER = "Orden de compra"
+    PURCHASE_ORDER = "Orden de compra"
     DONATION = "Donación"
     PAYMENT_LINK = "Link de pago"
     PAYMENT_GATEWAY = "Pasarela de pago"
@@ -35,19 +35,19 @@ class OrderEntity(Enum):
     """Metadatos asociados a la entidad `Order`."""
 
     # Descripciones para los campos de la entidad
-    STATUS_DESCRIPTION = "Estado actual de la órden/transacción."
-    CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la órden/transacción."
-    PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en la órden/transacción."
-    PAYMENT_DATA_DESCRIPTION = "Datos del pago de la órden/transacción."
+    STATUS_DESCRIPTION = "Estado actual de la orden/transacción."
+    CUSTOMER_DATA_DESCRIPTION = "Datos del cliente que realiza la orden/transacción."
+    PRODUCT_DATA_DESCRIPTION = "Datos de los productos incluidos en la orden/transacción."
+    PAYMENT_DATA_DESCRIPTION = "Datos del pago de la orden/transacción."
     IDEMPOTENCY_KEY_DESCRIPTION = "Clave de idempotencia creada por el cliente (navegador)."
     STATUS_HISTORY_DESCRIPTION = (
-        "Historial y registro cronológico de cambios de estado de la órden/transacción."
+        "Historial y registro cronológico de cambios de estado de la orden/transacción."
     )
-    ORDER_NUMBER_DESCRIPTION = "Número de referencia de la órden/transacción."
-    UNITS_DESCRIPTION = "Cantidad total de unidades de productos de la órden/transacción."
-    SUBTOTAL_DESCRIPTION = "Valor neto de la órden/transacción."
-    TOTAL_DESCRIPTION = "Valor total final de la órden/transacción."
-    TAX_AMOUNT_DESCRIPTION = "Total de impuestos aplicados de la órden/transacción."
+    ORDER_NUMBER_DESCRIPTION = "Número de referencia de la orden/transacción."
+    UNITS_DESCRIPTION = "Cantidad total de unidades de productos de la orden/transacción."
+    SUBTOTAL_DESCRIPTION = "Valor neto de la orden/transacción."
+    TOTAL_DESCRIPTION = "Valor total final de la orden/transacción."
+    TAX_AMOUNT_DESCRIPTION = "Total de impuestos aplicados de la orden/transacción."
     UNITS_PRODUCT_DESCRIPTION = "Cantidad de unidades del producto de un tipo."
     SUBTOTAL_PRODUCT_DESCRIPTION = "Valor neto de los productos de un tipo."
     TOTAL_PRODUCT_DESCRIPTION = "Valor total final de los productos de un tipo."

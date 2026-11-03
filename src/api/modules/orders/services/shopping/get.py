@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from src.api.common.exceptions import ResourceNotFound
+from src.api.modules.orders.constants import OrderDescription
 from src.api.modules.orders.dto import (
     ReadCustomerDataDTO,
     ReadOrderDTO,
@@ -10,13 +11,13 @@ from src.api.modules.orders.dto import (
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
 
-class GetOrderService:
+class GetPurchaseOrderService:
     """Servicio encargado de la consulta y obtención del detalle de una orden de compra."""
 
     def __init__(self, order_repo: IOrderRepository) -> None:
         self.__order_repo = order_repo
 
-    async def get(self, order_id: UUID) -> ReadOrderDTO:
+    async def get(self, purchase_order_id: UUID) -> ReadOrderDTO:
         """
         Obtiene el detalle completo de una orden de compra por su identificador único.
 
@@ -25,7 +26,10 @@ class GetOrderService:
         """
 
         # Validar que la orden exista
-        order = await self.__order_repo.get_order_by_id(id=order_id)
+        order = await self.__order_repo.get_order_by_id(
+            order_type=OrderDescription.PURCHASE_ORDER.value,
+            id=purchase_order_id,
+        )
 
         if not order:
             raise ResourceNotFound()
