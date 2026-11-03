@@ -498,6 +498,10 @@ class ReadOrderDTO(BaseModel):
             }
         ],
     )
+    date_joined: datetime = Field(
+        description="Fecha y hora de creación de la órden/transacción.",
+        examples=["2026-10-24T17:25:41.776689+00:00"],
+    )
 
 
 class ReadCustomerDataSummaryDTO(BaseModel):

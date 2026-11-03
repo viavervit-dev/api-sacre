@@ -16,6 +16,7 @@ from src.api.modules.orders.dto import (
     CreateOrderDTO,
     ReadCustomerDataDTO,
     ReadOrderDTO,
+    ReadPaymentDataDTO,
     ReadProductDataDTO,
 )
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
@@ -112,11 +113,13 @@ class CreateOrderCustomerWholesaleService(FinancialCalculationsMixin):
         order_data = order.to_dict()
         customer_data = order_data.pop("customer_data")
         product_data = order_data.pop("product_data")
+        payment_data = order_data.pop("payment_data")
 
         return ReadOrderDTO.model_construct(
             **order_data,
             customer_data=ReadCustomerDataDTO.model_construct(**customer_data),
             product_data=[ReadProductDataDTO.model_construct(**p) for p in product_data],
+            payment_data=ReadPaymentDataDTO.model_construct(**payment_data),
         )
 
     async def __run_business_validations(self, data: CreateOrderDTO) -> None:
