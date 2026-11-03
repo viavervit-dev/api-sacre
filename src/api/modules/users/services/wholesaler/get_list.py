@@ -1,10 +1,10 @@
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.users.dto import ReadCustomerWholesaleDTO
+from src.api.modules.users.dto import ReadWholesalerDTO
 
 
-class GetListCustomerWholesaleService:
-    """Servicio encargado de la consulta y serialización de clientes mayoristas."""
+class GetListWholesalerService:
+    """Servicio encargado de consultar la lista de clientes mayoristas."""
 
     def __init__(self, user_repo: IUserRepository) -> None:
         self.__user_repo = user_repo
@@ -13,7 +13,7 @@ class GetListCustomerWholesaleService:
         self,
         offset: int,
         limit: int,
-    ) -> tuple[list[ReadCustomerWholesaleDTO], int]:
+    ) -> tuple[list[ReadWholesalerDTO], int]:
         """Obtiene una lista paginada de clientes mayoristas y el total de registros."""
 
         users, total_items = await self.__user_repo.get_list_users(
@@ -31,10 +31,10 @@ class GetListCustomerWholesaleService:
         for user in users:
             user_data = user.to_dict()
             user_data.pop("date_joined")
-            profile_data = user.customer_wholesale.to_dict()
+            profile_data = user.wholesaler.to_dict()
             profile_data.pop("id")
             profile_data.pop("date_joined")
-            dto = ReadCustomerWholesaleDTO.model_construct(**user_data, **profile_data)
+            dto = ReadWholesalerDTO.model_construct(**user_data, **profile_data)
             result.append(dto)
 
         return result, total_items

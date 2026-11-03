@@ -9,7 +9,7 @@ from src.api.modules.auth.constants import UserEntity
 from src.api.modules.auth.models.permission import Group
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
-from src.api.modules.users.models.customer_wholesale import CustomerWholesale
+from src.api.modules.users.models.wholesaler import Wholesaler
 from src.api.settings.database import ModelBase
 
 # Constantes para validaciones de campos numéricos
@@ -63,13 +63,19 @@ class User(ModelBase):
         nullable=False,
     )
 
+    groups: Mapped[list[Group]] = relationship(
+        argument="Group",
+        secondary="auth.user_groups",
+    )
+
+    # Roles de usuario
     customer: Mapped[Customer] = relationship(
         argument="Customer",
         uselist=False,
         cascade="all, delete-orphan",
     )
-    customer_wholesale: Mapped[CustomerWholesale] = relationship(
-        argument="CustomerWholesale",
+    wholesaler: Mapped[Wholesaler] = relationship(
+        argument="Wholesaler",
         uselist=False,
         cascade="all, delete-orphan",
     )
@@ -77,10 +83,6 @@ class User(ModelBase):
         argument="Admin",
         uselist=False,
         cascade="all, delete-orphan",
-    )
-    groups: Mapped[list[Group]] = relationship(
-        argument="Group",
-        secondary="auth.user_groups",
     )
 
     def set_password(self, password: str) -> None:

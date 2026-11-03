@@ -12,7 +12,7 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import retrieve_list_products_service
+from src.api.modules.inventory.dependencies import get_list_products_service
 from src.api.modules.inventory.dto import ReadProductPrivateDTO, ReadProductPublicDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.get_list import GetListProductService
@@ -151,7 +151,7 @@ require_admin = UserOptionalPermissionChecker(
 )
 async def get_list_products(
     user: Annotated[User | None, Depends(require_admin)],
-    service: Annotated[GetListProductService, Depends(retrieve_list_products_service)],
+    service: Annotated[GetListProductService, Depends(get_list_products_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,

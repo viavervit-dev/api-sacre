@@ -242,7 +242,7 @@ class CreateProductPublicDTO(BaseModel):
     )
 
 
-class CreateProductWholesaleDTO(BaseModel):
+class CreateProductWholesalerDTO(BaseModel):
     """DTO para la creación de un producto para un cliente mayorista."""
 
     name: str = Field(

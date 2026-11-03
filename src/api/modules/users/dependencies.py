@@ -5,17 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.users.repositories.customer import CustomerRepository
-from src.api.modules.users.repositories.customer_wholesale import CustomerWholesaleRepository
+from src.api.modules.users.repositories.wholesaler import WholesalerRepository
 from src.api.modules.users.services.customers.create import CreateCustomerService
-from src.api.modules.users.services.customers_wholesale.create import (
-    CreateCustomerWholesaleService,
-)
-from src.api.modules.users.services.customers_wholesale.get_list import (
-    GetListCustomerWholesaleService,
-)
-from src.api.modules.users.services.customers_wholesale.update import (
-    UpdateCustomerWholesaleService,
-)
+from src.api.modules.users.services.wholesaler.create import CreateWholesalerService
+from src.api.modules.users.services.wholesaler.get_list import GetListWholesalerService
+from src.api.modules.users.services.wholesaler.update import UpdateWholesalerService
 from src.api.settings.database import db_session
 
 
@@ -25,12 +19,12 @@ def customer_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> Cus
     return CustomerRepository(db=db)
 
 
-def customer_wholesale_repository(
+def wholesaler_repository(
     db: Annotated[AsyncSession, Depends(db_session)],
-) -> CustomerWholesaleRepository:
+) -> WholesalerRepository:
     """Provee una instancia del repositorio de clientes mayoristas."""
 
-    return CustomerWholesaleRepository(db=db)
+    return WholesalerRepository(db=db)
 
 
 def create_customer_service(
@@ -42,37 +36,27 @@ def create_customer_service(
     return CreateCustomerService(user_repo=user_repo, customer_repo=customer_repo)
 
 
-def create_customer_wholesale_service(
+def create_wholesaler_service(
     user_repo: Annotated[UserRepository, Depends(user_repository)],
-    customer_wholesale_repo: Annotated[
-        CustomerWholesaleRepository, Depends(customer_wholesale_repository)
-    ],
-) -> CreateCustomerWholesaleService:
+    wholesaler_repo: Annotated[WholesalerRepository, Depends(wholesaler_repository)],
+) -> CreateWholesalerService:
     """Provee una instancia del servicio de creación de clientes mayoristas."""
 
-    return CreateCustomerWholesaleService(
-        customer_wholesale_repo=customer_wholesale_repo,
-        user_repo=user_repo,
-    )
+    return CreateWholesalerService(wholesaler_repo=wholesaler_repo, user_repo=user_repo)
 
 
-def update_customer_wholesale_service(
+def update_wholesaler_service(
     user_repo: Annotated[UserRepository, Depends(user_repository)],
-    customer_wholesale_repo: Annotated[
-        CustomerWholesaleRepository, Depends(customer_wholesale_repository)
-    ],
-) -> UpdateCustomerWholesaleService:
+    wholesaler_repo: Annotated[WholesalerRepository, Depends(wholesaler_repository)],
+) -> UpdateWholesalerService:
     """Provee una instancia del servicio de actualización de clientes mayoristas."""
 
-    return UpdateCustomerWholesaleService(
-        customer_wholesale_repo=customer_wholesale_repo,
-        user_repo=user_repo,
-    )
+    return UpdateWholesalerService(wholesaler_repo=wholesaler_repo, user_repo=user_repo)
 
 
-def get_list_customer_wholesale_service(
+def get_list_wholesaler_service(
     user_repo: Annotated[UserRepository, Depends(user_repository)],
-) -> GetListCustomerWholesaleService:
+) -> GetListWholesalerService:
     """Provee una instancia del servicio de obtención de lista de clientes mayoristas."""
 
-    return GetListCustomerWholesaleService(user_repo=user_repo)
+    return GetListWholesalerService(user_repo=user_repo)

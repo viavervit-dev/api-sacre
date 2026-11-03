@@ -70,11 +70,11 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         # Capturar la instantánea (snapshot) de los datos del cliente
         order_data["customer_data"] = {
             "id": user.id,
-            "name_or_company_name": user.customer_wholesale.name_or_company_name,
-            "extra_contacts": user.customer_wholesale.extra_contacts,
-            "location": user.customer_wholesale.location,
-            "phone": user.customer_wholesale.phone,
-            "ruc": user.customer_wholesale.ruc,
+            "name_or_company_name": user.wholesaler.name_or_company_name,
+            "extra_contacts": user.wholesaler.extra_contacts,
+            "location": user.wholesaler.location,
+            "phone": user.wholesaler.phone,
+            "ruc": user.wholesaler.ruc,
             "email": user.email,
         }
 

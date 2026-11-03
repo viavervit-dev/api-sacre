@@ -7,7 +7,7 @@ from src.api.modules.inventory.models.product import Product
 from src.api.modules.orders.models.order import Order
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
-from src.api.modules.users.models.customer_wholesale import CustomerWholesale
+from src.api.modules.users.models.wholesaler import Wholesaler
 
 
 class RoleGroupConfig(TypedDict):
@@ -54,10 +54,10 @@ GROUPS: list[RoleGroupConfig] = [
             f"{Product.__tablename__}.create",
             f"{Product.__tablename__}.update",
             f"{Product.__tablename__}.delete",
-            f"{CustomerWholesale.__tablename__}.create",
-            f"{CustomerWholesale.__tablename__}.read",
-            f"{CustomerWholesale.__tablename__}.update",
-            f"{CustomerWholesale.__tablename__}.delete",
+            f"{Wholesaler.__tablename__}.create",
+            f"{Wholesaler.__tablename__}.read",
+            f"{Wholesaler.__tablename__}.update",
+            f"{Wholesaler.__tablename__}.delete",
             f"{Order.__tablename__}.read",
             f"{Order.__tablename__}.create",
             "authentication.jwt",
@@ -75,10 +75,10 @@ PERMISSIONS = [
     f"{Customer.__tablename__}.update",
     f"{Customer.__tablename__}.delete",
     f"{Admin.__tablename__}.read",
-    f"{CustomerWholesale.__tablename__}.create",
-    f"{CustomerWholesale.__tablename__}.read",
-    f"{CustomerWholesale.__tablename__}.update",
-    f"{CustomerWholesale.__tablename__}.delete",
+    f"{Wholesaler.__tablename__}.create",
+    f"{Wholesaler.__tablename__}.read",
+    f"{Wholesaler.__tablename__}.update",
+    f"{Wholesaler.__tablename__}.delete",
     # Permisos para los modelos del módulo inventory
     f"{Category.__tablename__}.read.public",
     f"{Category.__tablename__}.read.private",

@@ -14,11 +14,11 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import add_product_wholesale_service
-from src.api.modules.inventory.dto import CreateProductWholesaleDTO, ReadProductPrivateDTO
+from src.api.modules.inventory.dependencies import add_product_wholesaler_service
+from src.api.modules.inventory.dto import CreateProductWholesalerDTO, ReadProductPrivateDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.add_product_wholesaler import (
-    AddProductWholesaleService,
+    AddProductWholesalerService,
 )
 
 add_product_wholesaler_router = APIRouter(prefix="/inventory", tags=["Inventario"])
@@ -29,11 +29,11 @@ require_admin = UserPermissionChecker(
 
 
 @add_product_wholesaler_router.post(
-    path="/product/{customer_wholesale_id}/",
+    path="/product/{wholesaler_id}/",
     response_description="**(CREATED)** Producto agregado exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateProductWholesaleDTO),
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateProductWholesalerDTO),
         status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
@@ -49,15 +49,15 @@ require_admin = UserPermissionChecker(
 )
 async def add_product_wholesaler(
     user: Annotated[User, Depends(require_admin)],
-    data: CreateProductWholesaleDTO,
-    customer_wholesale_id: Annotated[
+    data: CreateProductWholesalerDTO,
+    wholesaler_id: Annotated[
         UUID,
         Path(
             title="ID del cliente mayorista",
-            description="El ID del cliente mayorista al que se le asignará el producto.",
+            description="El identificador único del cliente mayorista en formato UUID v4.",
         ),
     ],
-    service: Annotated[AddProductWholesaleService, Depends(add_product_wholesale_service)],
+    service: Annotated[AddProductWholesalerService, Depends(add_product_wholesaler_service)],
 ) -> Response[ReadProductPrivateDTO]:
     """
     Permite crear un producto exclusivo para un cliente mayorista a partir de los datos
@@ -76,7 +76,7 @@ async def add_product_wholesaler(
         - Verifica la vigencia de la sesión y la existencia del usuario.
         - Comprueba que el usuario tenga rol de administrador y el permiso `products.create`.
     2. **Validación Sintáctica y Parámetros:**
-        - Valida el identificador del mayorista (`customer_wholesale_id`) como un UUID en la ruta.
+        - Valida el identificador del mayorista (`wholesaler_id`) como un UUID en la ruta.
         - Valida tipos de datos, longitudes y rangos numéricos.
     3. **Verificación de Existencia del Mayorista:**
         - Comprueba que el cliente mayorista exista en la base de datos. Si no existe, levanta
@@ -92,7 +92,7 @@ async def add_product_wholesaler(
         - Guarda el registro en la base de datos.
     """
 
-    product = await service.add_product(data=data, customer_wholesale_id=customer_wholesale_id)
+    product = await service.add_product(data=data, wholesaler_id=wholesaler_id)
 
     return Response(
         success=True,

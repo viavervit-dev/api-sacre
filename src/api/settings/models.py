@@ -24,4 +24,4 @@ from src.api.modules.orders.models.order import Order
 # Modelos del módulo de usuarios
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
-from src.api.modules.users.models.customer_wholesale import CustomerWholesale
+from src.api.modules.users.models.wholesaler import Wholesaler

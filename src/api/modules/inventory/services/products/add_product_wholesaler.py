@@ -8,34 +8,34 @@ from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.inventory.constants import ProductEntity
-from src.api.modules.inventory.dto import CreateProductWholesaleDTO, ReadProductPrivateDTO
+from src.api.modules.inventory.dto import CreateProductWholesalerDTO, ReadProductPrivateDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
     IProductRepository,
 )
-from src.api.modules.users.repositories.interfaces import ICustomerWholesaleRepository
+from src.api.modules.users.repositories.interfaces import IWholesalerRepository
 
 
-class AddProductWholesaleService(FinancialCalculationsMixin):
+class AddProductWholesalerService(FinancialCalculationsMixin):
     """Servicio encargado de la creación de productos exclusivos para mayoristas."""
 
     def __init__(
         self,
-        customer_wholesale_repo: ICustomerWholesaleRepository,
+        wholesaler_repo: IWholesalerRepository,
         user_repo: IUserRepository,
         product_repo: IProductRepository,
         category_repo: ICategoryRepository,
     ) -> None:
-        self.__customer_wholesale_repo = customer_wholesale_repo
+        self.__wholesaler_repo = wholesaler_repo
         self.__user_repo = user_repo
         self.__product_repo = product_repo
         self.__category_repo = category_repo
 
     async def add_product(
         self,
-        data: CreateProductWholesaleDTO,
-        customer_wholesale_id: UUID,
+        data: CreateProductWholesalerDTO,
+        wholesaler_id: UUID,
     ) -> ReadProductPrivateDTO:
         """
         Crea un producto exclusivo asignado a un cliente mayorista.
@@ -48,7 +48,7 @@ class AddProductWholesaleService(FinancialCalculationsMixin):
         # Validar que el cliente mayorista exista en la base de datos
         user = await self.__user_repo.get_user(
             filters={
-                "id": customer_wholesale_id,
+                "id": wholesaler_id,
                 "role": UserRoles.CUSTOMER_WHOLESALE.value,
             },
             load_permissions=False,
@@ -61,16 +61,16 @@ class AddProductWholesaleService(FinancialCalculationsMixin):
         product = await self.__create_product(data=data)
 
         # Agregamos el nuevo producto a la lista de productos existente
-        products_wholesale = user.customer_wholesale.products
+        products_wholesale = user.wholesaler.products
         products_wholesale.append(product.id)
-        _ = self.__customer_wholesale_repo.update_customer_wholesale(
-            instance=user.customer_wholesale,
+        _ = self.__wholesaler_repo.update_wholesaler(
+            instance=user.wholesaler,
             data={"products": products_wholesale},
         )
 
         return ReadProductPrivateDTO.model_construct(**product.to_dict())
 
-    async def __create_product(self, data: CreateProductWholesaleDTO) -> Product:
+    async def __create_product(self, data: CreateProductWholesalerDTO) -> Product:
         """
         Crea un nuevo producto para el catálogo público.
 
@@ -100,7 +100,7 @@ class AddProductWholesaleService(FinancialCalculationsMixin):
 
         return await self.__product_repo.create_product(data=product_data)
 
-    async def __run_business_validations(self, data: CreateProductWholesaleDTO) -> None:
+    async def __run_business_validations(self, data: CreateProductWholesalerDTO) -> None:
         """
         Ejecuta las validaciones de negocio previas al registro del producto.
 

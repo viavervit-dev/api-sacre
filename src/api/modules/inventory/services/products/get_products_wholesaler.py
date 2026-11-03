@@ -16,7 +16,7 @@ class GetProductsWholesalerService:
 
     async def get_products(
         self,
-        customer_wholesale_id: UUID,
+        wholesaler_id: UUID,
         offset: int,
         limit: int,
     ) -> tuple[list[ReadProductPrivateDTO], int]:
@@ -29,7 +29,7 @@ class GetProductsWholesalerService:
 
         user = await self.__user_repo.get_user(
             filters={
-                "id": customer_wholesale_id,
+                "id": wholesaler_id,
                 "role": UserRoles.CUSTOMER_WHOLESALE.value,
             },
             load_permissions=False,
@@ -39,7 +39,7 @@ class GetProductsWholesalerService:
             raise ResourceNotFound()
 
         products, total_items = await self.__product_repo.get_products_by_wholesaler(
-            products_id=user.customer_wholesale.products,
+            products_id=user.wholesaler.products,
             offset=offset,
             limit=limit,
         )
