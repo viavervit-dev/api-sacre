@@ -82,6 +82,7 @@ class ExceptionErrorMessages(Enum):
     generales.
     """
 
+    PRODUCT_NOT_AVAILABLE = "El producto no se encuentra disponible."
     CATEGORY_HAS_DEPENDENCIES = (
         "No se puede eliminar la categoría porque tiene productos asociados."
     )
