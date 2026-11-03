@@ -17,7 +17,7 @@ class UserRepository(IUserRepository):
 
     __profile_map = {
         UserRoles.CUSTOMER.value: User.customer,
-        UserRoles.CUSTOMER_WHOLESALE.value: User.customer_wholesale,
+        UserRoles.WHOLESALER.value: User.wholesaler,
         UserRoles.ADMINISTRATOR.value: User.admin,
     }
 

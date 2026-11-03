@@ -12,26 +12,24 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.users.dependencies import create_customer_wholesale_service
-from src.api.modules.users.dto import CreateCustomerWholesaleDTO, ReadCustomerWholesaleDTO
-from src.api.modules.users.models.customer_wholesale import CustomerWholesale
-from src.api.modules.users.services.customers_wholesale.create import (
-    CreateCustomerWholesaleService,
-)
+from src.api.modules.users.dependencies import create_wholesaler_service
+from src.api.modules.users.dto import CreateWholesalerDTO, ReadWholesalerDTO
+from src.api.modules.users.models.wholesaler import Wholesaler
+from src.api.modules.users.services.wholesaler.create import CreateWholesalerService
 
-create_customer_wholesale_router = APIRouter(prefix="/users", tags=["Usuarios"])
+create_wholesaler_router = APIRouter(prefix="/users", tags=["Usuarios"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
-    permissions={UserRoles.ADMINISTRATOR.value: f"{CustomerWholesale.__tablename__}.create"},
+    permissions={UserRoles.ADMINISTRATOR.value: f"{Wholesaler.__tablename__}.create"},
 )
 
 
-@create_customer_wholesale_router.post(
-    path="/customer_wholesale/",
+@create_wholesaler_router.post(
+    path="/wholesaler/",
     response_description="**(CREATED)** Cliente mayorista creado exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateCustomerWholesaleDTO),
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateWholesalerDTO),
         status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
@@ -44,18 +42,18 @@ require_admin = UserPermissionChecker(
         status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
-async def create_customer_wholesale(
+async def create_wholesaler(
     user: Annotated[User, Depends(require_admin)],
-    data: CreateCustomerWholesaleDTO,
-    service: Annotated[CreateCustomerWholesaleService, Depends(create_customer_wholesale_service)],
-) -> Response[ReadCustomerWholesaleDTO]:
+    data: CreateWholesalerDTO,
+    service: Annotated[CreateWholesalerService, Depends(create_wholesaler_service)],
+) -> Response[ReadWholesalerDTO]:
     """
     Permite crear un cliente mayorista. Ejecuta validaciones sintácticas y comprobaciones
     de unicidad en la base de datos para prevenir duplicados.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).
-    - **Permiso requerido:** `customer_wholesale.create`.
+    - **Permiso requerido:** `wholesaler.create`.
     - **Autenticación:** Cookies obligatorias `access_token` y `refresh_token` (JWT).
 
     ### Flujo de Ejecución
@@ -63,7 +61,7 @@ async def create_customer_wholesale(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario posea rol de administrador y el permiso
-            `customer_wholesale.create`.
+            `wholesaler.create`.
     2. **Validación Sintáctica:**
         - Valida el formato de correo electrónico, límites de caracteres en campos
             de texto y la estructura anidada de ubicación geográfica y contactos
@@ -77,11 +75,11 @@ async def create_customer_wholesale(
         - Guarda el registro en la base de datos.
     """
 
-    customer_wholesale = await service.create(data=data)
+    wholesaler = await service.create(data=data)
 
     return Response(
         success=True,
         pagination=False,
         message="Cliente mayorista creado exitosamente.",
-        data=customer_wholesale,
+        data=wholesaler,
     )

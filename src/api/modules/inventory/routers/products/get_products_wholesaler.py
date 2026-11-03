@@ -13,7 +13,7 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import products_by_wholesaler_service
+from src.api.modules.inventory.dependencies import get_products_wholesaler_service
 from src.api.modules.inventory.dto import ReadProductPrivateDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.get_products_wholesaler import (
@@ -29,7 +29,7 @@ require_admin = UserPermissionChecker(
 
 
 @get_products_wholesaler_router.get(
-    path="/product/{customer_wholesale_id}/",
+    path="/product/{wholesaler_id}/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -113,14 +113,14 @@ require_admin = UserPermissionChecker(
 )
 async def get_products_by_wholesaler(
     user: Annotated[User, Depends(require_admin)],
-    customer_wholesale_id: Annotated[
+    wholesaler_id: Annotated[
         UUID,
         Path(
             title="ID del cliente mayorista",
-            description="El ID del cliente mayorista del cual se obtendrán los productos.",
+            description="El identificador único del cliente mayorista en formato UUID v4.",
         ),
     ],
-    service: Annotated[GetProductsWholesalerService, Depends(products_by_wholesaler_service)],
+    service: Annotated[GetProductsWholesalerService, Depends(get_products_wholesaler_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,
@@ -164,7 +164,7 @@ async def get_products_by_wholesaler(
     """
 
     products, total_items = await service.get_products(
-        customer_wholesale_id=customer_wholesale_id,
+        wholesaler_id=wholesaler_id,
         offset=offset,
         limit=limit,
     )

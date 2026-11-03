@@ -12,29 +12,27 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.users.dependencies import get_list_customer_wholesale_service
-from src.api.modules.users.dto import ReadCustomerWholesaleDTO
-from src.api.modules.users.models.customer_wholesale import CustomerWholesale
-from src.api.modules.users.services.customers_wholesale.get_list import (
-    GetListCustomerWholesaleService,
-)
+from src.api.modules.users.dependencies import get_list_wholesaler_service
+from src.api.modules.users.dto import ReadWholesalerSummaryDTO
+from src.api.modules.users.models.wholesaler import Wholesaler
+from src.api.modules.users.services.wholesaler.get_list import GetListWholesalerService
 from src.api.settings.parameters import api_parameters
 
-get_list_customers_wholesale = APIRouter(prefix="/users", tags=["Usuarios"])
+get_list_wholesaler_router = APIRouter(prefix="/users", tags=["Usuarios"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
-    permissions={UserRoles.ADMINISTRATOR.value: f"{CustomerWholesale.__tablename__}.read"},
+    permissions={UserRoles.ADMINISTRATOR.value: f"{Wholesaler.__tablename__}.read"},
 )
 
 
-@get_list_customers_wholesale.get(
-    path="/customer_wholesale/",
+@get_list_wholesaler_router.get(
+    path="/wholesaler/",
     response_description="**(OK)** Lista de clientes mayoristas obtenida exitosamente.",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de clientes mayoristas obtenida exitosamente.",
-            "model": Response[PaginatedData[ReadCustomerWholesaleDTO]],
+            "model": Response[PaginatedData[ReadWholesalerSummaryDTO]],
             "content": {
                 "application/json": {
                     "examples": {
@@ -48,10 +46,7 @@ require_admin = UserPermissionChecker(
                                     "items": [
                                         {
                                             "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                                            "email": "user@email.com",
                                             "name_or_company_name": "Juan Pablo",
-                                            "ruc": "1790011674001",
-                                            "phone": "+593 123456789",
                                             "location": {
                                                 "country": "Ecuador",
                                                 "province": "Pichincha",
@@ -59,14 +54,6 @@ require_admin = UserPermissionChecker(
                                                 "city": "Zámbiza",
                                                 "address": "Manuel Larrea y Av. 6 de Diciembre",
                                             },
-                                            "extra_contacts": [
-                                                {
-                                                    "position": "Secretaria",
-                                                    "name": "María Pérez",
-                                                    "email": "user@email.com",
-                                                    "phone": "+593 987654321",
-                                                },
-                                            ],
                                         },
                                     ],
                                     "meta": {
@@ -109,11 +96,9 @@ require_admin = UserPermissionChecker(
         status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
-async def get_customers_wholesale(
+async def get_list_wholesaler(
     user: Annotated[User, Depends(require_admin)],
-    service: Annotated[
-        GetListCustomerWholesaleService, Depends(get_list_customer_wholesale_service)
-    ],
+    service: Annotated[GetListWholesalerService, Depends(get_list_wholesaler_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,
@@ -125,14 +110,14 @@ async def get_customers_wholesale(
         description=PAGINATION_LIMIT_DESCRIPTION,
         ge=1,
     ),
-) -> Response[PaginatedData[ReadCustomerWholesaleDTO]]:
+) -> Response[PaginatedData[ReadWholesalerSummaryDTO]]:
     """
     Permite consultar el listado de clientes mayoristas almacenados con soporte para
     paginación y ordenamiento cronológico descendente.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).
-    - **Permiso requerido:** `customer_wholesale.read`.
+    - **Permiso requerido:** `wholesaler.read`.
     - **Autenticación:** Cookies obligatorias `access_token` y `refresh_token` (JWT).
 
     ### Flujo de Ejecución
@@ -140,9 +125,9 @@ async def get_customers_wholesale(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario cuente con rol de administrador y el permiso específico
-            `customer_wholesale.read`.
+            `wholesaler.read`.
     2. **Consulta en Base de Datos y Paginación:**
-        - Realiza el conteo total de clientes mayoristas en `users.customer_wholesale`.
+        - Realiza el conteo total de clientes mayoristas.
         - Si no existen registros registrados, retorna una lista vacía y total 0.
         - Si existen registros, consulta los clientes ordenados de forma descendente por fecha
             de registro, aplicando `offset` y `limit`.
@@ -150,14 +135,14 @@ async def get_customers_wholesale(
         - Mapea la lista de clientes mayoristas al DTO de lectura.
     """
 
-    customers_wholesale, total_items = await service.get_list(offset=offset, limit=limit)
+    wholesaler_list, total_items = await service.get_list(offset=offset, limit=limit)
 
     return Response(
         success=True,
         pagination=True,
         message="Lista de clientes mayoristas obtenida exitosamente.",
         data=PaginatedData(
-            items=customers_wholesale,
+            items=wholesaler_list,
             meta=PaginationMeta(total=total_items, offset=offset, limit=limit),
         ),
     )

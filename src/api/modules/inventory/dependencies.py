@@ -11,7 +11,7 @@ from src.api.modules.inventory.services.categories.delete import DeleteCategoryS
 from src.api.modules.inventory.services.categories.get_list import GetListCategoryService
 from src.api.modules.inventory.services.categories.update import UpdateCategoryService
 from src.api.modules.inventory.services.products.add_product_wholesaler import (
-    AddProductWholesaleService,
+    AddProductWholesalerService,
 )
 from src.api.modules.inventory.services.products.create import CreateProductPublicService
 from src.api.modules.inventory.services.products.delete import DeleteProductService
@@ -20,10 +20,7 @@ from src.api.modules.inventory.services.products.get_products_wholesaler import 
     GetProductsWholesalerService,
 )
 from src.api.modules.inventory.services.products.update import UpdateProductService
-from src.api.modules.users.dependencies import (
-    CustomerWholesaleRepository,
-    customer_wholesale_repository,
-)
+from src.api.modules.users.dependencies import WholesalerRepository, wholesaler_repository
 from src.api.settings.database import db_session
 
 
@@ -39,7 +36,7 @@ def product_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> Prod
     return ProductRepository(db=db)
 
 
-def retrieve_list_products_service(
+def get_list_products_service(
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
 ) -> GetListProductService:
     """Provee una instancia del servicio de consulta de una lista de productos."""
@@ -47,7 +44,7 @@ def retrieve_list_products_service(
     return GetListProductService(product_repo=product_repo)
 
 
-def products_by_wholesaler_service(
+def get_products_wholesaler_service(
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
     user_repo: Annotated[UserRepository, Depends(user_repository)],
 ) -> GetProductsWholesalerService:
@@ -71,18 +68,16 @@ def create_product_public_service(
     )
 
 
-def add_product_wholesale_service(
+def add_product_wholesaler_service(
     user_repo: Annotated[UserRepository, Depends(user_repository)],
     category_repo: Annotated[CategoryRepository, Depends(category_repository)],
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
-    customer_wholesale_repo: Annotated[
-        CustomerWholesaleRepository, Depends(customer_wholesale_repository)
-    ],
-) -> AddProductWholesaleService:
+    wholesaler_repo: Annotated[WholesalerRepository, Depends(wholesaler_repository)],
+) -> AddProductWholesalerService:
     """Provee una instancia del servicio de creación de productos exclusivos para mayoristas."""
 
-    return AddProductWholesaleService(
-        customer_wholesale_repo=customer_wholesale_repo,
+    return AddProductWholesalerService(
+        wholesaler_repo=wholesaler_repo,
         category_repo=category_repo,
         product_repo=product_repo,
         user_repo=user_repo,

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
-from src.api.modules.users.models.customer_wholesale import CustomerWholesale
+from src.api.modules.users.models.wholesaler import Wholesaler
 
 
 class ICustomerRepository(ABC):
@@ -23,31 +23,23 @@ class ICustomerRepository(ABC):
         pass
 
 
-class ICustomerWholesaleRepository(ABC):
+class IWholesalerRepository(ABC):
     """Contrato de persistencia para el perfil de cliente mayorista `users.customer_wholesale`."""
 
     @abstractmethod
-    async def create_customer_wholesale(
-        self,
-        user_id: UUID,
-        data: dict[str, Any],
-    ) -> CustomerWholesale:
+    async def create_wholesaler(self, user_id: UUID, data: dict[str, Any]) -> Wholesaler:
         """Crea un nuevo cliente mayorista en la base de datos."""
 
         pass
 
     @abstractmethod
-    async def update_customer_wholesale(
-        self,
-        instance: CustomerWholesale,
-        data: dict[str, Any],
-    ) -> CustomerWholesale:
+    async def update_wholesaler(self, instance: Wholesaler, data: dict[str, Any]) -> Wholesaler:
         """Actualiza un cliente mayorista en la base de datos."""
 
         pass
 
     @abstractmethod
-    async def exists_customer_wholesale(self, filters: dict[str, Any]) -> bool:
+    async def exists_wholesaler(self, filters: dict[str, Any]) -> bool:
         """Verifica si existe un cliente mayorista que coincida con los filtros especificados."""
 
         pass

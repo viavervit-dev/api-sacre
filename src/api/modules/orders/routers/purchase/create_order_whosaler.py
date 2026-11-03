@@ -20,7 +20,9 @@ from src.api.modules.auth.models.user import User
 from src.api.modules.orders.dependencies import create_purchase_order_wholesaler_service
 from src.api.modules.orders.dto import CreateOrderDTO, ReadOrderDTO
 from src.api.modules.orders.models.order import Order
-from src.api.modules.orders.services.purchase.create import CreatePurchaseOrderWholesalerService
+from src.api.modules.orders.services.purchase.create_order_whosaler import (
+    CreatePurchaseOrderWholesalerService,
+)
 
 create_purchase_order_wholesaler_router = APIRouter(
     prefix="/orders",

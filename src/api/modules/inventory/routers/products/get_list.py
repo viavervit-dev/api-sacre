@@ -12,8 +12,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import retrieve_list_products_service
-from src.api.modules.inventory.dto import ReadProductPrivateDTO, ReadProductPublicDTO
+from src.api.modules.inventory.dependencies import get_list_products_service
+from src.api.modules.inventory.dto import ReadProductSummaryDTO
 from src.api.modules.inventory.models.product import Product
 from src.api.modules.inventory.services.products.get_list import GetListProductService
 from src.api.settings.parameters import api_parameters
@@ -37,12 +37,12 @@ require_admin = UserOptionalPermissionChecker(
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de productos obtenida exitosamente.",
-            "model": Response[PaginatedData[ReadProductPublicDTO | ReadProductPrivateDTO]],
+            "model": Response[PaginatedData[ReadProductSummaryDTO]],
             "content": {
                 "application/json": {
                     "examples": {
                         "response_1": {
-                            "summary": "Existen productos asignados - Datos privados",
+                            "summary": "Existen productos",
                             "value": {
                                 "success": True,
                                 "pagination": True,
@@ -55,22 +55,12 @@ require_admin = UserOptionalPermissionChecker(
                                             "categories": ["Rosarios", "Madera"],
                                             "description_short": "Rosario hecho a mano con cuentas"
                                             " de madera.",
-                                            "description_long": "Este rosario está fabricado a "
-                                            "mano utilizando madera de alta calidad, ideal para "
-                                            "orar en el día a día. Cuenta con un diseño elegante y"
-                                            "tradicional.",
                                             "images": [
                                                 "https://example.com/image1.jpg",
                                                 "https://example.com/image2.jpg",
                                                 "https://example.com/image3.jpg",
                                             ],
-                                            "price_neto": "10.50",
                                             "price_sale": "15.00",
-                                            "profit_margin": "0.16",
-                                            "iva": "0.16",
-                                            "stock_total": 100,
-                                            "stock_hand": 80,
-                                            "stock_sale": 20,
                                             "status": True,
                                         },
                                     ],
@@ -83,42 +73,7 @@ require_admin = UserOptionalPermissionChecker(
                             },
                         },
                         "response_2": {
-                            "summary": "Existen productos asignados - Datos públicos",
-                            "value": {
-                                "success": True,
-                                "pagination": True,
-                                "message": "Lista de productos obtenida exitosamente.",
-                                "data": {
-                                    "items": [
-                                        {
-                                            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                                            "name": "Rosario de madera",
-                                            "categories": ["Rosarios", "Madera"],
-                                            "description_short": "Rosario hecho a mano con cuentas"
-                                            " de madera.",
-                                            "description_long": "Este rosario está fabricado a "
-                                            "mano utilizando madera de alta calidad, ideal para "
-                                            "orar en el día a día. Cuenta con un diseño elegante y"
-                                            " tradicional.",
-                                            "images": [
-                                                "https://example.com/image1.jpg",
-                                                "https://example.com/image2.jpg",
-                                                "https://example.com/image3.jpg",
-                                            ],
-                                            "price_sale": "15.00",
-                                            "stock_sale": 20,
-                                        },
-                                    ],
-                                    "meta": {
-                                        "total": 1,
-                                        "offset": 0,
-                                        "limit": api_parameters.pagination_limit,
-                                    },
-                                },
-                            },
-                        },
-                        "response_3": {
-                            "summary": "No existen productos asignados",
+                            "summary": "No existen productos",
                             "value": {
                                 "success": True,
                                 "pagination": True,
@@ -151,7 +106,7 @@ require_admin = UserOptionalPermissionChecker(
 )
 async def get_list_products(
     user: Annotated[User | None, Depends(require_admin)],
-    service: Annotated[GetListProductService, Depends(retrieve_list_products_service)],
+    service: Annotated[GetListProductService, Depends(get_list_products_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,
@@ -163,7 +118,7 @@ async def get_list_products(
         le=api_parameters.pagination_limit,
         ge=1,
     ),
-) -> Response[PaginatedData[ReadProductPublicDTO | ReadProductPrivateDTO]]:
+) -> Response[PaginatedData[ReadProductSummaryDTO]]:
     """
     Permite consultar el listado de productos almacenados con soporte para paginación y
     ordenamiento cronológico descendente. La información y los filtros aplicados se adaptan
