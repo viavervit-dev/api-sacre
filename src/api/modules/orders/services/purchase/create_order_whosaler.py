@@ -96,7 +96,7 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         }
 
         # Creamos y enviamos el link de pago al cliente mayorista
-        payment_link = self.__payment_service.create_payment_link(order_data=order_data)
+        payment_link = await self.__payment_service.create_payment_link(order_data=order_data)
         order_data["payment_data"] = {
             "description": OrderDescription.PURCHASE_ORDER.value,
             "link": payment_link,

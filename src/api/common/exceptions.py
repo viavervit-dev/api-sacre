@@ -81,9 +81,13 @@ class BaseAppException(Exception):
 
     default_message = "Ha ocurrido un error inesperado en la aplicación."
 
-    def __init__(self, message: str | None = None, data: dict[str, Any] = {}) -> None:  # noqa
+    def __init__(
+        self,
+        message: str | None = None,
+        data: dict[str, Any] | None = None,
+    ) -> None:
         self.message = message or self.default_message
-        self.data = data
+        self.data = data if data is not None else {}
         super().__init__(self.message)
 
 

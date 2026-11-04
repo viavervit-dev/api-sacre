@@ -78,6 +78,17 @@ async def run(
 
 
 async def main() -> None:
+    email = os.getenv("ADMIN_EMAIL")
+    password = os.getenv("ADMIN_PASSWORD")
+    first_names = os.getenv("ADMIN_FIRST_NAMES", "Administrador")
+    last_names = os.getenv("ADMIN_LAST_NAMES", "Principal")
+
+    if not email or not password:
+        print(
+            "ADMIN_EMAIL o ADMIN_PASSWORD no configurados. "
+            "Se omite la creación del administrador inicial."
+        )
+        return
 
     await create_db_pool()
 
@@ -85,10 +96,10 @@ async def main() -> None:
         async for db in db_session():
             await run(
                 db=db,
-                email=str(os.getenv(key="ADMIN_EMAIL")),
-                password=str(os.getenv(key="ADMIN_PASSWORD")),
-                first_names=str(os.getenv(key="ADMIN_FIRST_NAMES")),
-                last_names=str(os.getenv(key="ADMIN_LAST_NAMES")),
+                email=email,
+                password=password,
+                first_names=first_names,
+                last_names=last_names,
             )
     except Exception as e:
         print(f"Ocurrió un error inesperado: {e}")
