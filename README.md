@@ -27,47 +27,58 @@ En una arquitectura hexagonal estricta o purista, el núcleo de dominio debe ser
 
 ---
 
-### 2.2. Estructura del Proyecto (`api/`)
+### 2.2. Estructura del Proyecto
 
 ```txt
-api/
-├── common/                             # Componentes y contratos transversales
-│   ├── constants.py                    # Constantes y mensajes de error globales
-│   ├── exceptions.py                   # Excepciones base de dominio y aplicación
-│   ├── response.py                     # Modelo unificado de respuesta API (Response[T])
-│   ├── schema.py                       # Generadores dinámicos de esquemas OpenAPI para errores
-│   └── utils.py                        # Mixins y utilidades transversales
+.
+├── .dockerignore                       # Exclusiones de archivos para la construcción de imágenes Docker
+├── Dockerfile                          # Multi-stage Dockerfile para despliegues
+├── pyproject.toml                      # Gestión de dependencias y configuración de herramientas
+├── alembic/                            # Migraciones de esquema y versiones de base de datos
 │
-├── settings/                           # Configuración central del sistema
-│   ├── database.py                     # Conexión asíncrona, pool asyncpg y gestión transaccional
-│   ├── exception_handlers.py           # Manejadores globales de excepciones (HTTP 400, 401, 403, 404, 409, 503)
-│   ├── http_client.py                  # Cliente HTTP asíncrono global (httpx) con pool de conexiones y timeouts
-│   ├── models.py                       # Registro central de modelos ORM para migraciones Alembic
-│   ├── openapi.py                      # Metadatos, etiquetas y configuración personalizada de Swagger UI / OpenAPI
-│   ├── parameters.py                   # Variables de entorno tipadas con Pydantic Settings
-│   ├── serialization.py                # Serializador JSON personalizado optimizado
-│   └── templates.py                    # Motor de plantillas Jinja2 para renderizado dinámico en módulos
-│
-├── modules/                            # Módulos de negocio delimitados por dominio
-│   └── <nombre_del_modulo>/            # Estructura uniforme de cada módulo
-│       ├── constants.py                # Constantes, enums y textos de validación del módulo
-│       ├── dependencies.py             # Proveedores FastAPI Depends (Inyección de dependencias)
-│       ├── dto.py                      # Contratos de entrada y salida (Pydantic DTOs)
-│       ├── fixtures/                   # (Opcional) Datos semilla o catálogos estáticos en JSON
-│       ├── models/                     # Entidades de dominio y modelos SQLAlchemy
-│       ├── repositories/               # Capa de persistencia (Patrón Repositorio)
-│       │   ├── interfaces.py           # Contratos/Puertos de salida (Clases abstractas ABC)
-│       │   └── <entidad>.py            # Implementación concreta con SQLAlchemy AsyncSession
-│       ├── routers/                    # Adaptadores primarios HTTP (Controladores FastAPI)
-│       └── services/                   # Casos de uso y lógica de negocio
-│
-├── scripts/                            # Utilidades CLI de mantenimiento y setup inicial
-│   ├── configure_roles.py              # Sincronización de roles y permisos en base de datos
-│   ├── create_admin.py                 # Creación de usuario administrador inicial
-│   ├── create_asymmetric_keys.py       # Generación de claves criptográficas Ed25519 para JWT
-│   └── load_countries.py               # Carga del catálogo de países y estructuras administrativas
-│
-└── main.py                             # Punto de entrada de la API (Instancia FastAPI, lifespan y rutas)
+└── src/
+    ├── scripts/                        # Utilidades CLI de mantenimiento y setup inicial
+    │   ├── configure_roles.py          # Sincronización de roles y permisos en base de datos
+    │   ├── create_admin.py             # Creación de usuario administrador inicial
+    │   ├── create_asymmetric_keys.py   # Generación de claves criptográficas Ed25519 para JWT
+    │   └── load_countries.py           # Carga del catálogo de países y estructuras administrativas
+    │
+    └── api/
+        ├── common/                     # Componentes y contratos transversales
+        │   ├── constants.py            # Constantes y mensajes de error globales
+        │   ├── exceptions.py           # Excepciones base de dominio y aplicación
+        │   ├── response.py             # Modelo unificado de respuesta API (Response[T])
+        │   ├── schema.py               # Generadores dinámicos de esquemas OpenAPI para errores
+        │   ├── utils.py                # Mixins y utilidades transversales
+        │   ├── email/                  # Servicio y dependencias de correo electrónico SMTP
+        │   └── payment/                # Servicios y dependencias de pasarela de pagos
+        │
+        ├── settings/                   # Configuración central del sistema
+        │   ├── database.py             # Conexión asíncrona, pool asyncpg y gestión transaccional
+        │   ├── exception_handlers.py   # Manejadores globales de excepciones (HTTP 400, 401, 403, 404, 409, 500, 502, 503)
+        │   ├── http_client.py          # Cliente HTTP asíncrono global (httpx) con pool de conexiones y timeouts
+        │   ├── models.py               # Registro central de modelos ORM para migraciones Alembic
+        │   ├── openapi.py              # Metadatos, etiquetas y configuración personalizada de Swagger UI / OpenAPI
+        │   ├── parameters.py           # Variables de entorno tipadas con Pydantic Settings
+        │   ├── serialization.py        # Serializador JSON personalizado optimizado con orjson
+        │   └── templates.py            # Motor de plantillas Jinja2 para renderizado dinámico en módulos
+        │
+        ├── modules/                    # Módulos de negocio delimitados por dominio
+        │   └── <nombre_del_modulo>/    # Estructura uniforme de cada módulo
+        │       ├── constants.py        # Constantes, enums y textos de validación del módulo
+        │       ├── dependencies.py     # Proveedores FastAPI Depends (Inyección de dependencias)
+        │       ├── dto.py              # Contratos de entrada y salida (Pydantic DTOs)
+        │       ├── fixtures/           # (Opcional) Datos semilla o catálogos estáticos en JSON
+        │       ├── models/             # Entidades de dominio y modelos SQLAlchemy
+        │       ├── repositories/       # Capa de persistencia (Patrón Repositorio)
+        │       │   ├── interfaces.py   # Contratos/Puertos de salida (Clases abstractas ABC)
+        │       │   └── <entidad>.py    # Implementación concreta con SQLAlchemy AsyncSession
+        │       ├── routers/            # Adaptadores primarios HTTP (Controladores FastAPI)
+        │       ├── services/           # Casos de uso y lógica de negocio
+        │       └── templates/          # (Opcional) Plantillas HTML/Jinja2 específicas del módulo
+        │
+        ├── gunicorn.conf.py            # Configuración de Gunicorn con UvicornWorker
+        └── main.py                     # Punto de entrada de la API (Instancia FastAPI, lifespan y rutas)
 ```
 
 ### 2.3. Anatomía Interna de un Módulo (`api/modules/<modulo>/`)
@@ -142,6 +153,8 @@ Crea un archivo `.env` dentro de la carpeta `src` del proyecto tomando como plan
 ```env
 # === Aplicación ===
 DEBUG=true
+ENABLE_DOCS=true
+CORS_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
 ADMIN_EMAIL=<value>
 ADMIN_PASSWORD=<value>
 ADMIN_FIRST_NAMES=<value>
@@ -189,10 +202,15 @@ MAIL_TIMEOUT=15
 HOST="127.0.0.1"
 PORT=8080
 WORKERS=4
+FORWARDED_ALLOW_IPS="*"
 ```
 
 > [!IMPORTANT]
 > **Valores esenciales que debes configurar antes de continuar:**
+> - **Entorno y Seguridad (`ENABLE_DOCS`, `CORS_ORIGINS`, `FORWARDED_ALLOW_IPS`)**:
+>   - `ENABLE_DOCS`: Habilita o restringe la exposición pública de `/docs`, `/redoc` y `/openapi.json`. Si no se define, se sincroniza con `DEBUG` (activo en desarrollo, desactivado en producción).
+>   - `CORS_ORIGINS`: Lista de orígenes web autorizados separados por coma (ej. `"https://sacre.ec,https://admin.sacre.ec"` o `http://localhost:3000` en desarrollo). Fundamental para que los navegadores admitan el envío de cookies de autenticación `HttpOnly`.
+>   - `FORWARDED_ALLOW_IPS`: Direcciones IP de proxies inversos o balanceadores (Cloudflare, Nginx, ALB) desde los cuales se confía en las cabeceras `X-Forwarded-*`. En Docker o redes internas privadas se usa `"*"` para registrar la IP real del cliente.
 > - **Datos del Administrador (`ADMIN_*`)**: Reemplaza los marcadores `<value>` por el correo electrónico, contraseña segura, nombres y apellidos del administrador inicial. Estos datos serán utilizados posteriormente por el script `src.scripts.create_admin` para registrar el usuario en la base de datos (ver **Paso 8**).
 > - **Credenciales de Base de Datos**: Asegúrate de que el usuario (`api_user`), la contraseña (`api_password`) y el nombre de la base de datos (`fastapi_db`) en `DATABASE_URL` y `ALEMBIC_DATABASE_URL` coincidan exactamente con los que configures en el **Paso 3**. Nota que `ALEMBIC_DATABASE_URL` utiliza el driver síncrono `postgresql+psycopg2://` para migraciones, mientras que `DATABASE_URL` utiliza el driver asíncrono `postgresql+asyncpg://` para la API.
 > - **Claves Asimétricas (`PRIVATE_KEY` y `PUBLIC_KEY`)**: Requieren un par de claves criptográficas asimétricas Ed25519 en formato PEM. Se generarán ejecutando el script del proyecto tras instalar las dependencias (ver **Paso 5**).
