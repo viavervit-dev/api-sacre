@@ -14,17 +14,22 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    POETRY_VERSION=2.1.1
+    POETRY_VERSION=2.4.3
 
 # Actualizar repositorios e instalar paquetes de compilación necesarios en Alpine
+# Incluye Rust/Cargo y OpenSSL requeridos para compilar cryptography y bcrypt en musl/Alpine
 RUN apk update && apk upgrade --no-cache && \
     apk add --no-cache \
         build-base \
         gcc \
         musl-dev \
-        postgresql-dev \
+        python3-dev \
         libffi-dev \
-        python3-dev
+        openssl-dev \
+        cargo \
+        rust \
+        postgresql-dev \
+        linux-headers
 
 # Actualizar herramientas de empaquetado e instalar Poetry
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
@@ -37,7 +42,7 @@ RUN poetry config virtualenvs.in-project true
 COPY pyproject.toml poetry.lock ./
 
 # Instalar dependencias de producción únicamente
-RUN poetry install --no-root --without development,testing
+RUN poetry install --no-root --without development,testing --no-interaction --no-ansi
 
 # ------------------------------------------------------------------------------
 # Etapa 2: Runner
@@ -55,6 +60,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apk update && apk upgrade --no-cache && \
     apk add --no-cache \
         libpq \
+        libffi \
+        openssl \
         ca-certificates
 
 # Crear usuario y grupo de sistema sin privilegios en Alpine
