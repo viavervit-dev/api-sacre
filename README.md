@@ -125,8 +125,12 @@ Cada módulo funciona como un dominio autocontenido y sigue un patrón de diseñ
 - Incluyen metadatos `json_schema_extra={"x-validation-errors": [...]}` para autodocumentar en OpenAPI los mensajes exactos de error que produce cada campo en caso de falla.
 
 #### Datos Semilla y Fixtures (`fixtures/`) [Opcional]
-- Directorio opcional presente en aquellos módulos que requieren precargar o disponer de información inicial estática o de referencia (por ejemplo, en `src/api/modules/countries/fixtures/` con archivos JSON para la división político-territorial).
+- Directorio opcional presente en aquellos módulos que requieren precargar o disponer de información inicial estática o de referencia.
 - Sirve como fuente desacoplada para scripts de mantenimiento y carga inicial (como `src/scripts/load_countries.py`) o tareas de sembrado de datos (*seeders*), evitando acoplar catálogos o estructuras masivas al código fuente.
+
+#### Plantillas y Renderizado Dinámico (`templates/`) [Opcional]
+- Directorio opcional en aquellos módulos que requieren generar contenido HTML o texto dinámico asociado a sus flujos de negocio.
+- Permite que cada módulo mantenga sus recursos visuales y de presentación co-localizados dentro de su propio dominio, siendo descubiertos automáticamente por el cargador centralizado de Jinja2 (`src/api/settings/templates.py`).
 
 ## 🔹 3. Tecnologías
 
@@ -226,7 +230,7 @@ Este proyecto utiliza **PostgreSQL** como motor de base de datos. Para la conexi
    sudo -u postgres psql
    ```
 
-2. Ejecuta los siguientes comandos SQL para crear el usuario, la base de datos y otorgar los permisos (puedes cambiar `api_user`, `api_password` y `fastapi_db` por los nombres que prefieras):
+2. Ejecuta los siguientes comandos SQL para crear el usuario, la base de datos y otorgar los permisos (cambia `api_user`, `api_password` y `fastapi_db` por los nombres que prefieras y tambien en `src/.env`):
    ```txt
    -- 1. Crear el usuario con su contraseña
    CREATE USER api_user WITH PASSWORD 'api_password';
@@ -245,9 +249,6 @@ Este proyecto utiliza **PostgreSQL** como motor de base de datos. Para la conexi
    \q
    ```
 
-> [!NOTE]
-> Si utilizas valores diferentes para `api_user`, `api_password` o `fastapi_db`, recuerda actualizarlos correspondientemente en las variables `DATABASE_URL` y `ALEMBIC_DATABASE_URL` de tu archivo `.env`.
-
 ### Paso 4: Instalar dependencias
 
 Este comando instalará todas las dependencias del proyecto.
@@ -265,7 +266,7 @@ El sistema utiliza firmas criptográficas asimétricas (algoritmo Ed25519) para 
 python3.14 -m src.scripts.create_asymmetric_keys
 ```
 
-El script imprimirá por consola la **clave privada** y la **clave pública** en formato PEM. Copia cada bloque de texto y pégalo entre comillas en tu archivo `.env` dentro de las variables `PRIVATE_KEY` y `PUBLIC_KEY` respectivamente:
+El script imprimirá por consola la **clave privada** y la **clave pública** en formato PEM. Copia cada bloque de texto y pégalo entre comillas en tu archivo `src/.env` dentro de las variables `PRIVATE_KEY` y `PUBLIC_KEY` respectivamente:
 
 ```txt
 PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
@@ -309,12 +310,9 @@ python3.14 -m src.scripts.load_countries
 python3.14 -m src.scripts.create_admin
 ```
 
-> [!NOTE]
-> Para más detalles sobre el funcionamiento y requerimientos de cada comando, consulta la sección [Scripts Disponibles](#-6-scripts-disponibles).
-
 ### Paso 9: Iniciar servidor de desarrollo
 
-Este comando iniciará el servidor utilizando el `HOST` y `PORT` definidos en el archivo `.env`. Si `DEBUG=true`, la recarga automática estará habilitada.
+Este comando iniciará el servidor utilizando el `HOST` y `PORT` definidos en el archivo `src/.env`. Si `DEBUG=true`, la recarga automática estará habilitada.
 
 ```txt
 python3.14 -m src.api.main
@@ -338,17 +336,11 @@ from src.api.modules.customers.models.customer import Customer
 from src.api.modules.products.models.product import Product
 ```
 
-> [!NOTE]
-> Alembic no descubre los modelos automáticamente. `api/settings/models.py` es el registro central que le indica a Alembic qué tablas existen. `alembic/env.py` importa este archivo y nunca necesita modificarse al agregar nuevos modelos.
-
 **3. Generar la migración** (Alembic compara el modelo con el estado actual de la BD):
 
 ```txt
 alembic revision --autogenerate -m "descripcion_del_cambio"
 ```
-
-> [!IMPORTANT]
-> Revisa siempre el archivo generado en `alembic/versions/` antes de aplicarlo. El `autogenerate` detecta la mayoría de cambios, pero no todos (p. ej. cambios en `CHECK` constraints, lógica de columnas calculadas).
 
 **4. Aplicar la migración** a la base de datos:
 
