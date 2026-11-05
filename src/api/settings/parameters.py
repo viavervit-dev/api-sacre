@@ -2,28 +2,29 @@ import tomllib
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def get_app_version() -> str:
-    """Lee la versión directamente del archivo `pyproject.toml`."""
+    """Lee la versión directamente del archivo `pyproject.toml` con fallback seguro."""
 
     pyproject_path = Path(__file__).resolve().parents[3] / "pyproject.toml"
 
-    if not pyproject_path.exists():
-        raise FileNotFoundError(f"pyproject.toml not found at: {pyproject_path}")
-
-    with open(pyproject_path, "rb") as f:
-        data = tomllib.load(f)
+    if pyproject_path.exists():
+        try:
+            with open(pyproject_path, "rb") as f:
+                data = tomllib.load(f)
+            return str(data.get("tool", {}).get("poetry", {}).get("version", "0.1.0"))
+        except Exception:
+            pass
 
     try:
-        return data["tool"]["poetry"]["version"]
-    except KeyError as e:
-        raise ValueError(
-            "Version not found in pyproject.toml. "
-            "Ensure [tool.poetry] section contains 'version' field."
-        ) from e
+        from importlib.metadata import version
+
+        return version("api-sacre")
+    except Exception:
+        return "0.1.0"
 
 
 class ApiParameters(BaseSettings):
@@ -44,9 +45,11 @@ class ApiParameters(BaseSettings):
     app_version: str = Field(default_factory=get_app_version)
     pagination_limit: int = 50
     debug: bool
+    enable_docs: bool
+    cors_origins: str
 
     # Base de Datos
-    alembic_database_url: str | None = None
+    alembic_database_url: str
     database_url: str
     db_pool_size: int
     db_pool_max_overflow: int
@@ -82,6 +85,38 @@ class ApiParameters(BaseSettings):
     host: str
     port: int
     workers: int
+    forwarded_allow_ips: str
+
+    @field_validator("private_key", "public_key", mode="before")
+    @classmethod
+    def normalize_pem_key(cls, v: str) -> str:
+        """Normaliza cadenas PEM reemplazando saltos de línea escapados si existen."""
+
+        if isinstance(v, str):
+            v = v.strip().strip("'\"")
+
+            if "\\n" in v:
+                v = v.replace("\\n", "\n")
+
+        return v
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Devuelve la lista de orígenes permitidos para CORS."""
+
+        if not self.cors_origins:
+            return []
+
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def is_docs_enabled(self) -> bool:
+        """Determina si la documentación Swagger/OpenAPI debe exponerse."""
+
+        if self.enable_docs is not None:
+            return self.enable_docs
+
+        return self.debug
 
 
 @lru_cache

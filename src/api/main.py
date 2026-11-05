@@ -3,8 +3,9 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 import uvicorn
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Request
 from fastapi import Response as FastAPIResponse
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel, Field
 
@@ -50,6 +51,9 @@ app = FastAPI(
     debug=api_parameters.debug,
     lifespan=lifespan,
     default_response_class=JSONResponse,
+    docs_url="/docs" if api_parameters.is_docs_enabled else None,
+    redoc_url="/redoc" if api_parameters.is_docs_enabled else None,
+    openapi_url="/openapi.json" if api_parameters.is_docs_enabled else None,
 )
 
 
@@ -91,6 +95,30 @@ app.openapi = openapi  # type: ignore[method-assign]
 
 # Registra los manejadores de excepciones personalizados
 register_exception_handlers(app=app)
+
+
+# Configuración de CORS
+if api_parameters.cors_origins_list:
+    app.add_middleware(
+        middleware_class=CORSMiddleware,
+        allow_origins=api_parameters.cors_origins_list,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+
+# Inyección de cabeceras de seguridad
+@app.middleware(middleware_type="http")
+async def security_headers_middleware(request: Request, call_next: Any) -> FastAPIResponse:
+    """Inyecta cabeceras de seguridad defensivas en todas las respuestas."""
+
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    return response
 
 
 # Configura el router principal para la API, con un prefijo para todas las rutas v1
@@ -190,4 +218,5 @@ if __name__ == "__main__":
         host=api_parameters.host,
         port=api_parameters.port,
         reload=api_parameters.debug,
+        workers=1 if api_parameters.debug else api_parameters.workers,
     )

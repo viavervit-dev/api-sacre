@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from fastapi import FastAPI, Request, status
@@ -21,6 +22,8 @@ from src.api.common.exceptions import (
 )
 from src.api.common.response import Response
 from src.api.settings.serialization import JSONResponse
+
+logger = logging.getLogger("api.exceptions")
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -132,6 +135,13 @@ def register_exception_handlers(app: FastAPI) -> None:
         exc: OperationalError,
     ) -> JSONResponse:
         """Manejador de errores cuando la base de datos no está disponible."""
+
+        logger.error(
+            "Base de datos no disponible en %s %s: %s",
+            request.method,
+            request.url.path,
+            exc,
+        )
 
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -327,5 +337,30 @@ def register_exception_handlers(app: FastAPI) -> None:
                 pagination=False,
                 message=exc.message,
                 data=exc.data,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: Exception,
+    ) -> JSONResponse:
+        """Manejador global para cualquier excepción imprevista."""
+
+        logger.error(
+            "Excepción no controlada en %s %s: %s",
+            request.method,
+            request.url.path,
+            exc,
+            exc_info=True,
+        )
+
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=Response(
+                success=False,
+                pagination=False,
+                message="Ha ocurrido un error interno en el servidor.",
+                data=None,
             ).model_dump(),
         )
