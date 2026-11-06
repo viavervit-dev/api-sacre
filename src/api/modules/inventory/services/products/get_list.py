@@ -7,7 +7,7 @@ from src.api.modules.inventory.repositories.interfaces import IProductRepository
 
 
 class GetListProductService:
-    """Servicio encargado de la consulta y serialización de productos."""
+    """Servicio encargado de la consulta de productos."""
 
     def __init__(self, product_repo: IProductRepository) -> None:
         self.__product_repo = product_repo
