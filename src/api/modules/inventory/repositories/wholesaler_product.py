@@ -24,7 +24,7 @@ class WholesalerProductRepository(IWholesalerProductRepository):
 
         return instance
 
-    async def get_non_exclusive_products(
+    async def get_active_products(
         self,
         offset: int,
         limit: int,

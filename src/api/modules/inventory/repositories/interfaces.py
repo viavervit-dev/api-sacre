@@ -131,6 +131,18 @@ class IWholesalerProductRepository(ABC):
         pass
 
     @abstractmethod
+    async def get_active_products(
+        self,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[WholesalerProduct], int]:
+        """
+        Obtiene una lista paginada de productos activos y el total de registros encontrados.
+        """
+
+        pass
+
+    @abstractmethod
     async def get_all_products(
         self,
         offset: int,
