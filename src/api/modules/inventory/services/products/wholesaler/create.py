@@ -8,7 +8,7 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.inventory.constants import ProductEntity
 from src.api.modules.inventory.dto import CreateWholesalerProductDTO, ReadWholesalerProductDTO
-from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
+from src.api.modules.inventory.models import WholesalerProduct
 from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
     IWholesalerProductRepository,

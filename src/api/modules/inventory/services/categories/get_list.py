@@ -21,18 +21,12 @@ class GetListCategoryService:
         """Obtiene una lista paginada de categorías según filtros y nivel de visibilidad."""
 
         if user and user.role == UserRoles.ADMINISTRATOR.value:
-            return await self.__get_private_data_category(
-                offset=offset,
-                limit=limit,
-            )
+            return await self.__get_private_data(offset=offset, limit=limit)
 
         # Tanto clientes autenticados como usuarios anónimos ven los datos público
-        return await self.__get_public_data_category(
-            offset=offset,
-            limit=limit,
-        )
+        return await self.__get_public_data(offset=offset, limit=limit)
 
-    async def __get_public_data_category(
+    async def __get_public_data(
         self,
         offset: int,
         limit: int,
@@ -43,7 +37,7 @@ class GetListCategoryService:
 
         result = []
 
-        categories, total_items = await self.__category_repo.get_list_categories_activated(
+        categories, total_items = await self.__category_repo.get_active_categories(
             offset=offset,
             limit=limit,
         )
@@ -57,7 +51,7 @@ class GetListCategoryService:
 
         return result, total_items
 
-    async def __get_private_data_category(
+    async def __get_private_data(
         self,
         offset: int,
         limit: int,
@@ -69,7 +63,7 @@ class GetListCategoryService:
 
         result = []
 
-        categories, total_items = await self.__category_repo.get_list_categories(
+        categories, total_items = await self.__category_repo.get_all_categories(
             offset=offset,
             limit=limit,
         )

@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
+from src.api.modules.inventory.models import WholesalerProduct
 from src.api.modules.inventory.repositories.interfaces import IWholesalerProductRepository
 
 

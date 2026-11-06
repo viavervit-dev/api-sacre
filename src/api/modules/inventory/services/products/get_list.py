@@ -21,18 +21,12 @@ class GetListProductService:
         """Obtiene una lista paginada de productos según filtros y nivel de visibilidad."""
 
         if user and user.role == UserRoles.ADMINISTRATOR.value:
-            return await self.__get_products_private_catalog(
-                offset=offset,
-                limit=limit,
-            )
+            return await self.__get_private_data(offset=offset, limit=limit)
 
         # Tanto clientes autenticados como usuarios anónimos ven el catálogo público
-        return await self.__get_products_public_catalog(
-            offset=offset,
-            limit=limit,
-        )
+        return await self.__get_public_data(offset=offset, limit=limit)
 
-    async def __get_products_public_catalog(
+    async def __get_public_data(
         self,
         offset: int,
         limit: int,
@@ -55,7 +49,7 @@ class GetListProductService:
 
         return result, total_items
 
-    async def __get_products_private_catalog(
+    async def __get_private_data(
         self,
         offset: int,
         limit: int,

@@ -4,18 +4,24 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.auth.dependencies import UserRepository, user_repository
-from src.api.modules.inventory.repositories.category import CategoryRepository
-from src.api.modules.inventory.repositories.product import ProductRepository
-from src.api.modules.inventory.repositories.wholesaler_product import WholesalerProductRepository
-from src.api.modules.inventory.services.categories.create import CreateCategoryService
-from src.api.modules.inventory.services.categories.delete import DeleteCategoryService
-from src.api.modules.inventory.services.categories.get_list import GetListCategoryService
-from src.api.modules.inventory.services.categories.update import UpdateCategoryService
-from src.api.modules.inventory.services.products.create import CreateProductPublicService
-from src.api.modules.inventory.services.products.delete import DeleteProductService
-from src.api.modules.inventory.services.products.get import GetProductService
-from src.api.modules.inventory.services.products.get_list import GetListProductService
-from src.api.modules.inventory.services.products.update import UpdateProductService
+from src.api.modules.inventory.repositories import (
+    CategoryRepository,
+    ProductRepository,
+    WholesalerProductRepository,
+)
+from src.api.modules.inventory.services.categories import (
+    CreateCategoryService,
+    DeleteCategoryService,
+    GetListCategoryService,
+    UpdateCategoryService,
+)
+from src.api.modules.inventory.services.products import (
+    CreateProductService,
+    DeleteProductService,
+    GetListProductService,
+    GetProductService,
+    UpdateProductService,
+)
 from src.api.modules.inventory.services.products.wholesaler import (
     AddProductWholesalerService,
     GetProductsWholesalerService,
@@ -73,13 +79,13 @@ def get_products_wholesaler_service(
     )
 
 
-def create_product_public_service(
+def create_product_service(
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
     category_repo: Annotated[CategoryRepository, Depends(category_repository)],
-) -> CreateProductPublicService:
+) -> CreateProductService:
     """Provee una instancia del servicio de creación de productos para el catálogo público."""
 
-    return CreateProductPublicService(
+    return CreateProductService(
         product_repo=product_repo,
         category_repo=category_repo,
     )

@@ -8,7 +8,7 @@ from src.api.common.exceptions import ResourceNotFound
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.inventory.constants import ProductEntity
 from src.api.modules.inventory.dto import ReadProductPrivateDTO, UpdateProductPublicDTO
-from src.api.modules.inventory.models.product import Product
+from src.api.modules.inventory.models import Product
 from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
     IProductRepository,

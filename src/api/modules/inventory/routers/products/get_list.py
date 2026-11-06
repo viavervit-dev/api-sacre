@@ -14,8 +14,8 @@ from src.api.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import get_list_products_service
 from src.api.modules.inventory.dto import ReadProductSummaryDTO
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.get_list import GetListProductService
+from src.api.modules.inventory.models import Product
+from src.api.modules.inventory.services.products import GetListProductService
 from src.api.settings.parameters import api_parameters
 
 get_list_products_router = APIRouter(prefix="/inventory", tags=["Inventario"])

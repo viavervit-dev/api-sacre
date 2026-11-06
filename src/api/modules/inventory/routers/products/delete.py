@@ -15,8 +15,8 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import delete_product_service
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.delete import DeleteProductService
+from src.api.modules.inventory.models import Product
+from src.api.modules.inventory.services.products import DeleteProductService
 
 delete_product_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(

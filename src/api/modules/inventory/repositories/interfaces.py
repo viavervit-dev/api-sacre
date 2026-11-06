@@ -3,25 +3,22 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from src.api.modules.inventory.models.category import Category
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
+from src.api.modules.inventory.models import Category, Product, WholesalerProduct
 
 
 class ICategoryRepository(ABC):
     """Contrato de persistencia para operaciones sobre categorías (`inventory.categories`)."""
 
     @abstractmethod
-    async def get_list_categories(self, offset: int, limit: int) -> tuple[Sequence[Category], int]:
+    async def get_all_categories(self, offset: int, limit: int) -> tuple[Sequence[Category], int]:
         """
-        Obtiene una lista paginada de categorías activadas/desactivadas y el total de
-        registros encontrados.
+        Obtiene una lista paginada de todas las categorías y el total de registros encontrados.
         """
 
         pass
 
     @abstractmethod
-    async def get_list_categories_activated(
+    async def get_active_categories(
         self,
         offset: int,
         limit: int,
