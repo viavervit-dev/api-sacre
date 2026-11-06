@@ -81,7 +81,7 @@ En una arquitectura hexagonal estricta o purista, el núcleo de dominio debe ser
         └── main.py                     # Punto de entrada de la API (Instancia FastAPI, lifespan y rutas)
 ```
 
-### 2.3. Anatomía Interna de un Módulo (`api/modules/<modulo>/`)
+### 2.3. Anatomía Interna de un Módulo (`src/api/modules/<modulo>/`)
 
 Cada módulo funciona como un dominio autocontenido y sigue un patrón de diseño uniforme:
 
@@ -320,15 +320,15 @@ python3.14 -m src.api.main
 
 ## 🔹 5. Base de Datos y Migraciones
 
-Este proyecto usa **Alembic** para gestionar las migraciones del esquema de base de datos. Los modelos ORM se definen en la carpeta `models/` de cada módulo y deben registrarse en `api/settings/models.py` para que Alembic los detecte.
+Este proyecto usa **Alembic** para gestionar las migraciones del esquema de base de datos. Los modelos ORM se definen en la carpeta `models/` de cada módulo y deben registrarse en `src/api/settings/models.py` para que Alembic los detecte.
 
 ### Flujo de trabajo
 
 Cada vez que crees o modifiques un modelo ORM, sigue estos pasos:
 
-**1. Crear o modificar el modelo** en `api/modules/<modulo>/models/<modelo>.py`
+**1. Crear o modificar el modelo** en `src/api/modules/<modulo>/models/<modelo>.py`
 
-**2. Registrar el modelo** en `api/settings/models.py` (solo si es un modelo nuevo):
+**2. Registrar el modelo** en `src/api/settings/models.py` (solo si es un modelo nuevo):
 
 ```python
 # api/settings/models.py
