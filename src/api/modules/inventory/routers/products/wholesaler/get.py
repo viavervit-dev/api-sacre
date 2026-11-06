@@ -8,33 +8,32 @@ from src.api.common.response import PaginatedData, PaginationMeta, Response
 from src.api.common.schema import (
     response_scheme_401,
     response_scheme_403,
+    response_scheme_404,
     response_scheme_503,
 )
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import get_products_wholesaler_service
-from src.api.modules.inventory.dto import ReadProductPrivateDTO
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.get_products_wholesaler import (
-    GetProductsWholesalerService,
-)
+from src.api.modules.inventory.dto import ReadWholesalerProductSummaryDTO
+from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
+from src.api.modules.inventory.services.products.wholesaler import GetProductsWholesalerService
 from src.api.settings.parameters import api_parameters
 
 get_products_wholesaler_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
-    permissions={UserRoles.ADMINISTRATOR.value: f"{Product.__tablename__}.read.private"},
+    permissions={UserRoles.ADMINISTRATOR.value: f"{WholesalerProduct.__tablename__}.read"},
 )
 
 
 @get_products_wholesaler_router.get(
-    path="/product/{wholesaler_id}/",
+    path="/product/wholesaler/{wholesaler_id}/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
             "description": "**(OK)** Lista de productos obtenida exitosamente.",
-            "model": Response[PaginatedData[ReadProductPrivateDTO]],
+            "model": Response[PaginatedData[ReadWholesalerProductSummaryDTO]],
             "content": {
                 "application/json": {
                     "examples": {
@@ -56,19 +55,6 @@ require_admin = UserPermissionChecker(
                                             "mano utilizando madera de alta calidad, ideal para "
                                             "orar en el día a día. Cuenta con un diseño elegante "
                                             "y tradicional.",
-                                            "images": [
-                                                "https://example.com/image1.jpg",
-                                                "https://example.com/image2.jpg",
-                                                "https://example.com/image3.jpg",
-                                            ],
-                                            "price_neto": "10.50",
-                                            "price_sale": "15.00",
-                                            "profit_margin": "0.16",
-                                            "iva": "0.16",
-                                            "stock_total": 100,
-                                            "stock_hand": 80,
-                                            "stock_sale": 20,
-                                            "status": True,
                                         },
                                     ],
                                     "meta": {
@@ -108,6 +94,7 @@ require_admin = UserPermissionChecker(
             auth_session_expired=True,
         ),
         status.HTTP_403_FORBIDDEN: response_scheme_403(),
+        status.HTTP_404_NOT_FOUND: response_scheme_404(),
         status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
@@ -132,15 +119,15 @@ async def get_products_by_wholesaler(
         le=api_parameters.pagination_limit,
         ge=1,
     ),
-) -> Response[PaginatedData[ReadProductPrivateDTO]]:
+) -> Response[PaginatedData[ReadWholesalerProductSummaryDTO]]:
     """
-    Permite consultar el listado de productos exclusivos asociados a un cliente mayorista
-    específico con soporte para paginación y ordenamiento cronológico descendente.
-    Estos productos no hacen parte del catálogo de productos que se ofrecen a los usuarios finales.
+    Permite consultar el listado de productos asociados a un cliente mayorista específico con
+    soporte para paginación y ordenamiento cronológico descendente. Estos productos no hacen parte
+    del catálogo de productos que se ofrecen a los usuarios finales.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).
-    - **Permiso requerido:** `products.read.private`.
+    - **Permiso requerido:** `wholesaler_products.read`.
     - **Autenticación:** Cookies obligatorias `access_token` y `refresh_token` (JWT).
 
     ### Flujo de Ejecución
@@ -148,11 +135,10 @@ async def get_products_by_wholesaler(
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Comprueba la vigencia de la sesión y la existencia del usuario en la base de datos.
         - Verifica que el usuario cuente con rol de administrador y el permiso específico
-            `products.read.private`.
+            `wholesaler_products.read`.
     2. **Validación de Parámetros:**
         - Valida que `wholesaler_id` en la ruta corresponda a un UUID válido.
-        - Valida los parámetros de paginación `offset` (>= 0) y `limit` (entre 1 y el valor
-            máximo configurado).
+        - Valida los parámetros de paginación.
     3. **Consulta en Base de Datos y Paginación:**
         - Realiza el conteo total de productos vinculados al mayorista (`wholesaler_id`).
         - Si no existen coincidencias, retorna una colección vacía y total 0.

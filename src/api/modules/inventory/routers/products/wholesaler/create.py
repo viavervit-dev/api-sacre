@@ -15,25 +15,23 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.dependencies import add_product_wholesaler_service
-from src.api.modules.inventory.dto import CreateProductWholesalerDTO, ReadProductPrivateDTO
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.add_product_wholesaler import (
-    AddProductWholesalerService,
-)
+from src.api.modules.inventory.dto import CreateWholesalerProductDTO, ReadWholesalerProductDTO
+from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
+from src.api.modules.inventory.services.products.wholesaler import AddProductWholesalerService
 
 add_product_wholesaler_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
     allowed_roles=[UserRoles.ADMINISTRATOR.value],
-    permissions={UserRoles.ADMINISTRATOR.value: f"{Product.__tablename__}.create"},
+    permissions={UserRoles.ADMINISTRATOR.value: f"{WholesalerProduct.__tablename__}.create"},
 )
 
 
 @add_product_wholesaler_router.post(
-    path="/product/{wholesaler_id}/",
+    path="/product/wholesaler/{wholesaler_id}/",
     response_description="**(CREATED)** Producto agregado exitosamente.",
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateProductWholesalerDTO),
+        status.HTTP_400_BAD_REQUEST: response_scheme_400(dto_class=CreateWholesalerProductDTO),
         status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             access_jwt_missing=True,
             refresh_jwt_missing=True,
@@ -49,7 +47,7 @@ require_admin = UserPermissionChecker(
 )
 async def add_product_wholesaler(
     user: Annotated[User, Depends(require_admin)],
-    data: CreateProductWholesalerDTO,
+    data: CreateWholesalerProductDTO,
     wholesaler_id: Annotated[
         UUID,
         Path(
@@ -58,7 +56,7 @@ async def add_product_wholesaler(
         ),
     ],
     service: Annotated[AddProductWholesalerService, Depends(add_product_wholesaler_service)],
-) -> Response[ReadProductPrivateDTO]:
+) -> Response[ReadWholesalerProductDTO]:
     """
     Permite crear un producto exclusivo para un cliente mayorista a partir de los datos
     proporcionados. Ejecuta validaciones sintácticas y comprobaciones de unicidad en la base
@@ -67,14 +65,15 @@ async def add_product_wholesaler(
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).
-    - **Permiso requerido:** `products.create`.
+    - **Permiso requerido:** `wholesaler_products.create`.
     - **Autenticación:** Cookies obligatorias `access_token` y `refresh_token` (JWT).
 
     ### Flujo de Ejecución
     1. **Autenticación y Autorización:**
         - Extrae y valida los tokens JWT presentes en las cookies de la petición.
         - Verifica la vigencia de la sesión y la existencia del usuario.
-        - Comprueba que el usuario tenga rol de administrador y el permiso `products.create`.
+        - Comprueba que el usuario tenga rol de administrador y el permiso
+            `wholesaler_products.create`.
     2. **Validación Sintáctica y Parámetros:**
         - Valida el identificador del mayorista (`wholesaler_id`) como un UUID en la ruta.
         - Valida tipos de datos, longitudes y rangos numéricos.

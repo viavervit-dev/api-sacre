@@ -4,17 +4,15 @@ from src.api.modules.inventory.routers.categories.create import create_category_
 from src.api.modules.inventory.routers.categories.delete import delete_category_router
 from src.api.modules.inventory.routers.categories.get_list import get_list_categories_router
 from src.api.modules.inventory.routers.categories.update import update_category_router
-from src.api.modules.inventory.routers.products.add_product_wholesaler import (
-    add_product_wholesaler_router,
-)
 from src.api.modules.inventory.routers.products.create import create_product_router
 from src.api.modules.inventory.routers.products.delete import delete_product_router
 from src.api.modules.inventory.routers.products.get import get_product_router
 from src.api.modules.inventory.routers.products.get_list import get_list_products_router
-from src.api.modules.inventory.routers.products.get_products_wholesaler import (
+from src.api.modules.inventory.routers.products.update import update_product_router
+from src.api.modules.inventory.routers.products.wholesaler import (
+    add_product_wholesaler_router,
     get_products_wholesaler_router,
 )
-from src.api.modules.inventory.routers.products.update import update_product_router
 
 router = APIRouter()
 router.include_router(router=create_category_router)
