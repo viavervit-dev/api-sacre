@@ -26,11 +26,11 @@ STOCK_SALE_MIN = ProductEntity.STOCK_SALE_MIN_VALUE.value
 
 
 class Product(ModelBase):
-    """Modelo ORM para la gestión de productos y artículos del inventario."""
+    """Modelo ORM para la gestión de productos del inventario."""
 
     __tablename__ = "products"
     __table_args__ = (
-        Index("ix_products_exclusive_status_date", "exclusive", "status", "date_joined"),
+        Index("ix_products_status_date", "status", "date_joined"),
         CheckConstraint(
             sqltext=f"price_neto >= {PRICE_NETO_MIN} AND price_neto <= {PRICE_NETO_MAX}",
             name="price_neto_range",
@@ -148,11 +148,6 @@ class Product(ModelBase):
     status: Mapped[bool] = mapped_column(
         Boolean,
         doc=ProductEntity.STATUS_DESCRIPTION.value,
-        nullable=False,
-    )
-    exclusive: Mapped[bool] = mapped_column(
-        Boolean,
-        doc=ProductEntity.EXCLUSIVE_DESCRIPTION.value,
         nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(

@@ -17,6 +17,7 @@ from src.api.modules.countries.models.country import Country
 # Modelos del módulo de productos
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.models.product import Product
+from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
 
 # Modelos del módulo de órdenes
 from src.api.modules.orders.models.order import Order
