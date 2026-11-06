@@ -12,10 +12,10 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import retrieve_list_category_service
+from src.api.modules.inventory.dependencies import get_list_category_service
 from src.api.modules.inventory.dto import ReadCategoryPrivateDTO, ReadCategoryPublicDTO
-from src.api.modules.inventory.models.category import Category
-from src.api.modules.inventory.services.categories.get_list import GetListCategoryService
+from src.api.modules.inventory.models import Category
+from src.api.modules.inventory.services.categories import GetListCategoryService
 from src.api.settings.parameters import api_parameters
 
 get_list_categories_router = APIRouter(prefix="/inventory", tags=["Inventario"])
@@ -25,8 +25,8 @@ require_admin = UserOptionalPermissionChecker(
         UserRoles.CUSTOMER.value,
     ],
     permissions={
-        UserRoles.ADMINISTRATOR.value: f"{Category.__tablename__}.read.private",
-        UserRoles.CUSTOMER.value: f"{Category.__tablename__}.read.public",
+        UserRoles.ADMINISTRATOR.value: f"{Category.__tablename__}.read",
+        UserRoles.CUSTOMER.value: f"{Category.__tablename__}.read",
     },
 )
 
@@ -129,7 +129,7 @@ require_admin = UserOptionalPermissionChecker(
 )
 async def get_list_categories(
     user: Annotated[User | None, Depends(require_admin)],
-    service: Annotated[GetListCategoryService, Depends(retrieve_list_category_service)],
+    service: Annotated[GetListCategoryService, Depends(get_list_category_service)],
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,

@@ -26,8 +26,8 @@ require_admin = UserOptionalPermissionChecker(
         UserRoles.CUSTOMER.value,
     ],
     permissions={
-        UserRoles.ADMINISTRATOR.value: f"{Product.__tablename__}.read.private",
-        UserRoles.CUSTOMER.value: f"{Product.__tablename__}.read.public",
+        UserRoles.ADMINISTRATOR.value: f"{Product.__tablename__}.read",
+        UserRoles.CUSTOMER.value: f"{Product.__tablename__}.read",
     },
 )
 
