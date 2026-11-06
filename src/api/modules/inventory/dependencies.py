@@ -24,6 +24,7 @@ from src.api.modules.inventory.services.products import (
 )
 from src.api.modules.inventory.services.products.wholesaler import (
     AddProductWholesalerService,
+    GetListProductWholesalerService,
     GetProductsWholesalerService,
 )
 from src.api.settings.database import db_session
@@ -77,6 +78,16 @@ def get_products_wholesaler_service(
         wholesaler_product_repo=wholesaler_product_repo,
         user_repo=user_repo,
     )
+
+
+def get_list_products_wholesaler_service(
+    wholesaler_product_repo: Annotated[
+        WholesalerProductRepository, Depends(wholesaler_product_repository)
+    ],
+) -> GetListProductWholesalerService:
+    """Provee una instancia del servicio de consulta de productos de un clientes mayoristas."""
+
+    return GetListProductWholesalerService(wholesaler_product_repo=wholesaler_product_repo)
 
 
 def create_product_service(
@@ -143,7 +154,7 @@ def delete_category_service(
     return DeleteCategoryService(category_repo=category_repo)
 
 
-def retrieve_list_category_service(
+def get_list_category_service(
     category_repo: Annotated[CategoryRepository, Depends(category_repository)],
 ) -> GetListCategoryService:
     """Provee una instancia del servicio de consulta de una lista de categorías."""

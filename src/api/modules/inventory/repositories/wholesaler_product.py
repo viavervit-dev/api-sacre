@@ -24,36 +24,6 @@ class WholesalerProductRepository(IWholesalerProductRepository):
 
         return instance
 
-    async def get_active_products(
-        self,
-        offset: int,
-        limit: int,
-    ) -> tuple[Sequence[WholesalerProduct], int]:
-
-        # Total para metadatos de paginación
-        count_stmt = (
-            select(func.count(WholesalerProduct.id))
-            .where(WholesalerProduct.exclusive == False)  # noqa: E712
-            .where(WholesalerProduct.status == True)  # noqa: E712
-        )
-        total_items = await self.__db.scalar(count_stmt) or 0
-
-        if total_items == 0:
-            return [], 0
-
-        # Paginación y ordenamiento
-        stmt = (
-            select(WholesalerProduct)
-            .where(WholesalerProduct.exclusive == False)  # noqa: E712
-            .where(WholesalerProduct.status == True)  # noqa: E712
-            .order_by(WholesalerProduct.date_joined.desc())
-            .offset(offset)
-            .limit(limit)
-        )
-        result = await self.__db.scalars(stmt)
-
-        return result.all(), total_items
-
     async def get_all_products(
         self,
         offset: int,
