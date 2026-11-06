@@ -1,20 +1,18 @@
 from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
-from pydantic import HttpUrl, TypeAdapter
 
 from src.api.common.exceptions import ResourceNotFound
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 from src.api.modules.inventory.constants import ProductEntity
-from src.api.modules.inventory.dto import CreateProductWholesalerDTO, ReadProductPrivateDTO
-from src.api.modules.inventory.models.product import Product
+from src.api.modules.inventory.dto import CreateWholesalerProductDTO, ReadWholesalerProductDTO
+from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
 from src.api.modules.inventory.repositories.interfaces import (
     ICategoryRepository,
-    IProductRepository,
+    IWholesalerProductRepository,
 )
-from src.api.modules.users.repositories.interfaces import IWholesalerRepository
 
 
 class AddProductWholesalerService(FinancialCalculationsMixin):
@@ -22,21 +20,19 @@ class AddProductWholesalerService(FinancialCalculationsMixin):
 
     def __init__(
         self,
-        wholesaler_repo: IWholesalerRepository,
         user_repo: IUserRepository,
-        product_repo: IProductRepository,
+        wholesaler_product_repo: IWholesalerProductRepository,
         category_repo: ICategoryRepository,
     ) -> None:
-        self.__wholesaler_repo = wholesaler_repo
         self.__user_repo = user_repo
-        self.__product_repo = product_repo
+        self.__wholesaler_product_repo = wholesaler_product_repo
         self.__category_repo = category_repo
 
     async def add_product(
         self,
-        data: CreateProductWholesalerDTO,
+        data: CreateWholesalerProductDTO,
         wholesaler_id: UUID,
-    ) -> ReadProductPrivateDTO:
+    ) -> ReadWholesalerProductDTO:
         """
         Crea un producto exclusivo asignado a un cliente mayorista.
 
@@ -55,21 +51,17 @@ class AddProductWholesalerService(FinancialCalculationsMixin):
             raise ResourceNotFound()
 
         # Creamos el producto
-        product = await self.__create_product(data=data)
+        product = await self.__create_product(data=data, wholesaler_id=wholesaler_id)
 
-        # Agregamos el nuevo producto a la lista de productos existente
-        products_wholesale = user.wholesaler.products
-        products_wholesale.append(product.id)
-        _ = self.__wholesaler_repo.update_wholesaler(
-            instance=user.wholesaler,
-            data={"products": products_wholesale},
-        )
+        return ReadWholesalerProductDTO.model_construct(**product.to_dict())
 
-        return ReadProductPrivateDTO.model_construct(**product.to_dict())
-
-    async def __create_product(self, data: CreateProductWholesalerDTO) -> Product:
+    async def __create_product(
+        self,
+        data: CreateWholesalerProductDTO,
+        wholesaler_id: UUID,
+    ) -> WholesalerProduct:
         """
-        Crea un nuevo producto para el catálogo público.
+        Crea un nuevo producto para un cliente mayorista.
 
         Raises:
             RequestValidationError: Si falla alguna validacion de negocio.
@@ -78,26 +70,16 @@ class AddProductWholesalerService(FinancialCalculationsMixin):
         # Ejecutamos validaciones de las reglas de negocio
         await self.__run_business_validations(data=data)
 
+        # Inicializar algunos valores por defecto
         product_data = data.model_dump()
+        product_data["status"] = True
 
-        # Calcular el precio de venta
-        product_data["price_sale"] = self.calculate_sale_price_product(
-            price_neto=product_data["price_neto"],
-            profit_margin=product_data["profit_margin"],
+        return await self.__wholesaler_product_repo.create_product(
+            wholesaler_id=wholesaler_id,
+            data=product_data,
         )
 
-        # Calcular el monto del IVA
-        product_data["tax_amount"] = self.calculate_tax_amount(amount=product_data["price_sale"])
-
-        # Inicializar algunos valores por defecto
-        product_data["stock_sale"] = product_data["stock_total"]
-        product_data["status"] = True
-        product_data["exclusive"] = True
-        product_data["stock_hand"] = 0
-
-        return await self.__product_repo.create_product(data=product_data)
-
-    async def __run_business_validations(self, data: CreateProductWholesalerDTO) -> None:
+    async def __run_business_validations(self, data: CreateWholesalerProductDTO) -> None:
         """
         Ejecuta las validaciones de negocio previas al registro del producto.
 
@@ -109,7 +91,9 @@ class AddProductWholesalerService(FinancialCalculationsMixin):
 
         # Validar que el nombre del producto no esté registrado en la base de datos
         if data.name:
-            exists = await self.__product_repo.exists_product(filters={"name": data.name})
+            exists = await self.__wholesaler_product_repo.exists_product(
+                filters={"name": data.name},
+            )
 
             if exists:
                 errors.append(
@@ -119,22 +103,6 @@ class AddProductWholesalerService(FinancialCalculationsMixin):
                         "type": "domain_validation",
                     }
                 )
-
-        # Validar que cada elemento de la lista de imágenes sea una URL válida
-        if data.images:
-            adapter = TypeAdapter(HttpUrl)
-
-            for i, url in enumerate(data.images):
-                try:
-                    adapter.validate_python(url)
-                except Exception:
-                    errors.append(
-                        {
-                            "loc": ("body", "images", i),  # type: ignore
-                            "msg": ProductEntity.URL_INVALID.value,
-                            "type": "domain_validation",
-                        }
-                    )
 
         # Validar que cada categoría exista en la base de datos
         if data.categories:

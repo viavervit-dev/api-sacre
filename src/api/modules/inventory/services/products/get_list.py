@@ -41,7 +41,7 @@ class GetListProductService:
 
         result = []
 
-        products, total_items = await self.__product_repo.get_products_public_catalog(
+        products, total_items = await self.__product_repo.get_active_products(
             offset=offset,
             limit=limit,
         )
@@ -64,7 +64,7 @@ class GetListProductService:
 
         result = []
 
-        products, total_items = await self.__product_repo.get_products_private_catalog(
+        products, total_items = await self.__product_repo.get_all_products(
             offset=offset,
             limit=limit,
         )
