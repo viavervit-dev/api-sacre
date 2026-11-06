@@ -10,7 +10,7 @@ from src.api.modules.inventory.repositories.interfaces import (
 )
 
 
-class CreateProductPublicService(FinancialCalculationsMixin):
+class CreateProductService(FinancialCalculationsMixin):
     """Servicio encargado de la creación de productos para el catálogo público."""
 
     def __init__(

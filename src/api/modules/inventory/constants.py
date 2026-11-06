@@ -76,6 +76,28 @@ class ProductEntity(Enum):
     STOCK_SALE_MIN_VALUE = 0
 
 
+class WholesalerProductEntity(Enum):
+    """Metadatos asociados a la entidad `WholesalerProduct`."""
+
+    # Descripciones para los campos de la entidad
+    NAME_DESCRIPTION = "Nombre del producto."
+    CATEGORIES_DESCRIPTION = "Lista de categorías a las que pertenece el producto."
+    DESCRIPTION_SHORT_DESCRIPTION = "Descripción corta del producto."
+    DESCRIPTION_LONG_DESCRIPTION = "Descripción larga del producto."
+    STATUS_DESCRIPTION = "Estado del producto."
+    EXCLUSIVE_DESCRIPTION = "Determina si el producto pertenece al catálogo público de productos.."
+
+    # Mensajes de error
+    NAME_IN_USE = "Este nombre ya está registrado."
+    CATEGORY_NOT_FOUND = "Esta categoría no existe."
+    WHOLESALER_NOT_FOUND = "El cliente mayorista no existe."
+
+    # Propiedades para los campos de la entidad
+    NAME_MAX_LENGTH = 60
+    DESCRIPTION_SHORT_MAX_LENGTH = 100
+    DESCRIPTION_LONG_MAX_LENGTH = 1000
+
+
 class ExceptionErrorMessages(Enum):
     """
     Enumeración que define constantes relacionadas con los mensajes de error para excepciones

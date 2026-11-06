@@ -12,10 +12,10 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.dependencies import create_product_public_service
+from src.api.modules.inventory.dependencies import create_product_service
 from src.api.modules.inventory.dto import CreateProductPublicDTO, ReadProductPrivateDTO
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.services.products.create import CreateProductPublicService
+from src.api.modules.inventory.models import Product
+from src.api.modules.inventory.services.products import CreateProductService
 
 create_product_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
@@ -45,7 +45,7 @@ require_admin = UserPermissionChecker(
 async def create_product(
     user: Annotated[User, Depends(require_admin)],
     data: CreateProductPublicDTO,
-    service: Annotated[CreateProductPublicService, Depends(create_product_public_service)],
+    service: Annotated[CreateProductService, Depends(create_product_service)],
 ) -> Response[ReadProductPrivateDTO]:
     """
     Permite crear un nuevo producto para el catálogo público. Ejecuta validaciones sintácticas

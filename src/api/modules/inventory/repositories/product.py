@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.modules.inventory.models.product import Product
+from src.api.modules.inventory.models import Product
 from src.api.modules.inventory.repositories.interfaces import IProductRepository
 
 
@@ -21,17 +21,14 @@ class ProductRepository(IProductRepository):
 
         return instance
 
-    async def get_products_public_catalog(
+    async def get_active_products(
         self,
         offset: int,
         limit: int,
     ) -> tuple[Sequence[Product], int]:
 
         # Total para metadatos de paginación
-        count_stmt = select(func.count(Product.id)).where(
-            Product.exclusive == False,  # noqa: E712
-            Product.status == True,  # noqa: E712
-        )
+        count_stmt = select(func.count(Product.id)).where(Product.status == True)  # noqa: E712
         total_items = await self.__db.scalar(count_stmt) or 0
 
         if total_items == 0:
@@ -40,10 +37,7 @@ class ProductRepository(IProductRepository):
         # Paginación y ordenamiento
         stmt = (
             select(Product)
-            .where(
-                Product.exclusive == False,  # noqa: E712
-                Product.status == True,  # noqa: E712
-            )
+            .where(Product.status == True)  # noqa: E712
             .order_by(Product.date_joined.desc())
             .offset(offset)
             .limit(limit)
@@ -52,56 +46,21 @@ class ProductRepository(IProductRepository):
 
         return result.all(), total_items
 
-    async def get_products_private_catalog(
+    async def get_all_products(
         self,
         offset: int,
         limit: int,
     ) -> tuple[Sequence[Product], int]:
 
         # Total para metadatos de paginación
-        count_stmt = select(func.count(Product.id)).where(Product.exclusive == False)  # noqa: E712
+        count_stmt = select(func.count(Product.id))
         total_items = await self.__db.scalar(count_stmt) or 0
 
         if total_items == 0:
             return [], 0
 
         # Paginación y ordenamiento
-        stmt = (
-            select(Product)
-            .where(Product.exclusive == False)  # noqa: E712
-            .order_by(Product.date_joined.desc())
-            .offset(offset)
-            .limit(limit)
-        )
-        result = await self.__db.scalars(stmt)
-
-        return result.all(), total_items
-
-    async def get_products_by_wholesaler(
-        self,
-        products_id: list[UUID],
-        offset: int,
-        limit: int,
-    ) -> tuple[Sequence[Product], int]:
-
-        if not products_id:
-            return [], 0
-
-        # Total para metadatos de paginación
-        count_stmt = select(func.count(Product.id)).where(Product.id.in_(products_id))
-        total_items = await self.__db.scalar(count_stmt) or 0
-
-        if total_items == 0:
-            return [], 0
-
-        # Registros paginados
-        stmt = (
-            select(Product)
-            .where(Product.id.in_(products_id))
-            .order_by(Product.date_joined.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = select(Product).order_by(Product.date_joined.desc()).offset(offset).limit(limit)
         result = await self.__db.scalars(stmt)
 
         return result.all(), total_items

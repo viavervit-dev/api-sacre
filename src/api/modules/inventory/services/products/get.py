@@ -36,9 +36,8 @@ class GetProductService:
         # Validar que el producto sea visible para el usuario según su rol
         if not user or user.role != UserRoles.ADMINISTRATOR.value:
             product_status = product.status
-            product_exclusive = product.exclusive
 
-            if product_exclusive and not product_status:
+            if not product_status:
                 raise DomainRuleViolation(
                     message=ExceptionErrorMessages.PRODUCT_NOT_AVAILABLE.value
                 )

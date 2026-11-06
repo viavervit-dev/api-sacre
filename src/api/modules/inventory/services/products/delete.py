@@ -2,7 +2,7 @@ from uuid import UUID
 
 from src.api.common.exceptions import DomainRuleViolation, ResourceNotFound
 from src.api.modules.inventory.constants import ExceptionErrorMessages
-from src.api.modules.inventory.models.product import Product
+from src.api.modules.inventory.models import Product
 from src.api.modules.inventory.repositories.interfaces import IProductRepository
 
 

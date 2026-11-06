@@ -3,24 +3,22 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from src.api.modules.inventory.models.category import Category
-from src.api.modules.inventory.models.product import Product
+from src.api.modules.inventory.models import Category, Product, WholesalerProduct
 
 
 class ICategoryRepository(ABC):
     """Contrato de persistencia para operaciones sobre categorías (`inventory.categories`)."""
 
     @abstractmethod
-    async def get_list_categories(self, offset: int, limit: int) -> tuple[Sequence[Category], int]:
+    async def get_all_categories(self, offset: int, limit: int) -> tuple[Sequence[Category], int]:
         """
-        Obtiene una lista paginada de categorías activadas/desactivadas y el total de
-        registros encontrados.
+        Obtiene una lista paginada de todas las categorías y el total de registros encontrados.
         """
 
         pass
 
     @abstractmethod
-    async def get_list_categories_activated(
+    async def get_active_categories(
         self,
         offset: int,
         limit: int,
@@ -72,41 +70,25 @@ class IProductRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_products_public_catalog(
+    async def get_active_products(
         self,
         offset: int,
         limit: int,
     ) -> tuple[Sequence[Product], int]:
         """
-        Obtiene una lista paginada de productos del catálogo público y el total de registros
-        encontrados.
+        Obtiene una lista paginada de productos activos y el total de registros encontrados.
         """
 
         pass
 
     @abstractmethod
-    async def get_products_private_catalog(
+    async def get_all_products(
         self,
         offset: int,
         limit: int,
     ) -> tuple[Sequence[Product], int]:
         """
-        Obtiene una lista paginada de productos del catálogo privado y el total de registros
-        encontrados.
-        """
-
-        pass
-
-    @abstractmethod
-    async def get_products_by_wholesaler(
-        self,
-        products_id: list[UUID],
-        offset: int,
-        limit: int,
-    ) -> tuple[Sequence[Product], int]:
-        """
-        Obtiene una lista paginada de productos asociados a un cliente mayorista y el total
-        de registros encontrados.
+        Obtiene una lista paginada de todos los productos y el total de registros encontrados.
         """
 
         pass
@@ -125,6 +107,73 @@ class IProductRepository(ABC):
 
     @abstractmethod
     async def delete_product(self, instance: Product) -> None:
+        """Elimina un producto de la base de datos."""
+
+        pass
+
+    @abstractmethod
+    async def exists_product(self, filters: dict[str, Any]) -> bool:
+        """Verifica si existe un producto que coincida con los filtros especificados."""
+
+        pass
+
+
+class IWholesalerProductRepository(ABC):
+    """
+    Contrato de persistencia para operaciones sobre productos de clientes mayoristas
+    (`inventory.wholesaler_products`).
+    """
+
+    @abstractmethod
+    async def get_product_by_id(self, id: UUID) -> WholesalerProduct | None:
+        """Obtiene un producto por su identificador único."""
+
+        pass
+
+    @abstractmethod
+    async def get_all_products(
+        self,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[WholesalerProduct], int]:
+        """
+        Obtiene una lista paginada de todos los productos y el total de registros encontrados.
+        """
+
+        pass
+
+    @abstractmethod
+    async def get_products_by_wholesaler(
+        self,
+        wholesaler_id: UUID,
+        offset: int,
+        limit: int,
+    ) -> tuple[Sequence[WholesalerProduct], int]:
+        """
+        Obtiene una lista paginada de productos asociados a un cliente mayorista y el total
+        de registros encontrados.
+        """
+
+        pass
+
+    @abstractmethod
+    async def create_product(self, data: dict[str, Any], wholesaler_id: UUID) -> WholesalerProduct:
+        """Crea un nuevo producto en la base de datos asociado a un cliente mayorista."""
+
+        pass
+
+    @abstractmethod
+    async def update_product(
+        self,
+        data: dict[str, Any],
+        instance: WholesalerProduct,
+    ) -> WholesalerProduct:
+        """Actualiza un producto en la base de datos."""
+
+        pass
+
+    @abstractmethod
+    async def delete_product(self, instance: WholesalerProduct) -> None:
         """Elimina un producto de la base de datos."""
 
         pass

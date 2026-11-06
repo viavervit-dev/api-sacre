@@ -4,6 +4,7 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.models.user import User
 from src.api.modules.inventory.models.category import Category
 from src.api.modules.inventory.models.product import Product
+from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
 from src.api.modules.orders.models.order import Order
 from src.api.modules.users.models.admin import Admin
 from src.api.modules.users.models.customer import Customer
@@ -29,15 +30,15 @@ GROUPS: list[RoleGroupConfig] = [
             f"{Customer.__tablename__}.read",
             f"{Customer.__tablename__}.update",
             f"{Customer.__tablename__}.delete",
-            f"{Category.__tablename__}.read.public",
-            f"{Product.__tablename__}.read.public",
+            f"{Category.__tablename__}.read",
+            f"{Product.__tablename__}.read",
             "authentication.jwt",
         ],
     },
     {
         "name": UserRoles.WHOLESALER.value,
         "permissions": [
-            f"{Product.__tablename__}.read.public",
+            f"{WholesalerProduct.__tablename__}.read",
             f"{Order.__tablename__}.read",
             "authentication.jwt",
         ],
@@ -46,14 +47,18 @@ GROUPS: list[RoleGroupConfig] = [
         "name": UserRoles.ADMINISTRATOR.value,
         "permissions": [
             f"{Admin.__tablename__}.read",
-            f"{Category.__tablename__}.read.private",
+            f"{Category.__tablename__}.read",
             f"{Category.__tablename__}.create",
             f"{Category.__tablename__}.update",
             f"{Category.__tablename__}.delete",
-            f"{Product.__tablename__}.read.private",
+            f"{Product.__tablename__}.read",
             f"{Product.__tablename__}.create",
             f"{Product.__tablename__}.update",
             f"{Product.__tablename__}.delete",
+            f"{WholesalerProduct.__tablename__}.read",
+            f"{WholesalerProduct.__tablename__}.create",
+            f"{WholesalerProduct.__tablename__}.update",
+            f"{WholesalerProduct.__tablename__}.delete",
             f"{Wholesaler.__tablename__}.create",
             f"{Wholesaler.__tablename__}.read",
             f"{Wholesaler.__tablename__}.update",
@@ -80,16 +85,18 @@ PERMISSIONS = [
     f"{Wholesaler.__tablename__}.update",
     f"{Wholesaler.__tablename__}.delete",
     # Permisos para los modelos del módulo inventory
-    f"{Category.__tablename__}.read.public",
-    f"{Category.__tablename__}.read.private",
+    f"{Category.__tablename__}.read",
     f"{Category.__tablename__}.create",
     f"{Category.__tablename__}.update",
     f"{Category.__tablename__}.delete",
-    f"{Product.__tablename__}.read.public",
-    f"{Product.__tablename__}.read.private",
+    f"{Product.__tablename__}.read",
     f"{Product.__tablename__}.create",
     f"{Product.__tablename__}.update",
     f"{Product.__tablename__}.delete",
+    f"{WholesalerProduct.__tablename__}.read",
+    f"{WholesalerProduct.__tablename__}.create",
+    f"{WholesalerProduct.__tablename__}.update",
+    f"{WholesalerProduct.__tablename__}.delete",
     # Permisos para los modelos del módulo orders
     f"{Order.__tablename__}.read",
     f"{Order.__tablename__}.create",

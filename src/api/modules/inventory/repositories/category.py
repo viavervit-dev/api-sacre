@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.modules.inventory.models.category import Category
+from src.api.modules.inventory.models import Category
 from src.api.modules.inventory.repositories.interfaces import ICategoryRepository
 
 
@@ -15,7 +15,7 @@ class CategoryRepository(ICategoryRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.__db = db
 
-    async def get_list_categories(self, offset: int, limit: int) -> tuple[Sequence[Category], int]:
+    async def get_all_categories(self, offset: int, limit: int) -> tuple[Sequence[Category], int]:
 
         # Total para metadatos de paginación
         count_stmt = select(func.count(Category.id))
@@ -31,7 +31,7 @@ class CategoryRepository(ICategoryRepository):
 
         return items, total_items
 
-    async def get_list_categories_activated(
+    async def get_active_categories(
         self,
         offset: int,
         limit: int,

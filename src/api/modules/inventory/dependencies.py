@@ -4,24 +4,28 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.auth.dependencies import UserRepository, user_repository
-from src.api.modules.inventory.repositories.category import CategoryRepository
-from src.api.modules.inventory.repositories.product import ProductRepository
-from src.api.modules.inventory.services.categories.create import CreateCategoryService
-from src.api.modules.inventory.services.categories.delete import DeleteCategoryService
-from src.api.modules.inventory.services.categories.get_list import GetListCategoryService
-from src.api.modules.inventory.services.categories.update import UpdateCategoryService
-from src.api.modules.inventory.services.products.add_product_wholesaler import (
-    AddProductWholesalerService,
+from src.api.modules.inventory.repositories import (
+    CategoryRepository,
+    ProductRepository,
+    WholesalerProductRepository,
 )
-from src.api.modules.inventory.services.products.create import CreateProductPublicService
-from src.api.modules.inventory.services.products.delete import DeleteProductService
-from src.api.modules.inventory.services.products.get import GetProductService
-from src.api.modules.inventory.services.products.get_list import GetListProductService
-from src.api.modules.inventory.services.products.get_products_wholesaler import (
+from src.api.modules.inventory.services.categories import (
+    CreateCategoryService,
+    DeleteCategoryService,
+    GetListCategoryService,
+    UpdateCategoryService,
+)
+from src.api.modules.inventory.services.products import (
+    CreateProductService,
+    DeleteProductService,
+    GetListProductService,
+    GetProductService,
+    UpdateProductService,
+)
+from src.api.modules.inventory.services.products.wholesaler import (
+    AddProductWholesalerService,
     GetProductsWholesalerService,
 )
-from src.api.modules.inventory.services.products.update import UpdateProductService
-from src.api.modules.users.dependencies import WholesalerRepository, wholesaler_repository
 from src.api.settings.database import db_session
 
 
@@ -35,6 +39,14 @@ def product_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> Prod
     """Provee una instancia del repositorio de productos."""
 
     return ProductRepository(db=db)
+
+
+def wholesaler_product_repository(
+    db: Annotated[AsyncSession, Depends(db_session)],
+) -> WholesalerProductRepository:
+    """Provee una instancia del repositorio de productos."""
+
+    return WholesalerProductRepository(db=db)
 
 
 def get_list_products_service(
@@ -54,24 +66,26 @@ def get_product_service(
 
 
 def get_products_wholesaler_service(
-    product_repo: Annotated[ProductRepository, Depends(product_repository)],
     user_repo: Annotated[UserRepository, Depends(user_repository)],
+    wholesaler_product_repo: Annotated[
+        WholesalerProductRepository, Depends(wholesaler_product_repository)
+    ],
 ) -> GetProductsWholesalerService:
     """Provee una instancia del servicio de consulta de productos de un cliente mayorista."""
 
     return GetProductsWholesalerService(
-        product_repo=product_repo,
+        wholesaler_product_repo=wholesaler_product_repo,
         user_repo=user_repo,
     )
 
 
-def create_product_public_service(
+def create_product_service(
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
     category_repo: Annotated[CategoryRepository, Depends(category_repository)],
-) -> CreateProductPublicService:
+) -> CreateProductService:
     """Provee una instancia del servicio de creación de productos para el catálogo público."""
 
-    return CreateProductPublicService(
+    return CreateProductService(
         product_repo=product_repo,
         category_repo=category_repo,
     )
@@ -80,15 +94,15 @@ def create_product_public_service(
 def add_product_wholesaler_service(
     user_repo: Annotated[UserRepository, Depends(user_repository)],
     category_repo: Annotated[CategoryRepository, Depends(category_repository)],
-    product_repo: Annotated[ProductRepository, Depends(product_repository)],
-    wholesaler_repo: Annotated[WholesalerRepository, Depends(wholesaler_repository)],
+    wholesaler_product_repo: Annotated[
+        WholesalerProductRepository, Depends(wholesaler_product_repository)
+    ],
 ) -> AddProductWholesalerService:
     """Provee una instancia del servicio de creación de productos exclusivos para mayoristas."""
 
     return AddProductWholesalerService(
-        wholesaler_repo=wholesaler_repo,
         category_repo=category_repo,
-        product_repo=product_repo,
+        wholesaler_product_repo=wholesaler_product_repo,
         user_repo=user_repo,
     )
 
