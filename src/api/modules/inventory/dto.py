@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 from src.api.common.exceptions import DTOValidationErrorMessages
 from src.api.modules.inventory.constants import (
@@ -190,6 +190,78 @@ class CreateWholesalerProductDTO(BaseModel):
                 DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
+    )
+
+
+class UpdateWholesalerProductDTO(BaseModel):
+    """DTO para la actualización de un producto para un cliente mayorista."""
+
+    name: str | None = Field(
+        max_length=WholesalerProductEntity.NAME_MAX_LENGTH.value,
+        description=WholesalerProductEntity.NAME_DESCRIPTION.value,
+        examples=["Rosario de madera"],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                WholesalerProductEntity.NAME_IN_USE.value,
+            ]
+        },
+        default=None,
+    )
+    categories: list[Annotated[str, Field(max_length=CATEGORY_NAME_MAX_LENGTH)]] | None = Field(
+        description=WholesalerProductEntity.CATEGORIES_DESCRIPTION.value,
+        examples=[["Rosarios", "Madera"]],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+                WholesalerProductEntity.CATEGORY_NOT_FOUND.value,
+            ]
+        },
+        default=None,
+    )
+    description_short: str | None = Field(
+        max_length=WholesalerProductEntity.DESCRIPTION_SHORT_MAX_LENGTH.value,
+        description=WholesalerProductEntity.DESCRIPTION_SHORT_DESCRIPTION.value,
+        examples=["Rosario hecho a mano con cuentas de madera."],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+        default=None,
+    )
+    description_long: str | None = Field(
+        max_length=WholesalerProductEntity.DESCRIPTION_LONG_MAX_LENGTH.value,
+        description=WholesalerProductEntity.DESCRIPTION_LONG_DESCRIPTION.value,
+        examples=[
+            "Este rosario está fabricado a mano utilizando madera de alta calidad, ideal para "
+            "orar en el día a día. Cuenta con un diseño elegante y tradicional."
+        ],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.STRING_TOO_LONG.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+        default=None,
+    )
+    exclusive: bool | None = Field(
+        description=WholesalerProductEntity.EXCLUSIVE_DESCRIPTION.value,
+        examples=[True, False],
+        json_schema_extra={
+            "x-validation-errors": [
+                DTOValidationErrorMessages.BOOL_TYPE.value,
+                DTOValidationErrorMessages.BOOL_PARSING.value,
+                DTOValidationErrorMessages.MISSING.value,
+                DTOValidationErrorMessages.VALUE_ERROR.value,
+            ]
+        },
+        default=None,
     )
 
 
@@ -384,8 +456,6 @@ class CreateProductPublicDTO(BaseModel):
 class UpdateProductPublicDTO(BaseModel):
     """DTO para la actualización de un producto del catálogo público."""
 
-    model_config = ConfigDict(use_enum_values=True)
-
     name: str | None = Field(
         max_length=ProductEntity.NAME_MAX_LENGTH.value,
         description=ProductEntity.NAME_DESCRIPTION.value,
@@ -393,7 +463,6 @@ class UpdateProductPublicDTO(BaseModel):
         json_schema_extra={
             "x-validation-errors": [
                 DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
                 ProductEntity.NAME_IN_USE.value,
             ]
@@ -406,7 +475,6 @@ class UpdateProductPublicDTO(BaseModel):
         json_schema_extra={
             "x-validation-errors": [
                 DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
                 ProductEntity.CATEGORY_NOT_FOUND.value,
             ]
@@ -420,7 +488,6 @@ class UpdateProductPublicDTO(BaseModel):
         json_schema_extra={
             "x-validation-errors": [
                 DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
@@ -436,7 +503,6 @@ class UpdateProductPublicDTO(BaseModel):
         json_schema_extra={
             "x-validation-errors": [
                 DTOValidationErrorMessages.STRING_TOO_LONG.value,
-                DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
             ]
         },
@@ -475,7 +541,6 @@ class UpdateProductPublicDTO(BaseModel):
                 DTOValidationErrorMessages.GREATER_THAN_EQUAL.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
                 DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
-                DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
             ]
@@ -494,7 +559,6 @@ class UpdateProductPublicDTO(BaseModel):
                 DTOValidationErrorMessages.GREATER_THAN_EQUAL.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
                 DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
-                DTOValidationErrorMessages.MISSING.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_PLACES.value,
                 DTOValidationErrorMessages.DECIMAL_MAX_DIGITS.value,
             ]
@@ -511,7 +575,6 @@ class UpdateProductPublicDTO(BaseModel):
                 DTOValidationErrorMessages.GREATER_THAN_EQUAL.value,
                 DTOValidationErrorMessages.VALUE_ERROR.value,
                 DTOValidationErrorMessages.LESS_THAN_EQUAL.value,
-                DTOValidationErrorMessages.MISSING.value,
             ]
         },
         default=None,
