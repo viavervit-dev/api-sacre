@@ -9,8 +9,8 @@ from src.api.common.payment.services.create_link import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.repositories.interfaces import IProductRepository
+from src.api.modules.inventory.models import WholesalerProduct
+from src.api.modules.inventory.repositories.interfaces import IWholesalerProductRepository
 from src.api.modules.orders.constants import OrderDescription, OrderEntity, OrderStatus
 from src.api.modules.orders.dto import (
     CreateOrderDTO,
@@ -27,16 +27,16 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
     def __init__(
         self,
-        product_repo: IProductRepository,
+        wholesaler_product_repo: IWholesalerProductRepository,
         order_repo: IOrderRepository,
         payment_service: CreatePaymentLinkService,
         user_repo: IUserRepository,
     ) -> None:
-        self.__product_repo = product_repo
+        self.__wholesaler_product_repo = wholesaler_product_repo
         self.__order_repo = order_repo
         self.__user_repo = user_repo
         self.__payment_service = payment_service
-        self.__products: list[Product] = []
+        self.__products: list[WholesalerProduct] = []
 
     async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
         """
@@ -151,7 +151,7 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         # Validar existencia de cada producto y cálculo de impuestos y totales por ítem
         for i, product in enumerate(data.product_data):
-            instance = await self.__product_repo.get_product_by_id(id=product.id)
+            instance = await self.__wholesaler_product_repo.get_product_by_id(id=product.id)
 
             if not instance:
                 raise RequestValidationError(

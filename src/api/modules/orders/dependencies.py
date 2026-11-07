@@ -7,7 +7,10 @@ from src.api.common.payment.dependencies import create_payment_link_service
 from src.api.common.payment.services.create_link import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.dependencies import UserRepository, user_repository
-from src.api.modules.inventory.dependencies import ProductRepository, product_repository
+from src.api.modules.inventory.dependencies import (
+    WholesalerProductRepository,
+    wholesaler_product_repository,
+)
 from src.api.modules.orders.repositories.order import OrderRepository
 from src.api.modules.orders.services.purchase.create_order_whosaler import (
     CreatePurchaseOrderWholesalerService,
@@ -55,10 +58,12 @@ def get_purchase_order_service(
 
 
 def create_purchase_order_wholesaler_service(
-    product_repo: Annotated[ProductRepository, Depends(product_repository)],
     order_repo: Annotated[OrderRepository, Depends(order_repository)],
     payment_service: Annotated[CreatePaymentLinkService, Depends(create_payment_link_service)],
     user_repo: Annotated[UserRepository, Depends(user_repository)],
+    wholesaler_product_repo: Annotated[
+        WholesalerProductRepository, Depends(wholesaler_product_repository)
+    ],
 ) -> CreatePurchaseOrderWholesalerService:
     """
     Provee una instancia del servicio encargado de la creación de órdenes de compra
@@ -67,7 +72,7 @@ def create_purchase_order_wholesaler_service(
 
     return CreatePurchaseOrderWholesalerService(
         payment_service=payment_service,
-        product_repo=product_repo,
+        wholesaler_product_repo=wholesaler_product_repo,
         order_repo=order_repo,
         user_repo=user_repo,
     )
