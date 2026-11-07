@@ -16,7 +16,7 @@ from src.api.modules.inventory.repositories.interfaces import (
 
 
 class AddProductWholesalerService(FinancialCalculationsMixin):
-    """Servicio encargado de la creación de productos exclusivos para mayoristas."""
+    """Servicio encargado de la creación de productos para clientes mayoristas."""
 
     def __init__(
         self,
@@ -34,7 +34,7 @@ class AddProductWholesalerService(FinancialCalculationsMixin):
         wholesaler_id: UUID,
     ) -> ReadWholesalerProductDTO:
         """
-        Crea un producto exclusivo asignado a un cliente mayorista.
+        Crea un producto asignado a un cliente mayorista.
 
         Raises:
             ResourceNotFound: Si el cliente mayorista no existe en la base de datos.
