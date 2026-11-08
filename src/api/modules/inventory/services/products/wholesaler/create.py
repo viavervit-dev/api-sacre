@@ -16,7 +16,7 @@ from src.api.modules.inventory.repositories.interfaces import (
 
 
 class AddProductWholesalerService(FinancialCalculationsMixin):
-    """Servicio encargado de la creación de productos para clientes mayoristas."""
+    """Servicio encargado de la creación de productos de clientes mayoristas."""
 
     def __init__(
         self,

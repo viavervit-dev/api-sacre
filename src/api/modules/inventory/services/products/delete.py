@@ -18,6 +18,7 @@ class DeleteProductService:
 
         Raises:
             DomainRuleViolation: Si falla alguna validación de las reglas de negocio.
+            ResourceNotFound: Si el producto no existe en la base de datos.
         """
 
         # Validar que el producto exista en la base de datos
