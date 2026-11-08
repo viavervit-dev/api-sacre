@@ -24,6 +24,7 @@ from src.api.modules.inventory.services.products import (
 )
 from src.api.modules.inventory.services.products.wholesaler import (
     AddProductWholesalerService,
+    DeleteProductWholesalerService,
     GetListProductWholesalerService,
     GetProductsWholesalerService,
     UpdateProductWholesalerService,
@@ -125,12 +126,22 @@ def update_product_wholesaler_service(
         WholesalerProductRepository, Depends(wholesaler_product_repository)
     ],
 ) -> UpdateProductWholesalerService:
-    """Provee una instancia del servicio de actualización de productos para clientes mayoristas."""
+    """Provee una instancia del servicio de actualización de productos de clientes mayoristas."""
 
     return UpdateProductWholesalerService(
         category_repo=category_repo,
         wholesaler_product_repo=wholesaler_product_repo,
     )
+
+
+def delete_product_wholesaler_service(
+    wholesaler_product_repo: Annotated[
+        WholesalerProductRepository, Depends(wholesaler_product_repository)
+    ],
+) -> DeleteProductWholesalerService:
+    """Provee una instancia del servicio de eliminación de productos de clientes mayoristas."""
+
+    return DeleteProductWholesalerService(wholesaler_product_repo=wholesaler_product_repo)
 
 
 def delete_product_service(

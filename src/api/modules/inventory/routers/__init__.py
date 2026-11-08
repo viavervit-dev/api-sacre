@@ -15,6 +15,7 @@ from src.api.modules.inventory.routers.products import (
 )
 from src.api.modules.inventory.routers.products.wholesaler import (
     add_product_wholesaler_router,
+    delete_product_wholesaler_router,
     get_list_products_wholesaler_router,
     get_products_wholesaler_router,
     update_product_wholesaler_router,
@@ -34,3 +35,4 @@ router.include_router(router=update_product_router)
 router.include_router(router=delete_product_router)
 router.include_router(router=add_product_wholesaler_router)
 router.include_router(router=update_product_wholesaler_router)
+router.include_router(router=delete_product_wholesaler_router)
