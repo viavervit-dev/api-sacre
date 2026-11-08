@@ -110,10 +110,10 @@ async def get_list_products_wholesaler(
     ),
 ) -> Response[PaginatedData[ReadWholesalerProductSummaryDTO]]:
     """
-    Permite consultar el listado de todos los productos de clientes mayoristas. Soporta paginación
-    por desplazamiento (`offset`) y límite (`limit`), ordenando los resultados cronológicamente de
-    forma descendente. Estos productos no forman parte del catálogo público general ofrecido a
-    clientes finales.
+    Permite consultar el listado de todos los productos para clientes mayoristas. Soporta
+    paginación por desplazamiento (`offset`) y límite (`limit`), ordenando los resultados
+    cronológicamente de forma descendente. Estos productos no forman parte del catálogo
+    público general ofrecido a clientes finales.
 
     ### Requisitos de Acceso
     - **Rol requerido:** Administrador (`admin`).

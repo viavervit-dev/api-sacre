@@ -12,7 +12,7 @@ from src.api.modules.inventory.repositories.interfaces import (
 
 
 class UpdateProductWholesalerService:
-    """Servicio encargado de la actualización de productos de clientes mayoristas."""
+    """Servicio encargado de la actualización de productos para clientes mayoristas."""
 
     def __init__(
         self,

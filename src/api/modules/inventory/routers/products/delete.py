@@ -36,6 +36,7 @@ require_admin = UserPermissionChecker(
             access_jwt_invalid=True,
             access_jwt_expired=True,
             jwt_user_not_found=True,
+            auth_session_expired=True,
         ),
         status.HTTP_403_FORBIDDEN: response_scheme_403(),
         status.HTTP_404_NOT_FOUND: response_scheme_404(),

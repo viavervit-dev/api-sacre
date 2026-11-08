@@ -8,7 +8,7 @@ from src.api.modules.inventory.repositories.interfaces import IWholesalerProduct
 
 
 class GetProductsWholesalerService:
-    """Servicio encargado de la consulta y serialización de productos de un mayorista."""
+    """Servicio encargado de la consulta y serialización para productos de un mayorista."""
 
     def __init__(
         self,

@@ -5,7 +5,7 @@ from src.api.modules.inventory.repositories.interfaces import IWholesalerProduct
 
 
 class DeleteProductWholesalerService:
-    """Servicio encargado de la eliminación de productos de clientes mayoristas."""
+    """Servicio encargado de la eliminación de productos para clientes mayoristas."""
 
     def __init__(self, wholesaler_product_repo: IWholesalerProductRepository) -> None:
         self.__wholesaler_product_repo = wholesaler_product_repo

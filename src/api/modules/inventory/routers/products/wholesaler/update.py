@@ -58,7 +58,7 @@ async def update_product_wholesaler(
     service: Annotated[UpdateProductWholesalerService, Depends(update_product_wholesaler_service)],
 ) -> Response[ReadWholesalerProductDTO]:
     """
-    Permite modificar de forma parcial un producto de un cliente mayorista a partir de los datos
+    Permite modificar de forma parcial un producto para clientes mayoristas a partir de los datos
     proporcionados y su identificador (`product_id`). Aplica validaciones de reglas de negocio para
     garantizar unicidad en el nombre y existencia previa de las categorías asociadas. Este producto
     es exclusivo del canal mayorista y no forma parte del catálogo público general.
