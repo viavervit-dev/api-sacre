@@ -15,8 +15,8 @@ from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.orders.dependencies import get_purchase_order_service
 from src.api.modules.orders.dto import ReadOrderDTO
-from src.api.modules.orders.models.order import Order
-from src.api.modules.orders.services.purchase.get import GetPurchaseOrderService
+from src.api.modules.orders.models import Order
+from src.api.modules.orders.services.purchase import GetPurchaseOrderService
 
 get_purchase_order_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
 require_admin = UserPermissionChecker(

@@ -1,14 +1,16 @@
 from fastapi import APIRouter
 
-from src.api.modules.orders.routers.calculations.add_percentage import add_percentage_router
-from src.api.modules.orders.routers.calculations.get_tax_amount import get_tax_amount_router
-from src.api.modules.orders.routers.calculations.multiply import multiply_router
-from src.api.modules.orders.routers.calculations.sum import sum_router
-from src.api.modules.orders.routers.purchase.create_order_whosaler import (
-    create_purchase_order_wholesaler_router,
+from src.api.modules.orders.routers.calculations import (
+    add_percentage_router,
+    get_tax_amount_router,
+    multiply_router,
+    sum_router,
 )
-from src.api.modules.orders.routers.purchase.get import get_purchase_order_router
-from src.api.modules.orders.routers.purchase.get_list import get_list_purchase_orders_router
+from src.api.modules.orders.routers.purchase import (
+    create_purchase_order_wholesaler_router,
+    get_list_purchase_orders_router,
+    get_purchase_order_router,
+)
 
 router = APIRouter()
 router.include_router(router=create_purchase_order_wholesaler_router)
