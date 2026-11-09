@@ -4,19 +4,19 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.common.payment.dependencies import create_payment_link_service
-from src.api.common.payment.services.create_link import CreatePaymentLinkService
+from src.api.common.payment.services import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.dependencies import (
     WholesalerProductRepository,
     wholesaler_product_repository,
 )
-from src.api.modules.orders.repositories.order import OrderRepository
-from src.api.modules.orders.services.purchase.create_order_whosaler import (
+from src.api.modules.orders.repositories import OrderRepository
+from src.api.modules.orders.services.purchase import (
     CreatePurchaseOrderWholesalerService,
+    GetListPurchaseOrderService,
+    GetPurchaseOrderService,
 )
-from src.api.modules.orders.services.purchase.get import GetPurchaseOrderService
-from src.api.modules.orders.services.purchase.get_list import GetListPurchaseOrderService
 from src.api.settings.database import db_session
 
 

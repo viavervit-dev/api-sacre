@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi.exceptions import RequestValidationError
 
 from src.api.common.exceptions import ResourceNotFound
-from src.api.common.payment.services.create_link import CreatePaymentLinkService
+from src.api.common.payment.services import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository

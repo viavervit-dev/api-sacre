@@ -11,5 +11,5 @@ from src.api.modules.auth.models.permission import Group, Permission, Permission
 from src.api.modules.auth.models.user import User, UserGroup
 from src.api.modules.countries.models.country import Country
 from src.api.modules.inventory.models import Category, Product, WholesalerProduct
-from src.api.modules.orders.models.order import Order
+from src.api.modules.orders.models import Order
 from src.api.modules.users.models import Admin, Customer, Wholesaler

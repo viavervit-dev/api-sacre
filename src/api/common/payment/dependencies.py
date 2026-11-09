@@ -5,7 +5,7 @@ from fastapi import Depends
 
 from src.api.common.email.dependencies import email_service
 from src.api.common.email.service import EmailService
-from src.api.common.payment.services.create_link import CreatePaymentLinkService
+from src.api.common.payment.services import CreatePaymentLinkService
 from src.api.common.payment.template import PaymentTemplateRenderer
 from src.api.settings.http_client import http_client
 

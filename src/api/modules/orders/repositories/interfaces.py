@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from src.api.modules.orders.models.order import Order
+from src.api.modules.orders.models import Order
 
 
 class IOrderRepository(ABC):

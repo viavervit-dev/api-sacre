@@ -6,7 +6,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.modules.orders.models.order import Order, order_number_seq
+from src.api.modules.orders.models import Order, order_number_seq
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
 
