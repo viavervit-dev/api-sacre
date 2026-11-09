@@ -51,7 +51,6 @@ class CreateProductService(FinancialCalculationsMixin):
 
         # Inicializar el stock en mano, el stock de venta y exclusividad
         product_data["stock_sale"] = product_data["stock_total"]
-        product_data["exclusive"] = False
         product_data["stock_hand"] = 0
 
         product = await self.__product_repo.create_product(data=product_data)
