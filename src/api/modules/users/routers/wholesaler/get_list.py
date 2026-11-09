@@ -14,8 +14,8 @@ from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models.user import User
 from src.api.modules.users.dependencies import get_list_wholesaler_service
 from src.api.modules.users.dto import ReadWholesalerSummaryDTO
-from src.api.modules.users.models.wholesaler import Wholesaler
-from src.api.modules.users.services.wholesaler.get_list import GetListWholesalerService
+from src.api.modules.users.models import Wholesaler
+from src.api.modules.users.services.wholesaler import GetListWholesalerService
 from src.api.settings.parameters import api_parameters
 
 get_list_wholesaler_router = APIRouter(prefix="/users", tags=["Usuarios"])
