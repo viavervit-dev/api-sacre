@@ -2,13 +2,9 @@ from typing import TypedDict
 
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.models.user import User
-from src.api.modules.inventory.models.category import Category
-from src.api.modules.inventory.models.product import Product
-from src.api.modules.inventory.models.wholesaler_product import WholesalerProduct
+from src.api.modules.inventory.models import Category, Product, WholesalerProduct
 from src.api.modules.orders.models.order import Order
-from src.api.modules.users.models.admin import Admin
-from src.api.modules.users.models.customer import Customer
-from src.api.modules.users.models.wholesaler import Wholesaler
+from src.api.modules.users.models import Admin, Customer, Wholesaler
 
 
 class RoleGroupConfig(TypedDict):

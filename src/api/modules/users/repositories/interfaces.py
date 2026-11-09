@@ -2,9 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 from uuid import UUID
 
-from src.api.modules.users.models.admin import Admin
-from src.api.modules.users.models.customer import Customer
-from src.api.modules.users.models.wholesaler import Wholesaler
+from src.api.modules.users.models import Admin, Customer, Wholesaler
 
 
 class ICustomerRepository(ABC):

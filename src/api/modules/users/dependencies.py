@@ -4,13 +4,14 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.auth.dependencies import UserRepository, user_repository
-from src.api.modules.users.repositories.customer import CustomerRepository
-from src.api.modules.users.repositories.wholesaler import WholesalerRepository
-from src.api.modules.users.services.customers.create import CreateCustomerService
-from src.api.modules.users.services.wholesaler.create import CreateWholesalerService
-from src.api.modules.users.services.wholesaler.get import GetWholesalerService
-from src.api.modules.users.services.wholesaler.get_list import GetListWholesalerService
-from src.api.modules.users.services.wholesaler.update import UpdateWholesalerService
+from src.api.modules.users.repositories import CustomerRepository, WholesalerRepository
+from src.api.modules.users.services.customers import CreateCustomerService
+from src.api.modules.users.services.wholesaler import (
+    CreateWholesalerService,
+    GetListWholesalerService,
+    GetWholesalerService,
+    UpdateWholesalerService,
+)
 from src.api.settings.database import db_session
 
 
