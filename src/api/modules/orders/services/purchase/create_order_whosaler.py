@@ -20,6 +20,7 @@ from src.api.modules.orders.dto import (
     ReadProductDataDTO,
 )
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
+from src.api.modules.orders.services import OrderNotificationService
 
 
 class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
@@ -30,12 +31,14 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         wholesaler_product_repo: IWholesalerProductRepository,
         order_repo: IOrderRepository,
         payment_service: CreatePaymentLinkService,
+        notification_service: OrderNotificationService,
         user_repo: IUserRepository,
     ) -> None:
         self.__wholesaler_product_repo = wholesaler_product_repo
         self.__order_repo = order_repo
         self.__user_repo = user_repo
         self.__payment_service = payment_service
+        self.__notification_service = notification_service
         self.__products: list[WholesalerProduct] = []
 
     async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
@@ -61,10 +64,10 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
             raise ResourceNotFound()
 
         # Ejecutar validaciones de las reglas de negocio
-        order_data = data.model_dump()
         await self.__run_business_validations(data=data)
 
         # Capturar la instantánea (snapshot) de los datos del cliente
+        order_data = data.model_dump()
         order_data["customer_data"] = {
             "id": user.id,
             "name_or_company_name": user.wholesaler.name_or_company_name,
@@ -104,6 +107,12 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         # Guardar información en la base de datos
         order = await self.__order_repo.create_order(data=order_data)
+
+        # Despachar la notificación por correo al cliente
+        await self.__notification_service.send_order_payment_link(
+            order_data=order_data,
+            payment_link=payment_link,
+        )
 
         # Extraer estructuras anidadas para instanciar el DTO de respuesta
         order_data = order.to_dict()

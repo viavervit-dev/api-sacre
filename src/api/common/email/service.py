@@ -8,13 +8,12 @@ from email.utils import formataddr
 import certifi
 
 from src.api.common.email.constants import ExceptionErrorMessages as EmailException
-from src.api.common.email.interfaces import IEmailService
 from src.api.common.exceptions import EmailConfigurationError, EmailDeliveryError
 
 logger = logging.getLogger(__name__)
 
 
-class EmailService(IEmailService):
+class EmailService:
     """
     Servicio encargado del despacho de correos electrónicos a través del servidor SMTP
     utilizando TLS y Contraseñas de Aplicación.
@@ -71,7 +70,15 @@ class EmailService(IEmailService):
         # Configuración estricta de contexto TLS con autoridades de certificación verificadas
         ssl_context = ssl.create_default_context(cafile=certifi.where())
 
-        def _send() -> None:
+        def __send() -> None:
+            """
+            Establece la conexión con el servidor SMTP, autentica y envía el mensaje de correo.
+
+            Raises:
+                EmailConfigurationError: Si fallan las credenciales de autenticación SMTP.
+                EmailDeliveryError: Si ocurre un error de conexión, timeout o fallo de red.
+            """
+
             try:
                 if self.__use_ssl:
                     with smtplib.SMTP_SSL(
@@ -115,4 +122,4 @@ class EmailService(IEmailService):
                     message=EmailException.CONNECTION_ERROR.value,
                 ) from exc
 
-        await asyncio.to_thread(_send)
+        await asyncio.to_thread(__send)
