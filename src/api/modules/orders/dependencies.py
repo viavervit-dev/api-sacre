@@ -9,7 +9,9 @@ from src.api.common.payment.services import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.dependencies import (
+    ProductRepository,
     WholesalerProductRepository,
+    product_repository,
     wholesaler_product_repository,
 )
 from src.api.modules.orders.repositories import OrderRepository
@@ -75,6 +77,7 @@ def create_purchase_order_wholesaler_service(
     notification_service: Annotated[OrderNotificationService, Depends(notification_service)],
     order_repo: Annotated[OrderRepository, Depends(order_repository)],
     user_repo: Annotated[UserRepository, Depends(user_repository)],
+    product_repo: Annotated[ProductRepository, Depends(product_repository)],
     wholesaler_product_repo: Annotated[
         WholesalerProductRepository, Depends(wholesaler_product_repository)
     ],
@@ -88,6 +91,7 @@ def create_purchase_order_wholesaler_service(
         payment_service=payment_service,
         wholesaler_product_repo=wholesaler_product_repo,
         notification_service=notification_service,
+        product_repo=product_repo,
         order_repo=order_repo,
         user_repo=user_repo,
     )

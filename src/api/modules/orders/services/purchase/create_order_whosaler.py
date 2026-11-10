@@ -9,8 +9,11 @@ from src.api.common.payment.services import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.inventory.models import WholesalerProduct
-from src.api.modules.inventory.repositories.interfaces import IWholesalerProductRepository
+from src.api.modules.inventory.models import Product, WholesalerProduct
+from src.api.modules.inventory.repositories.interfaces import (
+    IProductRepository,
+    IWholesalerProductRepository,
+)
 from src.api.modules.orders.constants import OrderDescription, OrderEntity, OrderStatus
 from src.api.modules.orders.dto import (
     CreateOrderDTO,
@@ -29,17 +32,19 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
     def __init__(
         self,
         wholesaler_product_repo: IWholesalerProductRepository,
+        product_repo: IProductRepository,
         order_repo: IOrderRepository,
         payment_service: CreatePaymentLinkService,
         notification_service: OrderNotificationService,
         user_repo: IUserRepository,
     ) -> None:
         self.__wholesaler_product_repo = wholesaler_product_repo
+        self.__product_repo = product_repo
         self.__order_repo = order_repo
         self.__user_repo = user_repo
         self.__payment_service = payment_service
         self.__notification_service = notification_service
-        self.__products: list[WholesalerProduct] = []
+        self.__products: list[WholesalerProduct | Product] = []
 
     async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
         """
@@ -160,7 +165,10 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         # Validar existencia de cada producto y cálculo de impuestos y totales por ítem
         for i, product in enumerate(data.product_data):
-            instance = await self.__wholesaler_product_repo.get_product_by_id(id=product.id)
+            instance: WholesalerProduct | Product | None = (
+                await self.__wholesaler_product_repo.get_product_by_id(id=product.id)
+                or await self.__product_repo.get_product_by_id(id=product.id)
+            )
 
             if not instance:
                 raise RequestValidationError(
