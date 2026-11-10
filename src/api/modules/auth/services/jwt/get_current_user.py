@@ -1,5 +1,5 @@
 from src.api.modules.auth.dto import ReadUserDTO
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import User
 
 
 class GetAuthUserService:

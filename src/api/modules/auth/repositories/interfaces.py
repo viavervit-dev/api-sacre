@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import User
 
 
 class IUserRepository(ABC):

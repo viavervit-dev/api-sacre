@@ -9,7 +9,7 @@ from src.api.common.schema import (
 )
 from src.api.modules.auth.dependencies import jwt_auth_admin_service
 from src.api.modules.auth.dto import AdminCredentialsDTO
-from src.api.modules.auth.services.jwt.authenticate_admin import AuthAdminService
+from src.api.modules.auth.services.jwt import AuthAdminService
 from src.api.settings.parameters import api_parameters
 
 jwt_admin_router = APIRouter(prefix="/authentication", tags=["Autenticación"])

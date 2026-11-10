@@ -11,11 +11,11 @@ from src.api.common.schema import (
 )
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import User
 from src.api.modules.inventory.dependencies import create_category_service
 from src.api.modules.inventory.dto import CreateCategoryDTO, ReadCategoryPrivateDTO
-from src.api.modules.inventory.models.category import Category
-from src.api.modules.inventory.services.categories.create import CreateCategoryService
+from src.api.modules.inventory.models import Category
+from src.api.modules.inventory.services.categories import CreateCategoryService
 
 create_category_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(

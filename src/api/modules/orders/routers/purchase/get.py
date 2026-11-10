@@ -12,7 +12,7 @@ from src.api.common.schema import (
 )
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import User
 from src.api.modules.orders.dependencies import get_purchase_order_service
 from src.api.modules.orders.dto import ReadOrderDTO
 from src.api.modules.orders.models import Order

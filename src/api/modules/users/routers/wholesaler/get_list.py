@@ -11,7 +11,7 @@ from src.api.common.schema import (
 )
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import User
 from src.api.modules.users.dependencies import get_list_wholesaler_service
 from src.api.modules.users.dto import ReadWholesalerSummaryDTO
 from src.api.modules.users.models import Wholesaler

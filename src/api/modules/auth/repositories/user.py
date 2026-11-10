@@ -7,8 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from src.api.modules.auth.constants import UserRoles
-from src.api.modules.auth.models.permission import Group
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import Group, User
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 
 

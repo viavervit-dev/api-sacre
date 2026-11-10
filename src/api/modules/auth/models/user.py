@@ -6,10 +6,8 @@ from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, St
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.api.modules.auth.constants import UserEntity
-from src.api.modules.auth.models.permission import Group
-from src.api.modules.users.models.admin import Admin
-from src.api.modules.users.models.customer import Customer
-from src.api.modules.users.models.wholesaler import Wholesaler
+from src.api.modules.auth.models import Group
+from src.api.modules.users.models import Admin, Customer, Wholesaler
 from src.api.settings.database import ModelBase
 
 # Constantes para validaciones de campos numéricos
