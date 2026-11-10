@@ -13,7 +13,7 @@ from src.api.common.schema import (
 )
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import User
 from src.api.modules.inventory.dependencies import add_product_wholesaler_service
 from src.api.modules.inventory.dto import CreateWholesalerProductDTO, ReadWholesalerProductDTO
 from src.api.modules.inventory.models import WholesalerProduct

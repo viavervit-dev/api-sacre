@@ -13,13 +13,15 @@ from src.api.common.exceptions import (
     UserNotFound,
 )
 from src.api.modules.auth.constants import ExceptionErrorMessages
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import User
+from src.api.modules.auth.repositories import UserRepository
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.auth.repositories.user import UserRepository
-from src.api.modules.auth.services.jwt.authenticate_admin import AuthAdminService
-from src.api.modules.auth.services.jwt.get_current_user import GetAuthUserService
-from src.api.modules.auth.services.jwt.logout import LogoutService
-from src.api.modules.auth.services.jwt.refresh import RefreshTokenService
+from src.api.modules.auth.services.jwt import (
+    AuthAdminService,
+    GetAuthUserService,
+    LogoutService,
+    RefreshTokenService,
+)
 from src.api.settings.database import db_session
 from src.api.settings.parameters import api_parameters
 

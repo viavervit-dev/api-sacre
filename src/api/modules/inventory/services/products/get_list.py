@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
 from src.api.modules.auth.constants import UserRoles
-from src.api.modules.auth.models.user import User
+from src.api.modules.auth.models import User
 from src.api.modules.inventory.dto import ReadProductSummaryDTO
 from src.api.modules.inventory.repositories.interfaces import IProductRepository
 

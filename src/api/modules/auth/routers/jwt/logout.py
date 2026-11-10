@@ -7,7 +7,7 @@ from src.api.common.schema import (
     response_scheme_503,
 )
 from src.api.modules.auth.dependencies import jwt_logout_service, tokens
-from src.api.modules.auth.services.jwt.logout import LogoutService
+from src.api.modules.auth.services.jwt import LogoutService
 from src.api.settings.parameters import api_parameters
 
 jwt_logout_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
