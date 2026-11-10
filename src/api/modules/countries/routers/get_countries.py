@@ -6,7 +6,7 @@ from src.api.common.response import Response
 from src.api.common.schema import response_scheme_503
 from src.api.modules.countries.dependencies import get_contries_service
 from src.api.modules.countries.dto import ReadCountryDTO
-from src.api.modules.countries.services.get_countries import RetrieveContriesService
+from src.api.modules.countries.services import RetrieveContriesService
 
 countries_router = APIRouter(prefix="/countries", tags=["Países"])
 

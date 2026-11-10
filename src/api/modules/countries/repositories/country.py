@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import load_only
 
-from src.api.modules.countries.models.country import Country
+from src.api.modules.countries.models import Country
 from src.api.modules.countries.repositories.interfaces import ICountryRepository
 
 

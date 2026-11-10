@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
-from src.api.modules.countries.models.country import Country
+from src.api.modules.countries.models import Country
 
 
 class ICountryRepository(ABC):
