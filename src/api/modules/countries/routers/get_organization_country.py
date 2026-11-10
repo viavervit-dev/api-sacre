@@ -6,9 +6,7 @@ from src.api.common.response import Response
 from src.api.common.schema import response_scheme_404, response_scheme_503
 from src.api.modules.countries.dependencies import get_organization_country_service
 from src.api.modules.countries.dto import ReadAdministrativeStructureDTO
-from src.api.modules.countries.services.get_organization_country import (
-    RetrieveOrganizationCountryService,
-)
+from src.api.modules.countries.services import RetrieveOrganizationCountryService
 
 organization_country_router = APIRouter(prefix="/countries", tags=["Países"])
 

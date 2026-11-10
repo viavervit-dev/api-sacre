@@ -3,9 +3,9 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.modules.countries.repositories.country import CountryRepository
-from src.api.modules.countries.services.get_countries import RetrieveContriesService
-from src.api.modules.countries.services.get_organization_country import (
+from src.api.modules.countries.repositories import CountryRepository
+from src.api.modules.countries.services import (
+    RetrieveContriesService,
     RetrieveOrganizationCountryService,
 )
 from src.api.settings.database import db_session
