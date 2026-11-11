@@ -4,8 +4,11 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api.common.exceptions import DomainRuleViolation
+from src.api.modules.orders.constants import OrderEntity, OrderStatus
 from src.api.modules.orders.models import Order, order_number_seq
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
@@ -59,9 +62,41 @@ class OrderRepository(IOrderRepository):
 
         instance = Order(**data)
         self.__db.add(instance)
-        await self.__db.flush()
+
+        try:
+            await self.__db.flush()
+            await self.__db.commit()
+        except IntegrityError as exc:
+            await self.__db.rollback()
+            idempotency_key = data["idempotency_key"]
+
+            if await self.exists_order(filters={"idempotency_key": idempotency_key}):
+                raise DomainRuleViolation(
+                    message=OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
+                ) from exc
+
+            raise
 
         return instance
+
+    async def update_payment_data(self, order: Order, payment_data: dict[str, Any]) -> Order:
+
+        # Se asigna un nuevo dict para que SQLAlchemy detecte el cambio en JSONB
+        order.payment_data = dict(payment_data)
+        await self.__db.commit()
+
+        return order
+
+    async def cancel_order(self, order: Order, cancelled_at: str) -> Order:
+
+        order.status = OrderStatus.CANCELLED.value
+        order.status_history = {
+            **order.status_history,
+            OrderStatus.CANCELLED.value: cancelled_at,
+        }
+        await self.__db.commit()
+
+        return order
 
     async def exists_order(self, filters: dict[str, Any]) -> bool:
 

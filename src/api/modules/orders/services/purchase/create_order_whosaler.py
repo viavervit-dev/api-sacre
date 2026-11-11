@@ -1,10 +1,11 @@
+import logging
 from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
 
-from src.api.common.exceptions import ResourceNotFound
+from src.api.common.exceptions import DomainRuleViolation, ResourceNotFound
 from src.api.common.payment.services import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
@@ -23,6 +24,8 @@ from src.api.modules.orders.dto import (
     ReadProductDataDTO,
 )
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
+
+logger = logging.getLogger(__name__)
 
 
 class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
@@ -67,8 +70,19 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         # Ejecutar validaciones de las reglas de negocio
         await self.__run_business_validations(data=data)
 
-        # Capturar la instantánea (snapshot) de los datos del cliente
+        # Establecer el estado inicial de algunos campos (sin link todavía)
         order_data = data.model_dump()
+        order_data["order_number"] = await self.__order_repo.get_next_order_number()
+        order_data["status"] = OrderStatus.PENDING_PAYMENT.value
+        order_data["status_history"] = {
+            OrderStatus.PENDING_PAYMENT.value: datetime.now(tz=UTC).isoformat(),
+        }
+        order_data["payment_data"] = {
+            "description": OrderDescription.PURCHASE_ORDER.value,
+            "link": None,
+        }
+
+        # Capturar la instantánea (snapshot) de los datos del cliente
         order_data["customer_data"] = {
             "id": user.id,
             "name_or_company_name": user.wholesaler.name_or_company_name,
@@ -92,22 +106,39 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
                     )
                     break
 
-        # Establecer el estado inicial de algunos campos
-        order_data["order_number"] = await self.__order_repo.get_next_order_number()
-        order_data["status"] = OrderStatus.PENDING_PAYMENT.value
-        order_data["status_history"] = {
-            OrderStatus.PENDING_PAYMENT.value: datetime.now(tz=UTC).isoformat(),
-        }
+        # Reservamos la orden en la base de datos
+        try:
+            order = await self.__order_repo.create_order(data=order_data)
+        except DomainRuleViolation as exc:
+            raise self.__idempotency_validation_error() from exc
 
-        # Creamos y enviamos el link de pago al cliente mayorista
-        payment_link = await self.__payment_service.create_payment_link(order_data=order_data)
-        order_data["payment_data"] = {
-            "description": OrderDescription.PURCHASE_ORDER.value,
-            "link": payment_link,
-        }
+        # Llamada externa al servicio de pagos
+        try:
+            payment_link = await self.__payment_service.create_payment_link(order_data=order_data)
+        except Exception:
+            try:
+                await self.__order_repo.cancel_order(
+                    cancelled_at=datetime.now(tz=UTC).isoformat(),
+                    order=order,
+                )
+            except Exception as cleanup_exc:
+                logger.error(
+                    "No se pudo cancelar la orden %s tras fallo en pasarela: %s",
+                    order.order_number,
+                    cleanup_exc,
+                    exc_info=True,
+                )
 
-        # Guardar información en la base de datos
-        order = await self.__order_repo.create_order(data=order_data)
+            raise
+
+        # Guardamos el enlace de pago generado
+        order = await self.__order_repo.update_payment_data(
+            order=order,
+            payment_data={
+                "description": OrderDescription.PURCHASE_ORDER.value,
+                "link": payment_link,
+            },
+        )
 
         # Extraer estructuras anidadas para instanciar el DTO de respuesta
         order_data = order.to_dict()
@@ -136,15 +167,7 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         )
 
         if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "idempotency_key"),
-                        "msg": OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
+            raise self.__idempotency_validation_error()
 
         # Inicializar acumuladores para verificar la consistencia financiera de los ítems
         calc_subtotal = Decimal("0.00")
@@ -237,3 +260,17 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         if errors:
             raise RequestValidationError(errors=errors)
+
+    @staticmethod
+    def __idempotency_validation_error() -> RequestValidationError:
+        """Construye el error de validación para claves de idempotencia duplicadas."""
+
+        return RequestValidationError(
+            errors=[
+                {
+                    "loc": ("body", "idempotency_key"),
+                    "msg": OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
+                    "type": "domain_validation",
+                }
+            ]
+        )

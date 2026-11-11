@@ -3,7 +3,7 @@ from typing import Any
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 from src.api.common.exceptions import (
     AuthenticationFailed,
@@ -301,6 +301,29 @@ def register_exception_handlers(app: FastAPI) -> None:
                 pagination=False,
                 message=exc.message,
                 data=exc.data,
+            ).model_dump(),
+        )
+
+    @app.exception_handler(IntegrityError)
+    async def db_integrity_error(  # pyright: ignore[reportUnusedFunction]
+        request: Request,
+        exc: IntegrityError,
+    ) -> JSONResponse:
+        """Manejador global para conflictos de integridad o unicidad en base de datos."""
+
+        logger.warning(
+            "Conflicto de integridad en %s %s: %s",
+            request.method,
+            request.url.path,
+            exc,
+        )
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content=Response(
+                success=False,
+                pagination=False,
+                message="La operación entró en conflicto con un registro existente.",
+                data=None,
             ).model_dump(),
         )
 

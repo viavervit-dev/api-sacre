@@ -33,6 +33,22 @@ class IOrderRepository(ABC):
         pass
 
     @abstractmethod
+    async def update_payment_data(
+        self,
+        order: Order,
+        payment_data: dict[str, Any],
+    ) -> Order:
+        """Actualiza los datos de pago de una orden y confirma la transacción."""
+
+        pass
+
+    @abstractmethod
+    async def cancel_order(self, order: Order, cancelled_at: str) -> Order:
+        """Marca una orden como cancelada y confirma la transacción."""
+
+        pass
+
+    @abstractmethod
     async def exists_order(self, filters: dict[str, Any]) -> bool:
         """Verifica si existe una órden/transacción que coincida con los filtros especificados."""
 
