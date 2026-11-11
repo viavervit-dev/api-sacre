@@ -1,8 +1,9 @@
 import asyncio
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Annotated, Any
 
 import pydantic_core
+from fastapi import Depends
 from sqlalchemy import MetaData, inspect, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -148,3 +149,6 @@ async def db_session() -> AsyncGenerator[AsyncSession]:
         except Exception:
             await session.rollback()
             raise
+
+
+DBSession = Annotated[AsyncSession, Depends(db_session, scope="function")]

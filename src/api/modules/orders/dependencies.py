@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.common.email.dependencies import EmailService, email_service
 from src.api.common.payment.dependencies import create_payment_link_service
@@ -21,10 +20,10 @@ from src.api.modules.orders.services.purchase import (
     GetListPurchaseOrderService,
     GetPurchaseOrderService,
 )
-from src.api.settings.database import db_session
+from src.api.settings.database import DBSession
 
 
-def order_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> OrderRepository:
+def order_repository(db: DBSession) -> OrderRepository:
     """Provee una instancia del repositorio de ordenes de compra."""
 
     return OrderRepository(db=db)

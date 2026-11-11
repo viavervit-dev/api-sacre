@@ -3,7 +3,6 @@ from uuid import UUID
 
 import jwt
 from fastapi import Depends, Request
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.common.exceptions import (
     AuthenticationFailed,
@@ -22,7 +21,7 @@ from src.api.modules.auth.services.jwt import (
     LogoutService,
     RefreshTokenService,
 )
-from src.api.settings.database import db_session
+from src.api.settings.database import DBSession
 from src.api.settings.parameters import api_parameters
 
 
@@ -59,7 +58,7 @@ optional_tokens = JWTAuthentication(auto_error=False)
 tokens = JWTAuthentication(auto_error=True)
 
 
-def user_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> IUserRepository:
+def user_repository(db: DBSession) -> IUserRepository:
     """Provee una instancia del repositorio de usuarios."""
 
     return UserRepository(db=db)

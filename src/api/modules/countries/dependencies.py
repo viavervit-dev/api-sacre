@@ -1,17 +1,16 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.countries.repositories import CountryRepository
 from src.api.modules.countries.services import (
     RetrieveContriesService,
     RetrieveOrganizationCountryService,
 )
-from src.api.settings.database import db_session
+from src.api.settings.database import DBSession
 
 
-def country_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> CountryRepository:
+def country_repository(db: DBSession) -> CountryRepository:
     """Provee una instancia del repositorio de países."""
 
     return CountryRepository(db=db)
