@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.users.repositories import CustomerRepository, WholesalerRepository
@@ -12,18 +11,16 @@ from src.api.modules.users.services.wholesaler import (
     GetWholesalerService,
     UpdateWholesalerService,
 )
-from src.api.settings.database import db_session
+from src.api.settings.database import DBSession
 
 
-def customer_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> CustomerRepository:
+def customer_repository(db: DBSession) -> CustomerRepository:
     """Provee una instancia del repositorio de clientes."""
 
     return CustomerRepository(db=db)
 
 
-def wholesaler_repository(
-    db: Annotated[AsyncSession, Depends(db_session)],
-) -> WholesalerRepository:
+def wholesaler_repository(db: DBSession) -> WholesalerRepository:
     """Provee una instancia del repositorio de clientes mayoristas."""
 
     return WholesalerRepository(db=db)

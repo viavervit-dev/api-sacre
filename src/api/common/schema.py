@@ -2,7 +2,6 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from src.api.common.email.constants import ExceptionErrorMessages as EmailException
 from src.api.common.exceptions import ExceptionErrorMessages as CommonException
 from src.api.common.payment.constants import ExceptionErrorMessages as PaymentException
 from src.api.modules.auth.constants import ExceptionErrorMessages as AuthExceptionError
@@ -352,7 +351,6 @@ def response_scheme_502(
     payment_gateway_unavailable: bool = False,
     payment_gateway_rejected: bool = False,
     payment_gateway_invalid_response: bool = False,
-    payment_email_delivery_error: bool = False,
 ) -> dict[str, Any]:
     """
     Genera el esquema OpenAPI de error 502 (Bad Gateway) para fallos devueltos por servicios
@@ -417,16 +415,6 @@ def response_scheme_502(
                 "data": {},
             },
         }
-    if payment_email_delivery_error:
-        scheme["content"]["application/json"]["examples"]["payment_email_delivery_error"] = {
-            "summary": "Fallo con el correo electrónico del cliente de la transacción",
-            "value": {
-                "success": False,
-                "pagination": False,
-                "message": PaymentException.DELIVERY_ERROR.value,
-                "data": {},
-            },
-        }
 
     return scheme
 
@@ -475,57 +463,6 @@ def response_scheme_504(
                 "success": False,
                 "pagination": False,
                 "message": PaymentException.GATEWAY_CONNECTION_ERROR.value,
-                "data": {},
-            },
-        }
-
-    return scheme
-
-
-def response_scheme_500(
-    smtp_credentials_not_configured: bool = False,
-    smtp_authentication_error: bool = False,
-) -> dict[str, Any]:
-    """
-    Genera el esquema OpenAPI de error 500 (Internal Server Error) para fallos de
-    configuraciones internas del servidor.
-    """
-
-    scheme: dict[str, Any] = {
-        "description": "**(INTERNAL_SERVER_ERROR)** Error en la configuración del servidor.",
-        "content": {
-            "application/json": {
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "success": {"type": "boolean"},
-                        "pagination": {"type": "boolean"},
-                        "message": {"type": "string"},
-                        "data": {"type": "object"},
-                    },
-                },
-                "examples": {},
-            }
-        },
-    }
-
-    if smtp_credentials_not_configured:
-        scheme["content"]["application/json"]["examples"]["smtp_credentials_not_configured"] = {
-            "summary": "Credenciales de correo no configuradas",
-            "value": {
-                "success": False,
-                "pagination": False,
-                "message": EmailException.CREDENTIALS_NOT_CONFIGURED.value,
-                "data": {},
-            },
-        }
-    if smtp_authentication_error:
-        scheme["content"]["application/json"]["examples"]["smtp_authentication_error"] = {
-            "summary": "Error de autenticación con el servidor de correo",
-            "value": {
-                "success": False,
-                "pagination": False,
-                "message": EmailException.AUTHENTICATION_ERROR.value,
                 "data": {},
             },
         }

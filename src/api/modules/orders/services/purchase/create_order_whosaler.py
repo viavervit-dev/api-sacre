@@ -23,7 +23,6 @@ from src.api.modules.orders.dto import (
     ReadProductDataDTO,
 )
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
-from src.api.modules.orders.services import OrderNotificationService
 
 
 class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
@@ -35,7 +34,6 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         product_repo: IProductRepository,
         order_repo: IOrderRepository,
         payment_service: CreatePaymentLinkService,
-        notification_service: OrderNotificationService,
         user_repo: IUserRepository,
     ) -> None:
         self.__wholesaler_product_repo = wholesaler_product_repo
@@ -43,7 +41,6 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         self.__order_repo = order_repo
         self.__user_repo = user_repo
         self.__payment_service = payment_service
-        self.__notification_service = notification_service
         self.__products: list[WholesalerProduct | Product] = []
 
     async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
@@ -56,7 +53,6 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
             PaymentGatewayCommunicationError: Si ocurre un timeout o error de red con el
                 servicio de pagos.
             PaymentGatewayError: Si el servicio de pagos rechaza la petición o responde con error.
-            EmailDeliveryError: Si ocurre un error al despachar el correo de confirmación.
         """
 
         # Validar que el cliente mayorista exista
@@ -112,12 +108,6 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         # Guardar información en la base de datos
         order = await self.__order_repo.create_order(data=order_data)
-
-        # Despachar la notificación por correo al cliente
-        await self.__notification_service.send_order_payment_link(
-            order_data=order_data,
-            payment_link=payment_link,
-        )
 
         # Extraer estructuras anidadas para instanciar el DTO de respuesta
         order_data = order.to_dict()

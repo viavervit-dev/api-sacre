@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Path, status
 
 from src.api.common.response import Response
 from src.api.common.schema import (
@@ -9,7 +9,6 @@ from src.api.common.schema import (
     response_scheme_401,
     response_scheme_403,
     response_scheme_404,
-    response_scheme_500,
     response_scheme_502,
     response_scheme_503,
     response_scheme_504,
@@ -17,9 +16,13 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.orders.dependencies import create_purchase_order_wholesaler_service
+from src.api.modules.orders.dependencies import (
+    create_purchase_order_wholesaler_service,
+    notification_service,
+)
 from src.api.modules.orders.dto import CreateOrderDTO, ReadOrderDTO
 from src.api.modules.orders.models import Order
+from src.api.modules.orders.services import OrderNotificationService
 from src.api.modules.orders.services.purchase import CreatePurchaseOrderWholesalerService
 
 create_purchase_order_wholesaler_router = APIRouter(
@@ -48,16 +51,11 @@ require_admin = UserPermissionChecker(
         ),
         status.HTTP_403_FORBIDDEN: response_scheme_403(),
         status.HTTP_404_NOT_FOUND: response_scheme_404(),
-        status.HTTP_500_INTERNAL_SERVER_ERROR: response_scheme_500(
-            smtp_credentials_not_configured=True,
-            smtp_authentication_error=True,
-        ),
         status.HTTP_502_BAD_GATEWAY: response_scheme_502(
             payment_gateway_config_error=True,
             payment_gateway_unavailable=True,
             payment_gateway_rejected=True,
             payment_gateway_invalid_response=True,
-            payment_email_delivery_error=True,
         ),
         status.HTTP_504_GATEWAY_TIMEOUT: response_scheme_504(
             payment_gateway_connection_error=True,
@@ -79,6 +77,8 @@ async def create_purchase_order_wholesaler(
     service: Annotated[
         CreatePurchaseOrderWholesalerService, Depends(create_purchase_order_wholesaler_service)
     ],
+    notifier: Annotated[OrderNotificationService, Depends(notification_service)],
+    background_tasks: BackgroundTasks,
 ) -> Response[ReadOrderDTO]:
     """
     Permite crear una orden de compra vinculada a un cliente mayorista a partir de los datos
@@ -122,6 +122,13 @@ async def create_purchase_order_wholesaler(
     """
 
     order = await service.create(data=data, wholesaler_id=wholesaler_id)
+
+    if order.payment_data.link:
+        background_tasks.add_task(
+            notifier.send_order_payment_link,
+            order_data=order.model_dump(warnings=False),
+            payment_link=order.payment_data.link,
+        )
 
     return Response(
         success=True,

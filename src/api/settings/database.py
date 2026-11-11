@@ -131,10 +131,7 @@ async def db_session() -> AsyncGenerator[AsyncSession]:
     ### Ejemplo de uso:
     ```python
     @app.get("/users/{user_id}")
-    async def get_user(
-        user_id: int,
-        session: Annotated[AsyncSession, Depends(get_db_session)], # Aquí se inyecta la sesión
-    ):
+    async def get_user(user_id: int, db: DBSession):
         ...
     ```
     """
