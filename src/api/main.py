@@ -20,7 +20,8 @@ from src.api.settings.exception_handlers import (
     build_unhandled_exception_response,
     register_exception_handlers,
 )
-from src.api.settings.http_client import close_http_client, create_http_client
+from src.api.settings.http import close_http_client, create_http_client
+from src.api.settings.middlewares import MaxBodySizeMiddleware
 from src.api.settings.openapi import API_DESCRIPTION, OPENAPI_TAGS, SWAGGER_UI_PARAMETERS
 from src.api.settings.parameters import api_parameters
 from src.api.settings.serialization import JSONResponse
@@ -109,6 +110,13 @@ async def unhandled_exceptions_middleware(request: Request, call_next: Any) -> F
         return await call_next(request)
     except Exception as exc:
         return build_unhandled_exception_response(request=request, exc=exc)
+
+
+# Límite global de tamaño del cuerpo de peticiones HTTP
+app.add_middleware(
+    middleware_class=MaxBodySizeMiddleware,
+    max_body_size=api_parameters.max_request_body_size,
+)
 
 
 # Configuración de CORS

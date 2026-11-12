@@ -43,6 +43,7 @@ class ApiParameters(BaseSettings):
     # Aplicación
     app_name: str = "API Sacre"
     app_version: str = Field(default_factory=get_app_version)
+    max_request_body_size: int = Field(default=2 * 1024 * 1024, gt=0)
     pagination_limit: int = 50
     debug: bool
     enable_docs: bool
@@ -63,8 +64,8 @@ class ApiParameters(BaseSettings):
     # Seguridad
     private_key: str
     public_key: str
-    access_token_expire: int
-    refresh_token_expire: int
+    access_token_expire: int = Field(default=30, gt=15)
+    refresh_token_expire: int = Field(default=5760)
 
     # Gestor de pagos
     api_payment_links: str
