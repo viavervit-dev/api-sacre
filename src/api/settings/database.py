@@ -65,11 +65,17 @@ async def create_db_pool() -> None:
 
     # Argumentos específicos para el driver asyncpg
     connect_args = {
+        # Timeout en segundos para establecer la conexión inicial física con Postgres
+        "timeout": api_parameters.db_connection_timeout,
         # Timeout para cualquier comando SQL individual
         "command_timeout": api_parameters.db_command_timeout,
         "server_settings": {
             # Timeout a nivel de Postgres para matar queries colgadas tras 10 segundos
             "statement_timeout": api_parameters.db_statement_timeout,
+            # Cierra sesiones que queden inactivas dentro de una transacción abierta
+            "idle_in_transaction_session_timeout": api_parameters.db_transaction_session_timeout,
+            # Timeout para evitar esperas indefinidas al intentar adquirir bloqueos
+            "lock_timeout": api_parameters.db_lock_timeout,
             # Desactiva JIT para reducir latencia en transacciones cortas OLTP
             "jit": api_parameters.db_jit,
         },

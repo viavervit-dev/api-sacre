@@ -57,8 +57,11 @@ class ApiParameters(BaseSettings):
     db_pool_timeout: int
     db_pool_recycle: int
     db_echo: bool
+    db_connection_timeout: int
     db_command_timeout: int
     db_jit: str
+    db_lock_timeout: str
+    db_transaction_session_timeout: str
     db_statement_timeout: str
 
     # Seguridad

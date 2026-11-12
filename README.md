@@ -168,12 +168,15 @@ ADMIN_LAST_NAMES=<value>
 # === Base de Datos ===
 ALEMBIC_DATABASE_URL="postgresql+psycopg2://api_user:api_password@localhost:5432/fastapi_db"
 DATABASE_URL="postgresql+asyncpg://api_user:api_password@localhost:5432/fastapi_db"
+DB_TRANSACTION_SESSION_TIMEOUT=15000
 DB_STATEMENT_TIMEOUT=10000
 DB_POOL_MAX_OVERFLOW=5
 DB_COMMAND_TIMEOUT=15
+DB_CONNECTION_TIMEOUT=5
+DB_LOCK_TIMEOUT=5000
 DB_POOL_RECYCLE=1800
 DB_POOL_TIMEOUT=5
-DB_POOL_SIZE=10
+DB_POOL_SIZE=5
 DB_ECHO=false
 DB_JIT=off
 
