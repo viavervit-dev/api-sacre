@@ -87,4 +87,4 @@ CMD alembic upgrade head && \
     python -m src.scripts.configure_roles && \
     python -m src.scripts.load_countries && \
     python -m src.scripts.create_admin && \
-    exec gunicorn -c src/api/gunicorn.conf.py src.api.main:app
+    exec gunicorn -c src/api/gunicorn.py src.api.main:app

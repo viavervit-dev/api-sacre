@@ -77,7 +77,7 @@ En una arquitectura hexagonal estricta o purista, el núcleo de dominio debe ser
         │       ├── services/           # Casos de uso y lógica de negocio
         │       └── templates/          # (Opcional) Plantillas HTML/Jinja2 específicas del módulo
         │
-        ├── gunicorn.conf.py            # Configuración de Gunicorn con UvicornWorker
+        ├── gunicorn.py            # Configuración de Gunicorn con UvicornWorker
         └── main.py                     # Punto de entrada de la API (Instancia FastAPI, lifespan y rutas)
 ```
 
