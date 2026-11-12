@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, tuple_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -152,13 +152,19 @@ class UserRepository(IUserRepository):
 
         return bool(result)
 
-    async def increment_session_versions(self, user_ids: Sequence[UUID]) -> None:
+    async def increment_session_versions(self, sessions: Sequence[tuple[UUID, int]]) -> list[UUID]:
+
+        if not sessions:
+            return []
 
         stmt = (
             update(User)
-            .where(User.id.in_(user_ids))
+            .where(tuple_(User.id, User.session_version).in_(sessions))
             .values(session_version=User.session_version + 1)
+            .returning(User.id)
         )
-
-        await self.__db.execute(stmt)
+        result = await self.__db.scalars(stmt)
+        updated_ids = list(result.all())
         await self.__db.commit()
+
+        return updated_ids

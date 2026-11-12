@@ -49,7 +49,10 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def increment_session_versions(self, user_ids: Sequence[UUID]) -> None:
-        """Incrementa en uno la versión de sesión de múltiples usuarios para revocar tokens."""
+    async def increment_session_versions(self, sessions: Sequence[tuple[UUID, int]]) -> list[UUID]:
+        """
+        Incrementa en uno la versión de sesión solo para los pares `(user_id, session_version)`
+        activos y devuelve los IDs actualizados.
+        """
 
         pass

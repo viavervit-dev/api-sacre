@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
 
-from src.api.common.exceptions import InvalidJWT, MissingJWT
+from src.api.common.exceptions import AuthenticationFailed, InvalidJWT, MissingJWT
 from src.api.common.response import Response as APIResponse
 from src.api.common.schema import (
     response_scheme_401,
@@ -26,6 +26,7 @@ jwt_logout_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
             refresh_jwt_missing=True,
             refresh_jwt_invalid=True,
             refresh_jwt_expired=True,
+            auth_session_expired=True,
         ),
         status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
@@ -55,6 +56,8 @@ async def logout(
         - Si está presente `access_token`, valida su firma y tipo (`access`) ignorando su
             expiración para comprobar coherencia de sesión (si es inválido, se descarta sin
             bloquear el cierre de sesión).
+        - Verifica que `session_version` del token de actualización siga activa
+            (401 si ya fue revocada).
     3. **Verificación de Coherencia de Sesión:**
         - Si `access_token` es criptográficamente válido pero su `sub` difiere del de
             `refresh_token` (sesión corrupta o mezcla de tokens), incrementa las versiones de
@@ -75,7 +78,7 @@ async def logout(
             raise MissingJWT(message=ExceptionErrorMessages.REFRESH_JWT_MISSING.value)
 
         await service.logout(access_token=access_token, refresh_token=refresh_token)
-    except (MissingJWT, InvalidJWT) as exc:
+    except (MissingJWT, InvalidJWT, AuthenticationFailed) as exc:
         error_response = JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content=APIResponse(
