@@ -7,11 +7,11 @@ from src.api.common.response import Response
 from src.api.settings.serialization import JSONResponse
 
 
-class __BodyTooLargeError(Exception):
+class _BodyTooLargeError(Exception):
     """Excepción interna para abortar la lectura cuando un stream excede el límite."""
 
 
-def __build_error_response(status_code: int, message: str) -> JSONResponse:
+def _build_error_response(status_code: int, message: str) -> JSONResponse:
     """Construye una respuesta JSON estándar para errores de tamaño de petición."""
 
     return JSONResponse(
@@ -52,7 +52,7 @@ class MaxBodySizeMiddleware:
                     content_length = -1
 
                 if content_length < 0:
-                    resp = __build_error_response(
+                    resp = _build_error_response(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         message="Cabecera Content-Length inválida.",
                     )
@@ -60,7 +60,7 @@ class MaxBodySizeMiddleware:
                     return
 
                 if content_length > self.max_body_size:
-                    resp = __build_error_response(
+                    resp = _build_error_response(
                         status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                         message="El cuerpo de la petición excede el tamaño máximo permitido.",
                     )
@@ -88,7 +88,7 @@ class MaxBodySizeMiddleware:
                 if received_bytes > self.max_body_size:
                     exceeded = True
 
-                    raise __BodyTooLargeError()
+                    raise _BodyTooLargeError()
 
             return message
 
@@ -107,11 +107,11 @@ class MaxBodySizeMiddleware:
 
             await send(message)
 
-        with suppress(__BodyTooLargeError):
+        with suppress(_BodyTooLargeError):
             await self.app(scope, limited_receive, tracking_send)
 
         if exceeded and not response_started:
-            resp = __build_error_response(
+            resp = _build_error_response(
                 status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                 message="El cuerpo de la petición excede el tamaño máximo permitido.",
             )
