@@ -6,6 +6,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import defer
 
 from src.api.common.exceptions import DomainRuleViolation
 from src.api.modules.orders.constants import OrderEntity, OrderStatus
@@ -38,16 +39,13 @@ class OrderRepository(IOrderRepository):
         # Condición de filtro por tipo de orden en el JSONB
         order_type_filter = Order.payment_data["description"].astext == order_type
 
-        # Total para metadatos de paginación
-        count_stmt = select(func.count(Order.id)).where(order_type_filter)
-        total_items = await self.__db.scalar(count_stmt) or 0
-
-        if total_items == 0:
-            return [], 0
-
-        # Paginación y ordenamiento
+        # Paginación y ordenamiento (diferir columnas JSONB pesadas innecesarias en el listado)
         stmt = (
             select(Order)
+            .options(
+                defer(Order.product_data),
+                defer(Order.status_history),
+            )
             .where(order_type_filter)
             .order_by(Order.date_joined.desc())
             .offset(offset)
@@ -55,6 +53,14 @@ class OrderRepository(IOrderRepository):
         )
         result = await self.__db.scalars(stmt)
         items = result.all()
+
+        # Si en la primera página el resultado es menor al límite, evitamos la consulta COUNT
+        if offset == 0 and len(items) < limit:
+            return items, len(items)
+
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Order.id)).where(order_type_filter)
+        total_items = await self.__db.scalar(count_stmt) or 0
 
         return items, total_items
 
