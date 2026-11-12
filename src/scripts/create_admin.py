@@ -52,7 +52,7 @@ async def run(
         session_version=1,
         email=email,
     )
-    user_account.set_password(password=password)
+    await user_account.set_password(password=password)
     db.add(user_account)
 
     await db.flush()

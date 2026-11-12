@@ -30,7 +30,7 @@ class AuthAdminService:
             raise AuthenticationFailed(message=ExceptionErrorMessages.CREDENTIALS_INVALID.value)
         if not instance.has_permission(permission_name="authentication.jwt"):
             raise AuthenticationFailed(message=ExceptionErrorMessages.CREDENTIALS_INVALID.value)
-        if not instance.verify_password(password=password):
+        if not await instance.verify_password(password=password):
             raise AuthenticationFailed(message=ExceptionErrorMessages.CREDENTIALS_INVALID.value)
 
         access_token = create_access_token(

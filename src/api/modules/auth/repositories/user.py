@@ -136,7 +136,7 @@ class UserRepository(IUserRepository):
 
         # Crear usuario y encriptar contraseña
         instance = User(email=email, role=role, session_version=1)
-        instance.set_password(password)
+        await instance.set_password(password)
         instance.groups.append(role_group)
 
         # Guardar en base de datos
