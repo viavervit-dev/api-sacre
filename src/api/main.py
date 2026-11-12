@@ -16,7 +16,10 @@ from src.api.modules.inventory.routers import router as inventory_router
 from src.api.modules.orders.routers import router as orders_router
 from src.api.modules.users.routers import router as users_router
 from src.api.settings.database import check_db_connection, close_db_pool, create_db_pool
-from src.api.settings.exception_handlers import register_exception_handlers
+from src.api.settings.exception_handlers import (
+    build_unhandled_exception_response,
+    register_exception_handlers,
+)
 from src.api.settings.http_client import close_http_client, create_http_client
 from src.api.settings.openapi import API_DESCRIPTION, OPENAPI_TAGS, SWAGGER_UI_PARAMETERS
 from src.api.settings.parameters import api_parameters
@@ -95,6 +98,17 @@ app.openapi = openapi  # type: ignore[method-assign]
 
 # Registra los manejadores de excepciones personalizados
 register_exception_handlers(app=app)
+
+
+# Captura excepciones no controladas dentro de CORSMiddleware y cabeceras de seguridad
+@app.middleware(middleware_type="http")
+async def unhandled_exceptions_middleware(request: Request, call_next: Any) -> FastAPIResponse:
+    """Convierte excepciones no controladas en 500 preservando CORS y cabeceras de seguridad."""
+
+    try:
+        return await call_next(request)
+    except Exception as exc:
+        return build_unhandled_exception_response(request=request, exc=exc)
 
 
 # Configuración de CORS

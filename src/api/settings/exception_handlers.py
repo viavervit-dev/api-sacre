@@ -4,6 +4,7 @@ from typing import Any
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import TimeoutError as SQLAlchemyTimeoutError
 
 from src.api.common.exceptions import (
     AuthenticationFailed,
@@ -22,6 +23,28 @@ from src.api.common.response import Response
 from src.api.settings.serialization import JSONResponse
 
 logger = logging.getLogger("api.exceptions")
+
+
+def build_unhandled_exception_response(request: Request, exc: Exception) -> JSONResponse:
+    """Construye la respuesta JSON 500 estándar y registra la excepción no controlada."""
+
+    logger.error(
+        "Excepción no controlada en %s %s: %s",
+        request.method,
+        request.url.path,
+        exc,
+        exc_info=True,
+    )
+
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content=Response(
+            success=False,
+            pagination=False,
+            message="Ha ocurrido un error interno en el servidor.",
+            data=None,
+        ).model_dump(),
+    )
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -128,9 +151,10 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(OperationalError)
+    @app.exception_handler(SQLAlchemyTimeoutError)
     async def db_unavailable(  # pyright: ignore[reportUnusedFunction]
         request: Request,
-        exc: OperationalError,
+        exc: OperationalError | SQLAlchemyTimeoutError,
     ) -> JSONResponse:
         """Manejador de errores cuando la base de datos no está disponible."""
 
@@ -342,12 +366,4 @@ def register_exception_handlers(app: FastAPI) -> None:
             exc_info=True,
         )
 
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=Response(
-                success=False,
-                pagination=False,
-                message="Ha ocurrido un error interno en el servidor.",
-                data=None,
-            ).model_dump(),
-        )
+        return build_unhandled_exception_response(request=request, exc=exc)

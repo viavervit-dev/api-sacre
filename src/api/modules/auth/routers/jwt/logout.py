@@ -21,6 +21,7 @@ jwt_logout_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
     path="/jwt/logout/",
     response_description="**(NO_CONTENT)** Se cierra la sesión del usuario.",
     status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
     responses={
         status.HTTP_401_UNAUTHORIZED: response_scheme_401(
             refresh_jwt_missing=True,
