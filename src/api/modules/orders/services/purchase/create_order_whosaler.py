@@ -44,7 +44,7 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         self.__order_repo = order_repo
         self.__user_repo = user_repo
         self.__payment_service = payment_service
-        self.__products: list[WholesalerProduct | Product] = []
+        self.__products_map: dict[UUID, WholesalerProduct | Product] = {}
 
     async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
         """
@@ -95,16 +95,16 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         # Enriquecer los ítems con información descriptiva actualizada desde el catálogo
         for product in order_data["product_data"]:
-            for instance_product in self.__products:
-                if instance_product.id == product["id"]:
-                    product.update(
-                        {
-                            "name": instance_product.name,
-                            "categories": instance_product.categories,
-                            "description_short": instance_product.description_short,
-                        }
-                    )
-                    break
+            instance_product = self.__products_map.get(product["id"])
+
+            if instance_product:
+                product.update(
+                    {
+                        "name": instance_product.name,
+                        "categories": instance_product.categories,
+                        "description_short": instance_product.description_short,
+                    }
+                )
 
         # Reservamos la orden en la base de datos
         try:
@@ -176,12 +176,29 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         calc_units = 0
         errors = []
 
+        # Cargar en lote todos los productos únicos de la orden (máximo 2 SELECTs en total)
+        unique_product_ids = list({product.id for product in data.product_data})
+        wholesaler_products = await self.__wholesaler_product_repo.get_products_by_ids(
+            ids=unique_product_ids,
+        )
+        self.__products_map = {product.id: product for product in wholesaler_products}
+
+        # Consultar productos del catálogo general únicamente para los IDs que no sean mayoristas
+        missing_ids = [
+            product_id
+            for product_id in unique_product_ids
+            if product_id not in self.__products_map
+        ]
+
+        if missing_ids:
+            public_products = await self.__product_repo.get_products_by_ids(ids=missing_ids)
+            self.__products_map.update(
+                {product.id: product for product in public_products},
+            )
+
         # Validar existencia de cada producto y cálculo de impuestos y totales por ítem
         for i, product in enumerate(data.product_data):
-            instance: WholesalerProduct | Product | None = (
-                await self.__wholesaler_product_repo.get_product_by_id(id=product.id)
-                or await self.__product_repo.get_product_by_id(id=product.id)
-            )
+            instance = self.__products_map.get(product.id)
 
             if not instance:
                 raise RequestValidationError(
@@ -194,8 +211,6 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
                     ]
                 )
 
-            # Guardar la instancia para enriquecer la orden sin volver a consultar la base de datos
-            self.__products.append(instance)
             expected_tax = self.calculate_tax_amount(amount=product.subtotal)
             expected_total = product.subtotal + expected_tax
 

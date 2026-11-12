@@ -21,6 +21,16 @@ class ProductRepository(IProductRepository):
 
         return instance
 
+    async def get_products_by_ids(self, ids: Sequence[UUID]) -> Sequence[Product]:
+
+        if not ids:
+            return []
+
+        stmt = select(Product).where(Product.id.in_(ids))
+        result = await self.__db.scalars(stmt)
+
+        return result.all()
+
     async def get_active_products(
         self,
         offset: int,

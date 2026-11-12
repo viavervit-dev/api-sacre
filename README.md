@@ -179,8 +179,6 @@ DB_JIT=off
 
 
 # === Seguridad y Autenticación ===
-ACCESS_TOKEN_EXPIRE=15
-REFRESH_TOKEN_EXPIRE=5760
 PRIVATE_KEY=<value>
 PUBLIC_KEY=<value>
 

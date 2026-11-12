@@ -24,6 +24,16 @@ class WholesalerProductRepository(IWholesalerProductRepository):
 
         return instance
 
+    async def get_products_by_ids(self, ids: Sequence[UUID]) -> Sequence[WholesalerProduct]:
+
+        if not ids:
+            return []
+
+        stmt = select(WholesalerProduct).where(WholesalerProduct.id.in_(ids))
+        result = await self.__db.scalars(stmt)
+
+        return result.all()
+
     async def get_all_products(
         self,
         offset: int,
