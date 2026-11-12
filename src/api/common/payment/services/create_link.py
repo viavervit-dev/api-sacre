@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from decimal import Decimal
@@ -48,27 +49,37 @@ class CreatePaymentLinkService:
         tax_amount: Decimal,
         order_number: str,
     ) -> str:
+        """
+        Construye el payload en centavos y realiza la petición HTTP al servicio de pagos
+        para generar y retornar el enlace de pago.
+
+        Raises:
+            ValueError: Si algún monto contiene más de dos decimales.
+            PaymentGatewayCommunicationError: Si ocurre un timeout o error de red con la pasarela.
+            PaymentGatewayError: Si la pasarela responde con error HTTP o un JSON inválido.
+        """
 
         try:
-            response = await self.__http_client.post(
-                url=api_parameters.api_payment_links,
-                json={
-                    "amount": self.__to_cents(amount=total),
-                    "amountWithTax": self.__to_cents(amount=subtotal),
-                    "tax": self.__to_cents(amount=tax_amount),
-                    "clientTransactionId": order_number,
-                    "storeId": api_parameters.api_payment_store_id,
-                    "currency": "USD",
-                    "oneTime": True,  # Se configura el link para un solo uso
-                    "isAmountEditable": False,
-                },
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {api_parameters.api_payment_key}",
-                },
-            )
-            response.raise_for_status()
-        except httpx.TimeoutException as exc:
+            async with asyncio.timeout(delay=15.0):
+                response = await self.__http_client.post(
+                    url=api_parameters.api_payment_links,
+                    json={
+                        "amount": self.__to_cents(amount=total),
+                        "amountWithTax": self.__to_cents(amount=subtotal),
+                        "tax": self.__to_cents(amount=tax_amount),
+                        "clientTransactionId": order_number,
+                        "storeId": api_parameters.api_payment_store_id,
+                        "currency": "USD",
+                        "oneTime": True,  # Se configura el link para un solo uso
+                        "isAmountEditable": False,
+                    },
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {api_parameters.api_payment_key}",
+                    },
+                )
+                response.raise_for_status()
+        except (httpx.TimeoutException, TimeoutError) as exc:
             logger.error("Timeout con la pasarela para la orden %s: %s", order_number, exc)
 
             raise PaymentGatewayCommunicationError(

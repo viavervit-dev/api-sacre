@@ -14,10 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class EmailService:
-    """
-    Servicio encargado del despacho de correos electrónicos a través del servidor SMTP
-    utilizando TLS y Contraseñas de Aplicación.
-    """
+    """Servicio encargado del envío asíncrono de correos electrónicos mediante SMTP (SSL/TLS)."""
 
     def __init__(
         self,
@@ -49,8 +46,12 @@ class EmailService:
         text_content: str,
     ) -> None:
         """
-        Envía un correo electrónico utilizando el pool de hilos (asyncio.to_thread) para
-        evitar bloquear el bucle de eventos de FastAPI.
+        Construye y envía un correo electrónico multipart (texto plano y HTML) de forma
+        asíncrona mediante un pool de hilos con control de timeout.
+
+        Raises:
+            EmailConfigurationError: Si faltan las credenciales o falla la autenticación SMTP.
+            EmailDeliveryError: Si ocurre un fallo de conexión, red o se agota el timeout.
         """
 
         if not self.__username or not self.__password:
@@ -122,4 +123,14 @@ class EmailService:
                     message=EmailException.CONNECTION_ERROR.value,
                 ) from exc
 
-        await asyncio.to_thread(__send)
+        total_timeout = min(max(self.__timeout * 2, 25), 35)
+
+        try:
+            async with asyncio.timeout(total_timeout):
+                await asyncio.to_thread(__send)
+        except TimeoutError as exc:
+            logger.error("Tiempo máximo total agotado al enviar correo SMTP: %s", exc)
+
+            raise EmailDeliveryError(
+                message=EmailException.CONNECTION_ERROR.value,
+            ) from exc

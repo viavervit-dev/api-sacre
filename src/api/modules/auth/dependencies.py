@@ -1,18 +1,16 @@
 from typing import Annotated
 from uuid import UUID
 
-import jwt
 from fastapi import Depends, Request
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.common.exceptions import (
     AuthenticationFailed,
-    InvalidJWT,
     MissingJWT,
     PermissionDenied,
     UserNotFound,
 )
 from src.api.modules.auth.constants import ExceptionErrorMessages
+from src.api.modules.auth.jwt import decode_token
 from src.api.modules.auth.models import User
 from src.api.modules.auth.repositories import UserRepository
 from src.api.modules.auth.repositories.interfaces import IUserRepository
@@ -22,8 +20,7 @@ from src.api.modules.auth.services.jwt import (
     LogoutService,
     RefreshTokenService,
 )
-from src.api.settings.database import db_session
-from src.api.settings.parameters import api_parameters
+from src.api.settings.database import DBSession
 
 
 class JWTAuthentication:
@@ -59,7 +56,7 @@ optional_tokens = JWTAuthentication(auto_error=False)
 tokens = JWTAuthentication(auto_error=True)
 
 
-def user_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> IUserRepository:
+def user_repository(db: DBSession) -> IUserRepository:
     """Provee una instancia del repositorio de usuarios."""
 
     return UserRepository(db=db)
@@ -79,18 +76,7 @@ async def user(
     """
 
     access_token, _ = tokens
-
-    try:
-        payload = jwt.decode(
-            jwt=access_token,
-            key=api_parameters.public_key,
-            algorithms=["EdDSA"],
-        )
-    except jwt.ExpiredSignatureError as exc:
-        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value) from exc
-    except jwt.InvalidTokenError as exc:
-        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value) from exc
-
+    payload = decode_token(token=access_token, expected_type="access")
     user_id = UUID(payload["sub"])
 
     # Buscamos el usuario
@@ -123,17 +109,7 @@ async def user_optional(
     if not access_token:
         return None
 
-    try:
-        payload = jwt.decode(
-            jwt=access_token,
-            key=api_parameters.public_key,
-            algorithms=["EdDSA"],
-        )
-    except jwt.ExpiredSignatureError as exc:
-        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value) from exc
-    except jwt.InvalidTokenError as exc:
-        raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value) from exc
-
+    payload = decode_token(token=access_token, expected_type="access")
     user_id = UUID(payload["sub"])
 
     # Buscamos el usuario

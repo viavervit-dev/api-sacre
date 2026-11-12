@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.common.email.dependencies import EmailService, email_service
 from src.api.common.payment.dependencies import create_payment_link_service
@@ -21,10 +20,10 @@ from src.api.modules.orders.services.purchase import (
     GetListPurchaseOrderService,
     GetPurchaseOrderService,
 )
-from src.api.settings.database import db_session
+from src.api.settings.database import DBSession
 
 
-def order_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> OrderRepository:
+def order_repository(db: DBSession) -> OrderRepository:
     """Provee una instancia del repositorio de ordenes de compra."""
 
     return OrderRepository(db=db)
@@ -74,7 +73,6 @@ def notification_service(
 
 def create_purchase_order_wholesaler_service(
     payment_service: Annotated[CreatePaymentLinkService, Depends(create_payment_link_service)],
-    notification_service: Annotated[OrderNotificationService, Depends(notification_service)],
     order_repo: Annotated[OrderRepository, Depends(order_repository)],
     user_repo: Annotated[UserRepository, Depends(user_repository)],
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
@@ -90,7 +88,6 @@ def create_purchase_order_wholesaler_service(
     return CreatePurchaseOrderWholesalerService(
         payment_service=payment_service,
         wholesaler_product_repo=wholesaler_product_repo,
-        notification_service=notification_service,
         product_repo=product_repo,
         order_repo=order_repo,
         user_repo=user_repo,

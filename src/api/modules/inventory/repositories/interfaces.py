@@ -70,6 +70,12 @@ class IProductRepository(ABC):
         pass
 
     @abstractmethod
+    async def get_products_by_ids(self, ids: Sequence[UUID]) -> Sequence[Product]:
+        """Obtiene múltiples productos a partir de una secuencia de identificadores únicos."""
+
+        pass
+
+    @abstractmethod
     async def get_active_products(
         self,
         offset: int,
@@ -127,6 +133,12 @@ class IWholesalerProductRepository(ABC):
     @abstractmethod
     async def get_product_by_id(self, id: UUID) -> WholesalerProduct | None:
         """Obtiene un producto por su identificador único."""
+
+        pass
+
+    @abstractmethod
+    async def get_products_by_ids(self, ids: Sequence[UUID]) -> Sequence[WholesalerProduct]:
+        """Obtiene múltiples productos a partir de una secuencia de identificadores únicos."""
 
         pass
 

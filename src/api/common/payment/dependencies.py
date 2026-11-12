@@ -4,7 +4,7 @@ import httpx
 from fastapi import Depends
 
 from src.api.common.payment.services import CreatePaymentLinkService
-from src.api.settings.http_client import http_client
+from src.api.settings.http import http_client
 
 
 def create_payment_link_service(

@@ -10,24 +10,26 @@ bind = f"{api_parameters.host}:{api_parameters.port}"
 worker_class = "uvicorn.workers.UvicornWorker"
 
 # Concurrencia y procesos de trabajo para arquitecturas asíncronas (FastAPI / ASGI)
-# En ASGI asíncrono (I/O no bloqueante con event loop), la fórmula clásica '(CPU * 2) + 1'
-# de servidores WSGI sincrónicos sobrecarga la CPU y multiplica excesivamente las conexiones
-# del pool de PostgreSQL. Se utiliza el conteo de CPU efectivo (respetando cgroups/Docker).
+# Conviene configurar la variable WORKERS explícitamente en el entorno de producción,
+# ya que os.process_cpu_count() lee afinidad de núcleos del host y no cuotas CFS de cgroups/Docker.
 _detected_cpus = getattr(os, "process_cpu_count", os.cpu_count)() or 1
 default_workers = max(_detected_cpus, 2)
 workers = api_parameters.workers if api_parameters.workers > 0 else default_workers
 
-# Gestión de conexiones y tiempos de espera en transacciones de E-commerce
-# En checkout y compras mayoristas, los flujos interactúan con pasarelas externas y SMTP.
-worker_connections = 1000
+# Tiempos de espera y ciclo de vida del proceso
+# timeout: tiempo máximo de silencio/heartbeat del worker antes de que el master lo reinicie
+# (no cancela peticiones HTTP individuales; el timeout de I/O se controla en la aplicación).
 timeout = 60
-# Tiempo suficiente para que órdenes y enlaces en curso completen antes del reciclaje
+
+# graceful_timeout: tiempo de espera para que solicitudes en curso finalicen al detener el worker
+# (requiere configurar el tiempo de parada del contenedor en al menos 50s antes de enviar SIGKILL).
 graceful_timeout = 45
-# Superior al idle timeout común de balanceadores (ALB 60s, Nginx 65s) para evitar 502s
+
+# keepalive: tiempo para conexiones inactivas, superior al idle timeout del proxy.
 keepalive = 65
 
 # Prevención de fugas de memoria en procesos de larga duración (reinicio suave)
-# Jitter aleatorio para evitar reinicios simultáneos de workers durante picos de venta
+# Jitter aleatorio para evitar reinicios simultáneos de workers durante picos de tráfico
 max_requests = 5000
 max_requests_jitter = 500
 
@@ -47,14 +49,9 @@ preload_app = False
 # Permite interpretar cabeceras X-Forwarded-For para capturar la IP real del cliente
 forwarded_allow_ips = api_parameters.forwarded_allow_ips
 
-# Protección contra ataques de denegación de servicio (Slowloris / HTTP Header Flooding)
-limit_request_line = 4094
-limit_request_fields = 100
-limit_request_field_size = 8190
-
 # Registro y observabilidad hacia stdout/stderr (estándar de contenedores de 12 factores)
-# Registra el tiempo de respuesta %(L)ss para auditar latencia en catálogo y pasarela
+# Uvicorn gestiona su propio formateador de acceso; los tiempos de respuesta deben medirse
+# en el proxy inverso (ej. $request_time en Nginx) o mediante middleware ASGI.
 accesslog = "-"
 errorlog = "-"
 loglevel = "debug" if api_parameters.debug else "info"
-access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(L)ss'

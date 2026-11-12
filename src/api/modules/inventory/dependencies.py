@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.auth.dependencies import UserRepository, user_repository
 from src.api.modules.inventory.repositories import (
@@ -29,24 +28,22 @@ from src.api.modules.inventory.services.products.wholesaler import (
     GetProductsWholesalerService,
     UpdateProductWholesalerService,
 )
-from src.api.settings.database import db_session
+from src.api.settings.database import DBSession
 
 
-def category_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> CategoryRepository:
+def category_repository(db: DBSession) -> CategoryRepository:
     """Provee una instancia del repositorio de categorías."""
 
     return CategoryRepository(db=db)
 
 
-def product_repository(db: Annotated[AsyncSession, Depends(db_session)]) -> ProductRepository:
+def product_repository(db: DBSession) -> ProductRepository:
     """Provee una instancia del repositorio de productos."""
 
     return ProductRepository(db=db)
 
 
-def wholesaler_product_repository(
-    db: Annotated[AsyncSession, Depends(db_session)],
-) -> WholesalerProductRepository:
+def wholesaler_product_repository(db: DBSession) -> WholesalerProductRepository:
     """Provee una instancia del repositorio de productos."""
 
     return WholesalerProductRepository(db=db)

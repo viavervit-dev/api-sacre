@@ -4,8 +4,12 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import defer
 
+from src.api.common.exceptions import DomainRuleViolation
+from src.api.modules.orders.constants import OrderEntity, OrderStatus
 from src.api.modules.orders.models import Order, order_number_seq
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
@@ -35,16 +39,13 @@ class OrderRepository(IOrderRepository):
         # Condición de filtro por tipo de orden en el JSONB
         order_type_filter = Order.payment_data["description"].astext == order_type
 
-        # Total para metadatos de paginación
-        count_stmt = select(func.count(Order.id)).where(order_type_filter)
-        total_items = await self.__db.scalar(count_stmt) or 0
-
-        if total_items == 0:
-            return [], 0
-
-        # Paginación y ordenamiento
+        # Paginación y ordenamiento (diferir columnas JSONB pesadas innecesarias en el listado)
         stmt = (
             select(Order)
+            .options(
+                defer(Order.product_data),
+                defer(Order.status_history),
+            )
             .where(order_type_filter)
             .order_by(Order.date_joined.desc())
             .offset(offset)
@@ -53,15 +54,55 @@ class OrderRepository(IOrderRepository):
         result = await self.__db.scalars(stmt)
         items = result.all()
 
+        # Si en la primera página el resultado es menor al límite, evitamos la consulta COUNT
+        if offset == 0 and len(items) < limit:
+            return items, len(items)
+
+        # Total para metadatos de paginación
+        count_stmt = select(func.count(Order.id)).where(order_type_filter)
+        total_items = await self.__db.scalar(count_stmt) or 0
+
         return items, total_items
 
     async def create_order(self, data: dict[str, Any]) -> Order:
 
         instance = Order(**data)
         self.__db.add(instance)
-        await self.__db.flush()
+
+        try:
+            await self.__db.flush()
+            await self.__db.commit()
+        except IntegrityError as exc:
+            await self.__db.rollback()
+            idempotency_key = data["idempotency_key"]
+
+            if await self.exists_order(filters={"idempotency_key": idempotency_key}):
+                raise DomainRuleViolation(
+                    message=OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
+                ) from exc
+
+            raise
 
         return instance
+
+    async def update_payment_data(self, order: Order, payment_data: dict[str, Any]) -> Order:
+
+        # Se asigna un nuevo dict para que SQLAlchemy detecte el cambio en JSONB
+        order.payment_data = dict(payment_data)
+        await self.__db.commit()
+
+        return order
+
+    async def cancel_order(self, order: Order, cancelled_at: str) -> Order:
+
+        order.status = OrderStatus.CANCELLED.value
+        order.status_history = {
+            **order.status_history,
+            OrderStatus.CANCELLED.value: cancelled_at,
+        }
+        await self.__db.commit()
+
+        return order
 
     async def exists_order(self, filters: dict[str, Any]) -> bool:
 

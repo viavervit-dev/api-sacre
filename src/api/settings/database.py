@@ -1,8 +1,9 @@
 import asyncio
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Annotated, Any
 
 import pydantic_core
+from fastapi import Depends
 from sqlalchemy import MetaData, inspect, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -64,11 +65,17 @@ async def create_db_pool() -> None:
 
     # Argumentos específicos para el driver asyncpg
     connect_args = {
+        # Timeout en segundos para establecer la conexión inicial física con Postgres
+        "timeout": api_parameters.db_connection_timeout,
         # Timeout para cualquier comando SQL individual
         "command_timeout": api_parameters.db_command_timeout,
         "server_settings": {
             # Timeout a nivel de Postgres para matar queries colgadas tras 10 segundos
             "statement_timeout": api_parameters.db_statement_timeout,
+            # Cierra sesiones que queden inactivas dentro de una transacción abierta
+            "idle_in_transaction_session_timeout": api_parameters.db_transaction_session_timeout,
+            # Timeout para evitar esperas indefinidas al intentar adquirir bloqueos
+            "lock_timeout": api_parameters.db_lock_timeout,
             # Desactiva JIT para reducir latencia en transacciones cortas OLTP
             "jit": api_parameters.db_jit,
         },
@@ -130,10 +137,7 @@ async def db_session() -> AsyncGenerator[AsyncSession]:
     ### Ejemplo de uso:
     ```python
     @app.get("/users/{user_id}")
-    async def get_user(
-        user_id: int,
-        session: Annotated[AsyncSession, Depends(get_db_session)], # Aquí se inyecta la sesión
-    ):
+    async def get_user(user_id: int, db: DBSession):
         ...
     ```
     """
@@ -148,3 +152,6 @@ async def db_session() -> AsyncGenerator[AsyncSession]:
         except Exception:
             await session.rollback()
             raise
+
+
+DBSession = Annotated[AsyncSession, Depends(db_session, scope="function")]

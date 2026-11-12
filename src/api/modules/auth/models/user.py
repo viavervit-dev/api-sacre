@@ -1,3 +1,4 @@
+import asyncio
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
@@ -83,22 +84,35 @@ class User(ModelBase):
         cascade="all, delete-orphan",
     )
 
-    def set_password(self, password: str) -> None:
-        """Genera y almacena el hash seguro de la contraseña usando bcrypt."""
+    async def set_password(self, password: str) -> None:
+        """Genera y almacena el hash seguro de la contraseña con `bcrypt`."""
+
+        self.password_hash = await asyncio.to_thread(self.__hash_password, password)
+
+    async def verify_password(self, password: str) -> bool:
+        """Comprueba la contraseña contra el hash almacenado."""
+
+        return await asyncio.to_thread(self.__check_password, password, self.password_hash)
+
+    @staticmethod
+    def __hash_password(password: str) -> str:
+        """Calcula el hash bcrypt de una contraseña en texto plano."""
 
         salt = bcrypt.gensalt()
-        self.password_hash = bcrypt.hashpw(
+
+        return bcrypt.hashpw(
             password=password.encode(encoding="utf-8"),
             salt=salt,
         ).decode(encoding="utf-8")
 
-    def verify_password(self, password: str) -> bool:
-        """Comprueba si la contraseña en texto plano coincide con el hash almacenado."""
+    @staticmethod
+    def __check_password(password: str, password_hash: str) -> bool:
+        """Verifica una contraseña contra su hash bcrypt."""
 
         try:
             return bcrypt.checkpw(
                 password=password.encode(encoding="utf-8"),
-                hashed_password=self.password_hash.encode(encoding="utf-8"),
+                hashed_password=password_hash.encode(encoding="utf-8"),
             )
         except ValueError:
             return False

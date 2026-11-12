@@ -3,14 +3,13 @@ from typing import Any
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import TimeoutError as SQLAlchemyTimeoutError
 
 from src.api.common.exceptions import (
     AuthenticationFailed,
     DomainRuleViolation,
     DTOValidationErrorMessages,
-    EmailConfigurationError,
-    EmailDeliveryError,
     ExceptionErrorMessages,
     InvalidJWT,
     MissingJWT,
@@ -24,6 +23,28 @@ from src.api.common.response import Response
 from src.api.settings.serialization import JSONResponse
 
 logger = logging.getLogger("api.exceptions")
+
+
+def build_unhandled_exception_response(request: Request, exc: Exception) -> JSONResponse:
+    """Construye la respuesta JSON 500 estándar y registra la excepción no controlada."""
+
+    logger.error(
+        "Excepción no controlada en %s %s: %s",
+        request.method,
+        request.url.path,
+        exc,
+        exc_info=True,
+    )
+
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content=Response(
+            success=False,
+            pagination=False,
+            message="Ha ocurrido un error interno en el servidor.",
+            data=None,
+        ).model_dump(),
+    )
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -130,9 +151,10 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(OperationalError)
+    @app.exception_handler(SQLAlchemyTimeoutError)
     async def db_unavailable(  # pyright: ignore[reportUnusedFunction]
         request: Request,
-        exc: OperationalError,
+        exc: OperationalError | SQLAlchemyTimeoutError,
     ) -> JSONResponse:
         """Manejador de errores cuando la base de datos no está disponible."""
 
@@ -306,37 +328,26 @@ def register_exception_handlers(app: FastAPI) -> None:
             ).model_dump(),
         )
 
-    @app.exception_handler(EmailConfigurationError)
-    async def email_configuration_error(
+    @app.exception_handler(IntegrityError)
+    async def db_integrity_error(  # pyright: ignore[reportUnusedFunction]
         request: Request,
-        exc: EmailConfigurationError,
+        exc: IntegrityError,
     ) -> JSONResponse:
-        """Manejador para errores de configuración del servidor de correo."""
+        """Manejador global para conflictos de integridad o unicidad en base de datos."""
 
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=Response(
-                success=False,
-                pagination=False,
-                message=exc.message,
-                data=exc.data,
-            ).model_dump(),
+        logger.warning(
+            "Conflicto de integridad en %s %s: %s",
+            request.method,
+            request.url.path,
+            exc,
         )
-
-    @app.exception_handler(EmailDeliveryError)
-    async def email_delivery_error(
-        request: Request,
-        exc: EmailDeliveryError,
-    ) -> JSONResponse:
-        """Manejador para fallos en la entrega o conectividad del correo electrónico."""
-
         return JSONResponse(
-            status_code=status.HTTP_502_BAD_GATEWAY,
+            status_code=status.HTTP_409_CONFLICT,
             content=Response(
                 success=False,
                 pagination=False,
-                message=exc.message,
-                data=exc.data,
+                message="La operación entró en conflicto con un registro existente.",
+                data=None,
             ).model_dump(),
         )
 
@@ -355,12 +366,4 @@ def register_exception_handlers(app: FastAPI) -> None:
             exc_info=True,
         )
 
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=Response(
-                success=False,
-                pagination=False,
-                message="Ha ocurrido un error interno en el servidor.",
-                data=None,
-            ).model_dump(),
-        )
+        return build_unhandled_exception_response(request=request, exc=exc)

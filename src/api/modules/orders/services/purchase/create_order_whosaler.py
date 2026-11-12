@@ -1,10 +1,11 @@
+import logging
 from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID
 
 from fastapi.exceptions import RequestValidationError
 
-from src.api.common.exceptions import ResourceNotFound
+from src.api.common.exceptions import DomainRuleViolation, ResourceNotFound
 from src.api.common.payment.services import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.constants import UserRoles
@@ -23,7 +24,8 @@ from src.api.modules.orders.dto import (
     ReadProductDataDTO,
 )
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
-from src.api.modules.orders.services import OrderNotificationService
+
+logger = logging.getLogger(__name__)
 
 
 class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
@@ -35,7 +37,6 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         product_repo: IProductRepository,
         order_repo: IOrderRepository,
         payment_service: CreatePaymentLinkService,
-        notification_service: OrderNotificationService,
         user_repo: IUserRepository,
     ) -> None:
         self.__wholesaler_product_repo = wholesaler_product_repo
@@ -43,8 +44,7 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         self.__order_repo = order_repo
         self.__user_repo = user_repo
         self.__payment_service = payment_service
-        self.__notification_service = notification_service
-        self.__products: list[WholesalerProduct | Product] = []
+        self.__products_map: dict[UUID, WholesalerProduct | Product] = {}
 
     async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
         """
@@ -56,7 +56,6 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
             PaymentGatewayCommunicationError: Si ocurre un timeout o error de red con el
                 servicio de pagos.
             PaymentGatewayError: Si el servicio de pagos rechaza la petición o responde con error.
-            EmailDeliveryError: Si ocurre un error al despachar el correo de confirmación.
         """
 
         # Validar que el cliente mayorista exista
@@ -71,8 +70,19 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         # Ejecutar validaciones de las reglas de negocio
         await self.__run_business_validations(data=data)
 
-        # Capturar la instantánea (snapshot) de los datos del cliente
+        # Establecer el estado inicial de algunos campos (sin link todavía)
         order_data = data.model_dump()
+        order_data["order_number"] = await self.__order_repo.get_next_order_number()
+        order_data["status"] = OrderStatus.PENDING_PAYMENT.value
+        order_data["status_history"] = {
+            OrderStatus.PENDING_PAYMENT.value: datetime.now(tz=UTC).isoformat(),
+        }
+        order_data["payment_data"] = {
+            "description": OrderDescription.PURCHASE_ORDER.value,
+            "link": None,
+        }
+
+        # Capturar la instantánea (snapshot) de los datos del cliente
         order_data["customer_data"] = {
             "id": user.id,
             "name_or_company_name": user.wholesaler.name_or_company_name,
@@ -85,38 +95,49 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         # Enriquecer los ítems con información descriptiva actualizada desde el catálogo
         for product in order_data["product_data"]:
-            for instance_product in self.__products:
-                if instance_product.id == product["id"]:
-                    product.update(
-                        {
-                            "name": instance_product.name,
-                            "categories": instance_product.categories,
-                            "description_short": instance_product.description_short,
-                        }
-                    )
-                    break
+            instance_product = self.__products_map.get(product["id"])
 
-        # Establecer el estado inicial de algunos campos
-        order_data["order_number"] = await self.__order_repo.get_next_order_number()
-        order_data["status"] = OrderStatus.PENDING_PAYMENT.value
-        order_data["status_history"] = {
-            OrderStatus.PENDING_PAYMENT.value: datetime.now(tz=UTC).isoformat(),
-        }
+            if instance_product:
+                product.update(
+                    {
+                        "name": instance_product.name,
+                        "categories": instance_product.categories,
+                        "description_short": instance_product.description_short,
+                    }
+                )
 
-        # Creamos y enviamos el link de pago al cliente mayorista
-        payment_link = await self.__payment_service.create_payment_link(order_data=order_data)
-        order_data["payment_data"] = {
-            "description": OrderDescription.PURCHASE_ORDER.value,
-            "link": payment_link,
-        }
+        # Reservamos la orden en la base de datos
+        try:
+            order = await self.__order_repo.create_order(data=order_data)
+        except DomainRuleViolation as exc:
+            raise self.__idempotency_validation_error() from exc
 
-        # Guardar información en la base de datos
-        order = await self.__order_repo.create_order(data=order_data)
+        # Llamada externa al servicio de pagos
+        try:
+            payment_link = await self.__payment_service.create_payment_link(order_data=order_data)
+        except Exception:
+            try:
+                await self.__order_repo.cancel_order(
+                    cancelled_at=datetime.now(tz=UTC).isoformat(),
+                    order=order,
+                )
+            except Exception as cleanup_exc:
+                logger.error(
+                    "No se pudo cancelar la orden %s tras fallo en pasarela: %s",
+                    order.order_number,
+                    cleanup_exc,
+                    exc_info=True,
+                )
 
-        # Despachar la notificación por correo al cliente
-        await self.__notification_service.send_order_payment_link(
-            order_data=order_data,
-            payment_link=payment_link,
+            raise
+
+        # Guardamos el enlace de pago generado
+        order = await self.__order_repo.update_payment_data(
+            order=order,
+            payment_data={
+                "description": OrderDescription.PURCHASE_ORDER.value,
+                "link": payment_link,
+            },
         )
 
         # Extraer estructuras anidadas para instanciar el DTO de respuesta
@@ -146,15 +167,7 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         )
 
         if exists:
-            raise RequestValidationError(
-                errors=[
-                    {
-                        "loc": ("body", "idempotency_key"),
-                        "msg": OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
-                        "type": "domain_validation",
-                    }
-                ]
-            )
+            raise self.__idempotency_validation_error()
 
         # Inicializar acumuladores para verificar la consistencia financiera de los ítems
         calc_subtotal = Decimal("0.00")
@@ -163,12 +176,29 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         calc_units = 0
         errors = []
 
+        # Cargar en lote todos los productos únicos de la orden (máximo 2 SELECTs en total)
+        unique_product_ids = list({product.id for product in data.product_data})
+        wholesaler_products = await self.__wholesaler_product_repo.get_products_by_ids(
+            ids=unique_product_ids,
+        )
+        self.__products_map = {product.id: product for product in wholesaler_products}
+
+        # Consultar productos del catálogo general únicamente para los IDs que no sean mayoristas
+        missing_ids = [
+            product_id
+            for product_id in unique_product_ids
+            if product_id not in self.__products_map
+        ]
+
+        if missing_ids:
+            public_products = await self.__product_repo.get_products_by_ids(ids=missing_ids)
+            self.__products_map.update(
+                {product.id: product for product in public_products},
+            )
+
         # Validar existencia de cada producto y cálculo de impuestos y totales por ítem
         for i, product in enumerate(data.product_data):
-            instance: WholesalerProduct | Product | None = (
-                await self.__wholesaler_product_repo.get_product_by_id(id=product.id)
-                or await self.__product_repo.get_product_by_id(id=product.id)
-            )
+            instance = self.__products_map.get(product.id)
 
             if not instance:
                 raise RequestValidationError(
@@ -181,8 +211,6 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
                     ]
                 )
 
-            # Guardar la instancia para enriquecer la orden sin volver a consultar la base de datos
-            self.__products.append(instance)
             expected_tax = self.calculate_tax_amount(amount=product.subtotal)
             expected_total = product.subtotal + expected_tax
 
@@ -247,3 +275,17 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         if errors:
             raise RequestValidationError(errors=errors)
+
+    @staticmethod
+    def __idempotency_validation_error() -> RequestValidationError:
+        """Construye el error de validación para claves de idempotencia duplicadas."""
+
+        return RequestValidationError(
+            errors=[
+                {
+                    "loc": ("body", "idempotency_key"),
+                    "msg": OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
+                    "type": "domain_validation",
+                }
+            ]
+        )
