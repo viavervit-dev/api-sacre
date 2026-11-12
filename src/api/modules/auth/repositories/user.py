@@ -59,12 +59,13 @@ class UserRepository(IUserRepository):
             relation_field = self.__profile_map[role]
             stmt = stmt.options(joinedload(relation_field))
 
-        # Carga inteligente de permisos
+        # Carga inteligente de permisos en una sola consulta SQL
         if load_permissions:
-            stmt = stmt.options(selectinload(User.groups).selectinload(Group.permissions))
+            stmt = stmt.options(joinedload(User.groups).joinedload(Group.permissions))
 
         result = await self.__db.execute(stmt)
-        return result.scalar_one_or_none()
+
+        return result.unique().scalar_one_or_none()
 
     async def get_list_users(
         self,
