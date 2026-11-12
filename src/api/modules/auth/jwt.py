@@ -59,7 +59,11 @@ def create_refresh_token(user_id: UUID, user_role: str, session_version: int) ->
     return encoded_jwt
 
 
-def decode_token(token: str, expected_type: Literal["access", "refresh"]) -> dict[str, Any]:
+def decode_token(
+    token: str,
+    expected_type: Literal["access", "refresh"],
+    verify_exp: bool = True,
+) -> dict[str, Any]:
     """
     Decodifica y valida la firma, vigencia, claims requeridos y tipo de un token JWT.
 
@@ -84,6 +88,7 @@ def decode_token(token: str, expected_type: Literal["access", "refresh"]) -> dic
             key=api_parameters.public_key,
             algorithms=["EdDSA"],
             options={
+                "verify_exp": verify_exp,
                 "require": [
                     "sub",
                     "exp",
@@ -91,7 +96,7 @@ def decode_token(token: str, expected_type: Literal["access", "refresh"]) -> dic
                     "user_role",
                     "session_version",
                     "token_type",
-                ]
+                ],
             },
         )
     except jwt.ExpiredSignatureError as exc:
