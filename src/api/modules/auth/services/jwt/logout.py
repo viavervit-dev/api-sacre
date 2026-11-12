@@ -1,11 +1,9 @@
 from uuid import UUID
 
-import jwt
-
 from src.api.common.exceptions import InvalidJWT
 from src.api.modules.auth.constants import ExceptionErrorMessages
+from src.api.modules.auth.jwt import decode_token
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.settings.parameters import api_parameters
 
 
 class LogoutService:
@@ -19,33 +17,11 @@ class LogoutService:
         Invalida la sesión activa de un usuario verificando sus tokens de acceso y actualización.
 
         Raises:
-            InvalidJWT: Si alguno de los tokens es inválido o ha expirado. Si los identificadores
-                de usuario en ambos tokens no coinciden.
+            InvalidJWT: Si los identificadores de usuario en ambos tokens no coinciden.
         """
 
-        # Validaciones del token de acceso
-        try:
-            access_token_payload = jwt.decode(
-                jwt=access_token,
-                key=api_parameters.public_key,
-                algorithms=["EdDSA"],
-            )
-        except jwt.ExpiredSignatureError:
-            raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_EXPIRED.value)  # noqa
-        except jwt.InvalidTokenError:
-            raise InvalidJWT(message=ExceptionErrorMessages.ACCESS_JWT_INVALID.value)  # noqa
-
-        # Validaciones del token de actualización
-        try:
-            refresh_token_payload = jwt.decode(
-                jwt=refresh_token,
-                key=api_parameters.public_key,
-                algorithms=["EdDSA"],
-            )
-        except jwt.ExpiredSignatureError:
-            raise InvalidJWT(message=ExceptionErrorMessages.REFRESH_JWT_EXPIRED.value)  # noqa
-        except jwt.InvalidTokenError:
-            raise InvalidJWT(message=ExceptionErrorMessages.REFRESH_JWT_INVALID.value)  # noqa
+        access_token_payload = decode_token(token=access_token, expected_type="access")
+        refresh_token_payload = decode_token(token=refresh_token, expected_type="refresh")
 
         # Validación del usuario del token de acceso
         if access_token_payload["sub"] != refresh_token_payload["sub"]:
