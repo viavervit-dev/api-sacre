@@ -14,10 +14,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserOptionalPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.inventory.dependencies import get_product_service
+from src.api.modules.inventory.dependencies import GetProductServiceDep
 from src.api.modules.inventory.dto import ReadProductPrivateDTO, ReadProductPublicDTO
 from src.api.modules.inventory.models import Product
-from src.api.modules.inventory.services.products import GetProductService
 
 get_product_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserOptionalPermissionChecker(
@@ -61,7 +60,7 @@ async def get_product(
             examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
         ),
     ],
-    service: Annotated[GetProductService, Depends(get_product_service)],
+    service: GetProductServiceDep,
 ) -> Response[ReadProductPrivateDTO | ReadProductPublicDTO]:
     """
     Permite consultar el detalle completo de un producto específico. La respuesta se adapta

@@ -14,10 +14,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.inventory.dependencies import get_products_wholesaler_service
+from src.api.modules.inventory.dependencies import GetProductsWholesalerServiceDep
 from src.api.modules.inventory.dto import ReadWholesalerProductSummaryDTO
 from src.api.modules.inventory.models import WholesalerProduct
-from src.api.modules.inventory.services.products.wholesaler import GetProductsWholesalerService
 from src.api.settings.parameters import api_parameters
 
 get_products_wholesaler_router = APIRouter(prefix="/inventory", tags=["Inventario"])
@@ -107,7 +106,7 @@ async def get_products_by_wholesaler(
             description="El identificador único del cliente mayorista en formato UUID v4.",
         ),
     ],
-    service: Annotated[GetProductsWholesalerService, Depends(get_products_wholesaler_service)],
+    service: GetProductsWholesalerServiceDep,
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,

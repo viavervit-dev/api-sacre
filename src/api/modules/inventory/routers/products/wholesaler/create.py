@@ -14,10 +14,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.inventory.dependencies import add_product_wholesaler_service
+from src.api.modules.inventory.dependencies import AddProductWholesalerServiceDep
 from src.api.modules.inventory.dto import CreateWholesalerProductDTO, ReadWholesalerProductDTO
 from src.api.modules.inventory.models import WholesalerProduct
-from src.api.modules.inventory.services.products.wholesaler import AddProductWholesalerService
 
 add_product_wholesaler_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
@@ -55,7 +54,7 @@ async def add_product_wholesaler(
             description="El identificador único del cliente mayorista en formato UUID v4.",
         ),
     ],
-    service: Annotated[AddProductWholesalerService, Depends(add_product_wholesaler_service)],
+    service: AddProductWholesalerServiceDep,
 ) -> Response[ReadWholesalerProductDTO]:
     """
     Permite crear un producto exclusivo para un cliente mayorista a partir de los datos

@@ -14,10 +14,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.inventory.dependencies import update_category_service
+from src.api.modules.inventory.dependencies import UpdateCategoryServiceDep
 from src.api.modules.inventory.dto import ReadCategoryPrivateDTO, UpdateCategoryDTO
 from src.api.modules.inventory.models import Category
-from src.api.modules.inventory.services.categories import UpdateCategoryService
 
 update_category_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
@@ -55,7 +54,7 @@ async def update_category(
             description="El identificador único de la categoría del producto en formato UUID v4.",
         ),
     ],
-    service: Annotated[UpdateCategoryService, Depends(update_category_service)],
+    service: UpdateCategoryServiceDep,
 ) -> Response[ReadCategoryPrivateDTO]:
     """
     Permite modificar de forma parcial los datos de una categoría de productos. Ejecuta

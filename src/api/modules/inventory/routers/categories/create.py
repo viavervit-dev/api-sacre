@@ -12,10 +12,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.inventory.dependencies import create_category_service
+from src.api.modules.inventory.dependencies import CreateCategoryServiceDep
 from src.api.modules.inventory.dto import CreateCategoryDTO, ReadCategoryPrivateDTO
 from src.api.modules.inventory.models import Category
-from src.api.modules.inventory.services.categories import CreateCategoryService
 
 create_category_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
@@ -45,7 +44,7 @@ require_admin = UserPermissionChecker(
 async def create_category(
     user: Annotated[User, Depends(require_admin)],
     data: CreateCategoryDTO,
-    service: Annotated[CreateCategoryService, Depends(create_category_service)],
+    service: CreateCategoryServiceDep,
 ) -> Response[ReadCategoryPrivateDTO]:
     """
     Permite crear una nueva categoría de productos. Ejecuta validaciones sintácticas y

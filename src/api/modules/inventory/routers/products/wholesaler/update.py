@@ -14,10 +14,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.inventory.dependencies import update_product_wholesaler_service
+from src.api.modules.inventory.dependencies import UpdateProductWholesalerServiceDep
 from src.api.modules.inventory.dto import ReadWholesalerProductDTO, UpdateWholesalerProductDTO
 from src.api.modules.inventory.models import WholesalerProduct
-from src.api.modules.inventory.services.products.wholesaler import UpdateProductWholesalerService
 
 update_product_wholesaler_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
@@ -55,7 +54,7 @@ async def update_product_wholesaler(
             description="El identificador único del producto en formato UUID v4.",
         ),
     ],
-    service: Annotated[UpdateProductWholesalerService, Depends(update_product_wholesaler_service)],
+    service: UpdateProductWholesalerServiceDep,
 ) -> Response[ReadWholesalerProductDTO]:
     """
     Permite modificar de forma parcial un producto para clientes mayoristas a partir de los datos

@@ -13,9 +13,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.inventory.dependencies import delete_product_wholesaler_service
+from src.api.modules.inventory.dependencies import DeleteProductWholesalerServiceDep
 from src.api.modules.inventory.models import WholesalerProduct
-from src.api.modules.inventory.services.products.wholesaler import DeleteProductWholesalerService
 
 delete_product_wholesaler_router = APIRouter(prefix="/inventory", tags=["Inventario"])
 require_admin = UserPermissionChecker(
@@ -52,7 +51,7 @@ async def delete_product_wholesaler(
             examples=["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
         ),
     ],
-    service: Annotated[DeleteProductWholesalerService, Depends(delete_product_wholesaler_service)],
+    service: DeleteProductWholesalerServiceDep,
 ) -> Response[dict[str, str]]:
     """
     Permite eliminar de forma permanente un producto para cliente mayorista a partir de su
