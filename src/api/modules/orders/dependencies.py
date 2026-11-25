@@ -6,7 +6,7 @@ from src.api.common.email.dependencies import EmailService, email_service
 from src.api.common.payment.dependencies import create_payment_link_service
 from src.api.common.payment.services import CreatePaymentLinkService
 from src.api.common.utils import FinancialCalculationsMixin
-from src.api.modules.auth.dependencies import UserRepository, user_repository
+from src.api.modules.auth.dependencies import UserRepositoryDep
 from src.api.modules.inventory.dependencies import (
     ProductRepository,
     WholesalerProductRepository,
@@ -74,7 +74,7 @@ def notification_service(
 def create_purchase_order_wholesaler_service(
     payment_service: Annotated[CreatePaymentLinkService, Depends(create_payment_link_service)],
     order_repo: Annotated[OrderRepository, Depends(order_repository)],
-    user_repo: Annotated[UserRepository, Depends(user_repository)],
+    user_repo: UserRepositoryDep,
     product_repo: Annotated[ProductRepository, Depends(product_repository)],
     wholesaler_product_repo: Annotated[
         WholesalerProductRepository, Depends(wholesaler_product_repository)

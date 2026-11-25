@@ -42,6 +42,7 @@ class ModelBase(DeclarativeBase):
         """Convierte las columnas cargadas del modelo a un diccionario."""
 
         state = inspect(self)
+
         return {
             col.key: getattr(self, col.key)
             for col in self.__table__.columns

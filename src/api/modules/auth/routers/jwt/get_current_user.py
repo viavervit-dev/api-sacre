@@ -9,10 +9,9 @@ from src.api.common.schema import (
     response_scheme_503,
 )
 from src.api.modules.auth.constants import UserRoles
-from src.api.modules.auth.dependencies import UserPermissionChecker, jwt_retrieve_user_service
+from src.api.modules.auth.dependencies import GetAuthenticatedUserServiceDep, UserPermissionChecker
 from src.api.modules.auth.dto import ReadUserDTO
 from src.api.modules.auth.models import User
-from src.api.modules.auth.services.jwt import GetAuthUserService
 from src.api.modules.users.models import Admin, Customer
 
 jwt_me_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
@@ -47,7 +46,7 @@ require_user = UserPermissionChecker(
 )
 async def get_current_user(
     user: Annotated[User, Depends(require_user)],
-    service: Annotated[type[GetAuthUserService], Depends(jwt_retrieve_user_service)],
+    service: GetAuthenticatedUserServiceDep,
 ) -> Response[ReadUserDTO]:
     """
     Permite consultar los datos personales y de cuenta del usuario que inició la sesión activa

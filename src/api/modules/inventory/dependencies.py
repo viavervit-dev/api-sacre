@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.api.modules.auth.dependencies import UserRepository, user_repository
+from src.api.modules.auth.dependencies import UserRepositoryDep
 from src.api.modules.inventory.repositories import (
     CategoryRepository,
     ProductRepository,
@@ -66,7 +66,7 @@ def get_product_service(
 
 
 def get_products_wholesaler_service(
-    user_repo: Annotated[UserRepository, Depends(user_repository)],
+    user_repo: UserRepositoryDep,
     wholesaler_product_repo: Annotated[
         WholesalerProductRepository, Depends(wholesaler_product_repository)
     ],
@@ -102,7 +102,7 @@ def create_product_service(
 
 
 def add_product_wholesaler_service(
-    user_repo: Annotated[UserRepository, Depends(user_repository)],
+    user_repo: UserRepositoryDep,
     category_repo: Annotated[CategoryRepository, Depends(category_repository)],
     wholesaler_product_repo: Annotated[
         WholesalerProductRepository, Depends(wholesaler_product_repository)

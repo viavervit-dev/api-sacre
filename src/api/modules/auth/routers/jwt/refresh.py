@@ -1,12 +1,9 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Response, status
 
 from src.api.common.exceptions import MissingJWT
 from src.api.common.schema import response_scheme_401, response_scheme_503
 from src.api.modules.auth.constants import ExceptionErrorMessages
-from src.api.modules.auth.dependencies import jwt_refresh_token_service, optional_tokens
-from src.api.modules.auth.services.jwt import RefreshTokenService
+from src.api.modules.auth.dependencies import RefreshTokenServiceDep, TokensOptionalDep
 from src.api.settings.parameters import api_parameters
 
 jwt_refresh_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
@@ -30,9 +27,9 @@ jwt_refresh_router = APIRouter(prefix="/authentication", tags=["Autenticación"]
     },
 )
 async def refresh_token(
-    tokens: Annotated[tuple[str | None, str | None], Depends(optional_tokens)],
+    tokens: TokensOptionalDep,
     response: Response,
-    service: Annotated[RefreshTokenService, Depends(jwt_refresh_token_service)],
+    service: RefreshTokenServiceDep,
 ) -> None:
     """
     Permite generar un nuevo token de acceso (`access_token`) a partir de un token de actualización

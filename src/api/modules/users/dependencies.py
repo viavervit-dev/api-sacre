@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.api.modules.auth.dependencies import UserRepository, user_repository
+from src.api.modules.auth.dependencies import UserRepositoryDep
 from src.api.modules.users.repositories import CustomerRepository, WholesalerRepository
 from src.api.modules.users.services.customers import CreateCustomerService
 from src.api.modules.users.services.wholesaler import (
@@ -27,7 +27,7 @@ def wholesaler_repository(db: DBSessionDep) -> WholesalerRepository:
 
 
 def create_customer_service(
-    user_repo: Annotated[UserRepository, Depends(user_repository)],
+    user_repo: UserRepositoryDep,
     customer_repo: Annotated[CustomerRepository, Depends(customer_repository)],
 ) -> CreateCustomerService:
     """Provee una instancia del servicio de creación de clientes."""
@@ -36,7 +36,7 @@ def create_customer_service(
 
 
 def create_wholesaler_service(
-    user_repo: Annotated[UserRepository, Depends(user_repository)],
+    user_repo: UserRepositoryDep,
     wholesaler_repo: Annotated[WholesalerRepository, Depends(wholesaler_repository)],
 ) -> CreateWholesalerService:
     """Provee una instancia del servicio de creación de clientes mayoristas."""
@@ -45,7 +45,7 @@ def create_wholesaler_service(
 
 
 def update_wholesaler_service(
-    user_repo: Annotated[UserRepository, Depends(user_repository)],
+    user_repo: UserRepositoryDep,
     wholesaler_repo: Annotated[WholesalerRepository, Depends(wholesaler_repository)],
 ) -> UpdateWholesalerService:
     """Provee una instancia del servicio de actualización de clientes mayoristas."""
@@ -53,17 +53,13 @@ def update_wholesaler_service(
     return UpdateWholesalerService(wholesaler_repo=wholesaler_repo, user_repo=user_repo)
 
 
-def get_list_wholesaler_service(
-    user_repo: Annotated[UserRepository, Depends(user_repository)],
-) -> GetListWholesalerService:
+def get_list_wholesaler_service(user_repo: UserRepositoryDep) -> GetListWholesalerService:
     """Provee una instancia del servicio de obtención de lista de clientes mayoristas."""
 
     return GetListWholesalerService(user_repo=user_repo)
 
 
-def get_wholesaler_service(
-    user_repo: Annotated[UserRepository, Depends(user_repository)],
-) -> GetWholesalerService:
+def get_wholesaler_service(user_repo: UserRepositoryDep) -> GetWholesalerService:
     """Provee una instancia del servicio de obtención de un cliente mayorista."""
 
     return GetWholesalerService(user_repo=user_repo)

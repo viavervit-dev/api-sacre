@@ -5,7 +5,7 @@ from src.api.modules.auth.jwt import create_access_token, create_refresh_token
 from src.api.modules.auth.repositories.interfaces import IUserRepository
 
 
-class AuthAdminService:
+class AuthenticateAdminService:
     """Servicio encargado de la autenticación y emisión de tokens JWT para administradores."""
 
     def __init__(self, user_repo: IUserRepository) -> None:

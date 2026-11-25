@@ -1,6 +1,4 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Response, status
 
 from src.api.common.exceptions import AuthenticationFailed, InvalidJWT, MissingJWT
 from src.api.common.response import Response as APIResponse
@@ -9,8 +7,7 @@ from src.api.common.schema import (
     response_scheme_503,
 )
 from src.api.modules.auth.constants import ExceptionErrorMessages
-from src.api.modules.auth.dependencies import jwt_logout_service, optional_tokens
-from src.api.modules.auth.services.jwt import LogoutService
+from src.api.modules.auth.dependencies import LogoutServiceDep, TokensOptionalDep
 from src.api.settings.parameters import api_parameters
 from src.api.settings.serialization import JSONResponse
 
@@ -33,9 +30,9 @@ jwt_logout_router = APIRouter(prefix="/authentication", tags=["Autenticación"])
     },
 )
 async def logout(
-    tokens: Annotated[tuple[str | None, str | None], Depends(optional_tokens)],
+    tokens: TokensOptionalDep,
     response: Response,
-    service: Annotated[LogoutService, Depends(jwt_logout_service)],
+    service: LogoutServiceDep,
 ) -> Response | None:
     """
     Permite revocar la sesión activa del usuario autenticado invalidando su sesión a partir del
