@@ -30,7 +30,7 @@ La estructura de un commit sigue el siguiente formato:
 | `<tipo>` | Indica la naturaleza del cambio realizado. |
 | `<scope>` | (opcional) Señala el ámbito o área afectada por el cambio. |
 | `<descripción>` | Frase nominal que describe el cambio. Máximo 72 caracteres. |
-| `<cuerpo>` | Detalles adicionales, razones del cambio, contexto o diferencias con la versión anterior. Útil cuando la descripción no es suficiente. |
+| `<cuerpo>` | Texto descriptivo con el contexto, propósito e impacto del cambio. No usar solo listas ni tecnicismos/clases internas. |
 | `<notas de pie>` | Información especial como referencias a incidencias, tickets o cambios que rompen compatibilidad (BREAKING CHANGE). |
 
 ## 🔹 3. Estilo de Redacción
@@ -57,33 +57,53 @@ Al usar **frases nominales** (sustantivos y descripciones), las release notes se
 
 ```markdown
 ## Funcionalidades
-- Botón de login con opciones de redes sociales
-- Autenticación con Google OAuth
-- Endpoint de creación de productos (POST /products)
+- botón de login con opciones de redes sociales
+- autenticación con Google OAuth
+- endpoint de creación de productos (`POST /products`)
 
 ## Correcciones
-- Corrección de overflow en tarjetas móviles
-- Manejo de expiración de tokens JWT
+- corrección de overflow en tarjetas móviles
+- manejo de expiración de tokens JWT
 ```
 
 | ❌ Imperativo (NO usar) | ✅ Frase Nominal (usar) |
 |------------------------|------------------------|
-| `Agregar login con Google` | `Login con Google OAuth` |
-| `Corregir overflow en cards` | `Corrección de overflow en tarjetas móviles` |
-| `Implementar lazy loading` | `Carga diferida para imágenes de productos` |
-| `Crear endpoint de productos` | `Endpoint de creación de productos` |
-| `Actualizar dependencias` | `Actualización de dependencias de seguridad` |
-| `Eliminar código deprecado` | `Limpieza de código deprecado` |
-| `Refactorizar servicio de usuario` | `Refactorización del servicio de usuario` |
+| `Agregar login con Google` | `login con Google OAuth` |
+| `Corregir overflow en cards` | `corrección de overflow en tarjetas móviles` |
+| `Implementar lazy loading` | `carga diferida para imágenes de productos` |
+| `Crear endpoint de productos` | `endpoint de creación de productos` |
+| `Actualizar dependencias` | `actualización de dependencias de seguridad` |
+| `Eliminar código deprecado` | `limpieza de código deprecado` |
+| `Refactorizar servicio de usuario` | `refactorización del servicio de usuario` |
+
+### 3.3. Redacción del Cuerpo (`<cuerpo>`)
+
+Cuando el cambio requiera contexto adicional o justificación funcional (especialmente en squash merges hacia `development`), se debe incluir un cuerpo explicativo separado del asunto por una línea en blanco.
+
+> [!IMPORTANT]
+> El cuerpo del commit debe iniciar con un **texto descriptivo continuo** (uno o dos párrafos breves) que explique el **propósito, impacto y alcance** de la modificación sin detallar nombres de clases internas, métodos privados o tecnicismos de bajo nivel del código. Cuando sí corresponda mencionar conceptos relacionados con el código (librerías, funciones, clases, rutas de ficheros, directorios o endpoints), envuélvelos entre backticks (`` ` ``).
+>
+> Si resulta útil para estructurar o presentar puntos clave, componentes o pasos, es totalmente válido incluir una **lista con viñetas (`- ...`)** o una **enumeración (`1. ...`)**, siempre que se coloque **justo después del párrafo de contexto**.
+
+| ❌ A evitar en el cuerpo | ✅ Recomendado en el cuerpo |
+|--------------------------|----------------------------|
+| Solo listas de viñetas o ítems sueltos sin párrafo introductorio | Párrafo narrativo estructurado inicial, seguido opcionalmente de una lista o numeración si aporta claridad |
+| Nombres de clases internas, funciones o métodos (`UploadFileService`, `CadFileRepository`, `process_file()`) | Capacidades funcionales o de dominio ("servicio de procesamiento", "persistencia en base de datos") |
+| Explicaciones hiper-técnicas de bajo nivel | Explicaciones claras sobre el valor aportado, la robustez, el rendimiento o la seguridad |
 
 ### 3.5. Reglas de Redacción
 
 | Regla | Descripción |
 |-------|-------------|
+| **Inicio en minúscula** | La descripción debe iniciar siempre en minúscula, salvo que empiece con una sigla/concepto técnico (ej. `DTO`, `API`, `JWT`) o el nombre propio de una clase/módulo entre backticks (ej. `` `CustomerRepository` ``, `` `UploadFileService` ``). |
+| **Backticks para código** | Envuelve entre backticks (`` ` ``) los conceptos relacionados con el código: librerías, funciones, clases, rutas de ficheros, directorios o endpoints (ej. `` `CustomerService` ``, `` `src/api/settings/` ``, `` `POST /products` ``). |
 | **Sin verbos al inicio** | No empieces con "Agregar", "Corregir", "Crear", etc. |
 | **Usa sustantivos** | Describe QUÉ es el cambio, no qué hacer. |
-| **Máximo 72 caracteres** | Mantén la descripción concisa. |
+| **Máximo 72 caracteres** | Mantén la descripción concisa (considerando los caracteres de los backticks). |
 | **Sin punto final** | No termines con punto. |
+
+> [!NOTE]
+> Al ejecutar `git commit -m` en terminal (`bash`/`zsh`), usa **comillas simples** (`'...'`) o el editor (`git commit`) para evitar que la shell interprete los backticks (`` ` ``) como ejecución de comandos.
 
 ## 🔹 4. Prefijos Reservados
 
@@ -96,15 +116,15 @@ Imagina que estás creando un nuevo endpoint `POST /products`:
 
 ```txt
 # Durante el desarrollo (en tu feature branch)
-add(products): Modelo Product con campos base
-add(products): ProductRepository con métodos CRUD
-add(products): CreateProductService
-add(products): Endpoint POST en ProductController
-add(products): Middleware de validación de entrada
-test(products): Tests unitarios y de integración
+add(products): modelo `Product` con campos base
+add(products): `ProductRepository` con métodos CRUD
+add(products): `CreateProductService`
+add(products): endpoint POST en `ProductController`
+add(products): middleware de validación de entrada
+test(products): tests unitarios y de integración
 
 # Al hacer squash merge (mensaje final del PR)
-feat(api): Endpoint de creación de productos (POST /products)
+feat(api): endpoint de creación de productos (`POST /products`)
 ```
 
 ## 🔹 5. Tipos de Commit
@@ -129,18 +149,18 @@ Los tipos clasifican los cambios de manera uniforme y permiten que cualquier per
 **Ejemplos (mensaje de squash merge):**
 ```txt
 # Backend
-feat(usuarios): Endpoint de creación de clientes (POST /customers)
-feat(facturación): Generación automática de facturas electrónicas
-feat(autenticación): Login con Google OAuth 2.0
+feat(usuarios): endpoint de creación de clientes (`POST /customers`)
+feat(facturación): generación automática de facturas electrónicas
+feat(autenticación): login con Google OAuth 2.0
 
 # Frontend
-feat(productos): Componente de búsqueda con filtros avanzados
-feat(carrito): Vista previa del pedido antes de confirmar
-feat(dashboard): Gráficos interactivos de ventas mensuales
+feat(productos): componente de búsqueda con filtros avanzados
+feat(carrito): vista previa del pedido antes de confirmar
+feat(dashboard): gráficos interactivos de ventas mensuales
 
 # Móvil / Desktop
-feat(notificaciones): Notificaciones push en tiempo real
-feat(offline): Modo sin conexión con sincronización automática
+feat(notificaciones): notificaciones push en tiempo real
+feat(offline): modo sin conexión con sincronización automática
 ```
 
 ### 5.2. `fix` - Corrección de Bug ⚡
@@ -161,18 +181,18 @@ feat(offline): Modo sin conexión con sincronización automática
 **Ejemplos (mensaje de squash merge):**
 ```txt
 # Backend
-fix(facturación): Corrección de cálculo de IVA en productos exentos
-fix(autenticación): Manejo de tokens JWT expirados
-fix(reportes): Corrección de filtro de fechas en exportación
+fix(facturación): corrección de cálculo de IVA en productos exentos
+fix(autenticación): manejo de tokens JWT expirados
+fix(reportes): corrección de filtro de fechas en exportación
 
 # Frontend
-fix(formularios): Validación de campos requeridos en registro
-fix(tabla): Paginación incorrecta al filtrar resultados
-fix(modal): Cierre inesperado al hacer clic fuera del área
+fix(formularios): validación de campos requeridos en registro
+fix(tabla): paginación incorrecta al filtrar resultados
+fix(modal): cierre inesperado al hacer clic fuera del área
 
 # General
-fix(api): Respuesta 500 al enviar payload vacío
-fix(permisos): Acceso denegado a usuarios con rol administrador
+fix(api): respuesta 500 al enviar payload vacío
+fix(permisos): acceso denegado a usuarios con rol administrador
 ```
 
 ### 5.3. `perf` - Mejora de Rendimiento ⚡
@@ -193,18 +213,18 @@ fix(permisos): Acceso denegado a usuarios con rol administrador
 **Ejemplos (mensaje de squash merge):**
 ```txt
 # Backend
-perf(reportes): Optimización de consulta de ventas (60% más rápido)
-perf(api): Paginación de resultados en endpoint /products
-perf(cache): Caché Redis para datos de catálogo
+perf(reportes): optimización de consulta de ventas (60% más rápido)
+perf(api): paginación de resultados en endpoint `/products`
+perf(cache): caché `Redis` para datos de catálogo
 
 # Frontend
-perf(imágenes): Carga diferida (lazy loading) en galería
-perf(bundle): División de código para carga inicial más rápida
-perf(tabla): Virtualización de filas en listados grandes
+perf(imágenes): carga diferida (lazy loading) en galería
+perf(bundle): división de código para carga inicial más rápida
+perf(tabla): virtualización de filas en listados grandes
 
 # Base de datos
-perf(db): Índices para búsquedas por fecha y cliente
-perf(consultas): Reducción de N+1 en listado de pedidos
+perf(db): índices para búsquedas por fecha y cliente
+perf(consultas): reducción de N+1 en listado de pedidos
 ```
 
 ### 5.4. `add` - Bloque de Construcción 🔨
@@ -223,18 +243,18 @@ perf(consultas): Reducción de N+1 en listado de pedidos
 **Ejemplos:**
 ```txt
 # Backend
-add(clientes): Modelo Customer con validaciones
-add(clientes): CustomerRepository con métodos CRUD
-add(api): Middleware de validación de permisos
+add(clientes): modelo `Customer` con validaciones
+add(clientes): `CustomerRepository` con métodos CRUD
+add(api): middleware de validación de permisos
 
 # Frontend
-add(formularios): Componente InputField reutilizable
-add(tabla): Lógica de ordenamiento por columnas
-add(estilos): Variables CSS para tema oscuro
+add(formularios): componente `InputField` reutilizable
+add(tabla): lógica de ordenamiento por columnas
+add(estilos): variables CSS para tema oscuro
 
 # Testing
-add(mocks): Mock de servicio de pagos para tests
-add(fixtures): Datos de prueba para módulo de facturación
+add(mocks): mock de servicio de pagos para tests
+add(fixtures): datos de prueba para módulo de facturación
 ```
 
 ### 5.5. `wip` - Trabajo en Progreso 🔨
@@ -256,11 +276,11 @@ add(fixtures): Datos de prueba para módulo de facturación
 
 **Ejemplos:**
 ```txt
-wip: Avance en formulario de registro
-wip(autenticación): Implementación parcial de OAuth2
-wip: Checkpoint antes de refactor mayor
-wip(reportes): Gráficos a medio terminar
-wip: Guardando cambios antes de cambiar de rama
+wip: avance en formulario de registro
+wip(autenticación): implementación parcial de OAuth2
+wip: checkpoint antes de refactor mayor
+wip(reportes): gráficos a medio terminar
+wip: guardando cambios antes de cambiar de rama
 ```
 
 ### 5.6. `docs` - Documentación
@@ -278,13 +298,13 @@ wip: Guardando cambios antes de cambiar de rama
 **Ejemplos:**
 ```txt
 # Documentación de proyecto
-docs: Actualización de README con instrucciones de instalación
-docs: Guía de contribución para nuevos desarrolladores
-docs: Manual de usuario para módulo de facturación
+docs: actualización de `README.md` con instrucciones de instalación
+docs: guía de contribución para nuevos desarrolladores
+docs: manual de usuario para módulo de facturación
 
 # Documentación técnica
-docs(api): Especificación OpenAPI para endpoints de productos
-docs(arquitectura): Diagramas de flujo del sistema
+docs(api): especificación OpenAPI para endpoints de productos
+docs(arquitectura): diagramas de flujo del sistema
 docs(código): JSDoc en funciones de utilidades
 ```
 
@@ -301,11 +321,11 @@ docs(código): JSDoc en funciones de utilidades
 
 **Ejemplos:**
 ```txt
-style: Aplicación de reglas de ESLint en todo el proyecto
-style: Formateo con Prettier
-style(componentes): Corrección de indentación en archivos JSX
-style(api): Reordenamiento de imports según convención
-style: Eliminación de espacios en blanco innecesarios
+style: aplicación de reglas de `ESLint` en todo el proyecto
+style: formateo con `Prettier`
+style(componentes): corrección de indentación en archivos JSX
+style(api): reordenamiento de imports según convención
+style: eliminación de espacios en blanco innecesarios
 ```
 
 ### 5.8. `refactor` - Refactorización
@@ -323,14 +343,14 @@ style: Eliminación de espacios en blanco innecesarios
 **Ejemplos:**
 ```txt
 # Backend
-refactor(servicios): Extracción de lógica común a clase base
-refactor(api): División de controlador grande en módulos
-refactor(db): Migración de queries raw a ORM
+refactor(servicios): extracción de lógica común a clase base
+refactor(api): división de controlador grande en módulos
+refactor(db): migración de queries raw a ORM
 
 # Frontend
-refactor(componentes): Conversión de clases a hooks
-refactor(estado): Migración de Redux a Zustand
-refactor(estilos): Reorganización de archivos CSS por módulo
+refactor(componentes): conversión de clases a hooks
+refactor(estado): migración de `Redux` a `Zustand`
+refactor(estilos): reorganización de archivos CSS por módulo
 ```
 
 ### 5.9. `test` - Pruebas
@@ -346,20 +366,20 @@ refactor(estilos): Reorganización de archivos CSS por módulo
 **Ejemplos:**
 ```txt
 # Tests unitarios
-test(servicios): Tests para CustomerService
-test(utilidades): Tests para funciones de formateo
+test(servicios): tests para `CustomerService`
+test(utilidades): tests para funciones de formateo
 
 # Tests de integración
-test(api): Tests de integración para endpoint /orders
-test(autenticación): Tests de flujo OAuth completo
+test(api): tests de integración para endpoint `/orders`
+test(autenticación): tests de flujo OAuth completo
 
 # Tests E2E
-test(checkout): Suite E2E para flujo de compra
-test(registro): Tests automatizados de formulario de registro
+test(checkout): suite E2E para flujo de compra
+test(registro): tests automatizados de formulario de registro
 
 # Configuración de tests
-test: Configuración de Jest para tests asíncronos
-test: Corrección de mocks desactualizados
+test: configuración de `Jest` para tests asíncronos
+test: corrección de mocks desactualizados
 ```
 
 ### 5.10. `chore` - Mantenimiento
@@ -380,16 +400,16 @@ test: Corrección de mocks desactualizados
 **Ejemplos:**
 ```txt
 # Dependencias de desarrollo
-chore: Actualización de ESLint a versión 9
-chore: Actualización de TypeScript a 5.x
+chore: actualización de `ESLint` a versión 9
+chore: actualización de `TypeScript` a 5.x
 
 # Scripts y herramientas
-chore: Script de limpieza de caché de desarrollo
-chore: Configuración de Husky para pre-commit hooks
+chore: script de limpieza de caché de desarrollo
+chore: configuración de `Husky` para pre-commit hooks
 
 # Limpieza
-chore: Eliminación de archivos temporales del repositorio
-chore: Actualización de .gitignore
+chore: eliminación de archivos temporales del repositorio
+chore: actualización de `.gitignore`
 ```
 
 ### 5.11. `ci` - Integración Continua
@@ -405,17 +425,17 @@ chore: Actualización de .gitignore
 **Ejemplos:**
 ```txt
 # GitHub Actions
-ci: Workflow para tests en paralelo
-ci: Job de análisis de código con SonarQube
-ci: Automatización de releases con semantic-release
+ci: workflow para tests en paralelo
+ci: job de análisis de código con SonarQube
+ci: automatización de releases con semantic-release
 
 # Pipelines
-ci: Optimización del tiempo de build (caché de dependencias)
-ci: Stage de despliegue a entorno de staging
+ci: optimización del tiempo de build (caché de dependencias)
+ci: stage de despliegue a entorno de staging
 
 # Calidad
-ci: Integración de reporte de cobertura con Codecov
-ci: Escaneo de vulnerabilidades en dependencias
+ci: integración de reporte de cobertura con Codecov
+ci: escaneo de vulnerabilidades en dependencias
 ```
 
 ### 5.12. `build` - Sistema de Build
@@ -432,18 +452,18 @@ ci: Escaneo de vulnerabilidades en dependencias
 **Ejemplos:**
 ```txt
 # Dependencias de producción
-build: Actualización de React a versión 19
-build: Actualización de Django por parche de seguridad
-build: Migración de axios a fetch nativo
+build: actualización de `React` a versión 19
+build: actualización de `Django` por parche de seguridad
+build: migración de `axios` a `fetch` nativo
 
 # Configuración de build
-build(webpack): Configuración para tree-shaking
-build(vite): Optimización de chunks para lazy loading
-build: Configuración de minificación de CSS
+build(webpack): configuración para tree-shaking
+build(vite): optimización de chunks para lazy loading
+build: configuración de minificación de CSS
 
 # Docker
-build(docker): Dockerfile multistage para imagen más ligera
-build(docker): Actualización de imagen base por seguridad
+build(docker): `Dockerfile` multistage para imagen más ligera
+build(docker): actualización de imagen base por seguridad
 ```
 
 ### 5.13. `revert` - Revertir Cambios
@@ -458,52 +478,66 @@ build(docker): Actualización de imagen base por seguridad
 
 **Ejemplos:**
 ```txt
-revert: Reversión de "feat(auth): Login con Google"
+revert: reversión de "feat(auth): login con Google"
 
 This reverts commit <hash>.
 ```
 
 ## 🔹 6. Scope
 
-El `scope` indica qué parte del sistema se ve afectada por el cambio. En este proyecto, el scope tiene un rol especial: **se usa como título de categoría en las notas de la release**.
+El `scope` indica qué parte del sistema se ve afectada por el cambio. En este proyecto, el scope tiene un rol fundamental: **el flujo de automatización en `release.config.cjs` lo utiliza para ordenar alfabéticamente los commits dentro de cada sección de la release**.
 
 > [!IMPORTANT]
-> El scope es **obligatorio** en commits finales (`feat`, `fix`, `perf`) y **opcional** en los casos restantes.
+> El scope es **obligatorio** en commits finales (`feat`, `fix`, `perf`) y **opcional** en los casos restantes. Siempre debe representar el **módulo funcional o dominio principal exacto**.
 
-### 6.1. ¿Por qué es importante el Scope?
+### 6.1. ¿Por qué el Scope debe ser el nombre exacto del módulo?
 
-Cuando semantic-release genera las notas de la release, agrupa los cambios por scope. Por ejemplo:
+En el pipeline de publicación ([release.config.cjs](file:///home/theasintota/projects/api-pricut/release.config.cjs)), las notas de la release se organizan por secciones de tipo (`✨ Nuevas Funcionalidades`, `🐛 Corrección de Errores`, `⚡️ Mejoras de Rendimiento`) y dentro de cada sección los commits se ordenan alfabéticamente según su `scope`:
 
-**Commits:**
-```txt
-feat(usuarios): Funcionalidad para crear clientes
-feat(usuarios): Filtros avanzados en listado
-fix(productos): Corrección de precio con descuento
-feat(reportes): Exportación a PDF
+```javascript
+context.commitGroups.forEach(group => {
+  group.commits.sort((a, b) => {
+    const scopeA = a.scope ? a.scope.toLowerCase() : '';
+    const scopeB = b.scope ? b.scope.toLowerCase() : '';
+    return scopeA.localeCompare(scopeB);
+  });
+});
 ```
 
-**Release Notes generadas:**
-```markdown
-## Usuarios
-- Funcionalidad para crear clientes
-- Filtros avanzados en listado
+Si cada desarrollador inventa variantes de scope (por ejemplo `cotizaciones`, `cotizador`, `presupuestos`) o usa nombres de subdirectorios técnicos (`routers`, `services`, `dto`), los cambios quedan dispersos y desorganizados en el changelog. Al usar el **nombre exacto del módulo principal** (`quote_generator`), todos los commits asociados al mismo dominio se agrupan y ordenan de forma natural.
 
-## Productos
-- Corrección de precio con descuento
-
-## Reportes
-- Exportación a PDF
-```
-
-### 6.2. Reglas de Formato
+### 6.2. Reglas de Formato del Scope
 
 | Regla | Descripción | Ejemplo |
 |-------|-------------|---------|
-| **Idioma** | En español | `usuarios`, `productos`, `reportes` |
-| **Formato** | Sustantivo en minúsculas | `facturación`, `autenticación` |
-| **Singular o plural** | Usa el que suene más natural como título | `usuarios` (no `usuario`) |
-| **Sin artículos** | No uses "el", "la", "los" | `clientes` (no `los-clientes`) |
-| **Kebab-case si es compuesto** | Para nombres de dos palabras | `notas-credito`, `tipos-documento` |
+| **Nombre exacto del módulo** | Debe coincidir exactamente con el nombre del módulo funcional o dominio principal (`src/api/modules/<modulo>`) o módulo raíz transversal (`settings`, `common`, `api`). | `quote_generator`, `settings`, `common` |
+| **Granularidad de dominio (No capas técnicas)** | Nunca uses carpetas internas o capas técnicas (`routers`, `services`, `dto`, `models`, `constants`) como scope. El scope siempre es el módulo contenedor. | ✅ `quote_generator`<br>❌ `routers`, `services`, `dto` |
+| **Formato idéntico al código** | Mantén el identificador exacto tal como está definido en la arquitectura del proyecto (ej. `quote_generator`). Evita traducciones o alias que fragmenten el changelog. | `quote_generator` (no `cotizaciones` ni `cotizador`) |
+| **Sin artículos ni prefijos** | No uses "el", "la", ni agregues palabras adicionales. | `quote_generator` (no `el-quote_generator`) |
+
+### 6.3. Granularidad y Múltiples Módulos
+
+#### ¿Qué ocurre si solo se modifica una subcapa interna?
+Si el cambio se realizó exclusivamente en `src/api/modules/quote_generator/routers/`, el `<scope>` **debe seguir siendo `quote_generator`**, nunca `routers`. La granularidad siempre se mantiene a nivel del módulo funcional de negocio.
+
+#### ¿Qué ocurre cuando es necesario modificar varios módulos?
+1. **Commits atómicos (Recomendado):** Si los cambios son independientes o pertenecen a responsabilidades distintas, sepáralos en commits diferentes para que cada uno conserve su scope exacto:
+   ```bash
+   git add src/api/modules/quote_generator/
+   git commit -m 'add(quote_generator): endpoint de subida de archivos'
+
+   git add src/api/settings/
+   git commit -m 'refactor(settings): inmutabilidad en parámetros de configuración'
+   ```
+2. **Módulo principal dominante:** Si un cambio en otro módulo (ej. `settings` o `common`) fue realizado exclusivamente para soportar la funcionalidad del módulo principal, se utiliza el scope del módulo dominante:
+   ```txt
+   add(quote_generator): integración con parámetros de límites de subida
+   ```
+3. **Cambios transversales a nivel de plataforma:** Si el cambio impacta de forma global a la API o al sistema sin pertenecer a un módulo de negocio particular, utiliza el scope del componente transversal:
+   - `api`: Routing general, middlewares globales, ciclo de vida o configuración del servidor FastAPI.
+   - `common`: Excepciones base, utilidades transversales o tipos comunes compartidos.
+   - `settings`: Configuración y parámetros globales.
+4. **Omitir el scope en commits de desarrollo:** En commits intermedios (`add`, `refactor`, `chore`, `wip`), el scope es opcional. Si un commit intermedio abarca varios módulos y ninguno es dominante, se puede omitir el scope.
 
 ## 🔹 7. Breaking Change
 
@@ -529,13 +563,13 @@ Añade `BREAKING CHANGE` si y solo si el cambio exige alguna de estas tres cosas
 3. **Incluye en el body:** Una explicación corta del cambio y en el footer las instrucciones de migración detalladas.
 
 ```txt
-feat(api)!: Cambio en estructura de respuesta del endpoint /usuarios
+feat(api)!: cambio en estructura de respuesta del endpoint `/usuarios`
 
 Unificación de nomenclatura de campos y eliminación de wrappers de metadata.
 
-BREAKING CHANGE: el campo "id_usuario" pasa a llamarse "userId".
+BREAKING CHANGE: el campo `id_usuario` pasa a llamarse `userId`.
 Pasos de migración:
-1. Actualizar cliente para leer userId en lugar de id_usuario.
+1. Actualizar cliente para leer `userId` en lugar de `id_usuario`.
 2. Recompilar y desplegar cliente X antes de desplegar servicio Y.
 ```
 
@@ -552,21 +586,25 @@ Evita estos errores frecuentes al escribir commits:
 
 | ❌ Incorrecto | ✅ Correcto | Razón |
 |--------------|-------------|-------|
-| `Agregar login con Google` | `Integración de login con Google` | Usa frase nominal, no imperativo |
-| `Corregir el bug de overflow` | `Corrección de bug de overflow` | Evita artículos y verbos al inicio |
-| `Implementar lazy loading` | `Implementación de carga diferida` | Describe QUÉ es, no QUÉ hacer |
-| `Actualizar dependencias.` | `Actualización de dependencias` | Sin punto final |
+| `Agregar login con Google` | `login con Google OAuth` | Usa frase nominal y minúscula, no imperativo |
+| `Corregir el bug de overflow` | `corrección de bug de overflow` | Evita artículos y verbos al inicio |
+| `Implementar lazy loading` | `implementación de carga diferida` | Describe QUÉ es, no QUÉ hacer |
+| `Actualizar dependencias.` | `actualización de dependencias` | Sin punto final y en minúscula |
+| `feat(api): Creación de endpoint` | `feat(api): endpoint de creación` | Inicia en minúscula salvo clases o siglas |
+| `add: DTO de usuario` | `add: DTO de usuario` | ✅ Correcto (`DTO` es sigla técnica) |
+| `add: CustomerService` | `` add: `CustomerService` `` | Envuelve clases/funciones en backticks |
+| `chore: actualización de .gitignore` | `` chore: actualización de `.gitignore` `` | Envuelve rutas o ficheros en backticks |
 
 ### 8.2. Errores de Tipo de Commit
 
 | ❌ Incorrecto | ✅ Correcto | Razón |
 |--------------|-------------|-------|
-| `feat: Creación de modelo Product` | `add: Modelo Product` | Es un paso intermedio, no la feature completa |
-| `fix: Cambio de color de botón` | `style: Ajuste de color de botón` | Cambio estético, no es un bug |
-| `feat: Actualización de dependencias` | `build: Actualización de dependencias` | No es funcionalidad nueva |
-| `chore: Corrección de test roto` | `test: Corrección de test unitario` | Es específico de testing |
-| `fix: Refactorización de función` | `refactor: Reorganización de función` | No había bug que corregir |
-| `feat: Mejora de rendimiento` | `perf: Optimización de consultas` | No es funcionalidad, es optimización |
+| `feat: creación de modelo Product` | `` add: modelo `Product` `` | Es un paso intermedio, no la feature completa |
+| `fix: cambio de color de botón` | `style: ajuste de color de botón` | Cambio estético, no es un bug |
+| `feat: actualización de dependencias` | `build: actualización de dependencias` | No es funcionalidad nueva |
+| `chore: corrección de test roto` | `test: corrección de test unitario` | Es específico de testing |
+| `fix: refactorización de función` | `refactor: reorganización de función` | No había bug que corregir |
+| `feat: mejora de rendimiento` | `perf: optimización de consultas` | No es funcionalidad, es optimización |
 
 ### 8.3. Otros Errores a Evitar
 
@@ -574,5 +612,6 @@ Evita estos errores frecuentes al escribir commits:
 - ❌ **Commits muy grandes:** Un commit debe hacer una sola cosa
 - ❌ **Mezclar tipos:** No combines `feat` + `fix` en el mismo commit
 - ❌ **Usar verbos imperativos:** Usa `Adición de` en lugar de `Agregar`
+- ❌ **Omitir backticks en código:** Envuelve librerías, funciones, clases, rutas de ficheros, directorios o endpoints entre `` ` ``
 - ❌ **Exceder 72 caracteres:** Mantén la descripción concisa
 - ❌ **Terminar con punto:** No uses puntuación final
