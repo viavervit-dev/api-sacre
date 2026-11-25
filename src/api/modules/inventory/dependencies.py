@@ -28,22 +28,22 @@ from src.api.modules.inventory.services.products.wholesaler import (
     GetProductsWholesalerService,
     UpdateProductWholesalerService,
 )
-from src.api.settings.database import DBSession
+from src.api.settings.database import DBSessionDep
 
 
-def category_repository(db: DBSession) -> CategoryRepository:
+def category_repository(db: DBSessionDep) -> CategoryRepository:
     """Provee una instancia del repositorio de categorías."""
 
     return CategoryRepository(db=db)
 
 
-def product_repository(db: DBSession) -> ProductRepository:
+def product_repository(db: DBSessionDep) -> ProductRepository:
     """Provee una instancia del repositorio de productos."""
 
     return ProductRepository(db=db)
 
 
-def wholesaler_product_repository(db: DBSession) -> WholesalerProductRepository:
+def wholesaler_product_repository(db: DBSessionDep) -> WholesalerProductRepository:
     """Provee una instancia del repositorio de productos."""
 
     return WholesalerProductRepository(db=db)

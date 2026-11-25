@@ -20,7 +20,7 @@ from src.api.modules.auth.services.jwt import (
     LogoutService,
     RefreshTokenService,
 )
-from src.api.settings.database import DBSession
+from src.api.settings.database import DBSessionDep
 
 
 class JWTAuthentication:
@@ -56,7 +56,7 @@ optional_tokens = JWTAuthentication(auto_error=False)
 tokens = JWTAuthentication(auto_error=True)
 
 
-def user_repository(db: DBSession) -> IUserRepository:
+def user_repository(db: DBSessionDep) -> IUserRepository:
     """Provee una instancia del repositorio de usuarios."""
 
     return UserRepository(db=db)

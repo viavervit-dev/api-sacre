@@ -11,16 +11,16 @@ from src.api.modules.users.services.wholesaler import (
     GetWholesalerService,
     UpdateWholesalerService,
 )
-from src.api.settings.database import DBSession
+from src.api.settings.database import DBSessionDep
 
 
-def customer_repository(db: DBSession) -> CustomerRepository:
+def customer_repository(db: DBSessionDep) -> CustomerRepository:
     """Provee una instancia del repositorio de clientes."""
 
     return CustomerRepository(db=db)
 
 
-def wholesaler_repository(db: DBSession) -> WholesalerRepository:
+def wholesaler_repository(db: DBSessionDep) -> WholesalerRepository:
     """Provee una instancia del repositorio de clientes mayoristas."""
 
     return WholesalerRepository(db=db)

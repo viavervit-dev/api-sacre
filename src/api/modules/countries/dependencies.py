@@ -7,10 +7,10 @@ from src.api.modules.countries.services import (
     RetrieveContriesService,
     RetrieveOrganizationCountryService,
 )
-from src.api.settings.database import DBSession
+from src.api.settings.database import DBSessionDep
 
 
-def country_repository(db: DBSession) -> CountryRepository:
+def country_repository(db: DBSessionDep) -> CountryRepository:
     """Provee una instancia del repositorio de países."""
 
     return CountryRepository(db=db)

@@ -114,6 +114,15 @@ async def close_db_pool() -> None:
         _engine = None
 
 
+def get_session_factory() -> async_sessionmaker[AsyncSession]:
+    """Retorna la fábrica de sesiones asíncronas para operaciones independientes y scripts."""
+
+    if _async_session_factory is None:
+        raise RuntimeError("Base de datos no inicializada. Llama a create_db_pool() primero.")
+
+    return _async_session_factory
+
+
 async def check_db_connection() -> bool:
     """Verifica que la base de datos esté disponible ejecutando una consulta simple."""
 
@@ -131,16 +140,7 @@ async def check_db_connection() -> bool:
 
 
 async def db_session() -> AsyncGenerator[AsyncSession]:
-    """
-    Dependencia para obtener una sesión de base de datos.
-
-    ### Ejemplo de uso:
-    ```python
-    @app.get("/users/{user_id}")
-    async def get_user(user_id: int, db: DBSession):
-        ...
-    ```
-    """
+    """Dependencia para obtener una sesión de base de datos."""
 
     if _async_session_factory is None:
         raise RuntimeError("Base de datos no inicializada. Llama a create_db_pool() primero.")
@@ -154,4 +154,4 @@ async def db_session() -> AsyncGenerator[AsyncSession]:
             raise
 
 
-DBSession = Annotated[AsyncSession, Depends(db_session, scope="function")]
+DBSessionDep = Annotated[AsyncSession, Depends(db_session, scope="function")]

@@ -20,10 +20,10 @@ from src.api.modules.orders.services.purchase import (
     GetListPurchaseOrderService,
     GetPurchaseOrderService,
 )
-from src.api.settings.database import DBSession
+from src.api.settings.database import DBSessionDep
 
 
-def order_repository(db: DBSession) -> OrderRepository:
+def order_repository(db: DBSessionDep) -> OrderRepository:
     """Provee una instancia del repositorio de ordenes de compra."""
 
     return OrderRepository(db=db)
