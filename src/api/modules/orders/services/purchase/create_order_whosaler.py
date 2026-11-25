@@ -28,7 +28,7 @@ from src.api.modules.orders.repositories.interfaces import IOrderRepository
 logger = logging.getLogger(__name__)
 
 
-class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
+class CreateOrderWholesalerService(FinancialCalculationsMixin):
     """Servicio encargado de la creación de órdenes de compra para clientes mayoristas."""
 
     def __init__(
@@ -36,14 +36,14 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
         wholesaler_product_repo: IWholesalerProductRepository,
         product_repo: IProductRepository,
         order_repo: IOrderRepository,
-        payment_service: CreatePaymentLinkService,
+        create_payment_link_service: CreatePaymentLinkService,
         user_repo: IUserRepository,
     ) -> None:
         self.__wholesaler_product_repo = wholesaler_product_repo
         self.__product_repo = product_repo
         self.__order_repo = order_repo
         self.__user_repo = user_repo
-        self.__payment_service = payment_service
+        self.__create_payment_link_service = create_payment_link_service
         self.__products_map: dict[UUID, WholesalerProduct | Product] = {}
 
     async def create(self, data: CreateOrderDTO, wholesaler_id: UUID) -> ReadOrderDTO:
@@ -114,7 +114,7 @@ class CreatePurchaseOrderWholesalerService(FinancialCalculationsMixin):
 
         # Llamada externa al servicio de pagos
         try:
-            payment_link = await self.__payment_service.create_payment_link(order_data=order_data)
+            payment_link = await self.__create_payment_link_service.create(order_data=order_data)
         except Exception:
             try:
                 await self.__order_repo.cancel_order(

@@ -1,4 +1,7 @@
 from functools import lru_cache
+from typing import Annotated
+
+from fastapi import Depends
 
 from src.api.common.email.service import EmailService
 from src.api.settings.parameters import api_parameters
@@ -19,3 +22,6 @@ def email_service() -> EmailService:
         starttls=api_parameters.mail_starttls,
         timeout=api_parameters.mail_timeout,
     )
+
+
+EmailServiceDep = Annotated[EmailService, Depends(email_service)]

@@ -1,11 +1,8 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_400
-from src.api.common.utils import FinancialCalculationsMixin
-from src.api.modules.orders.dependencies import financial_calculations_service
+from src.api.modules.orders.dependencies import FinancialCalculationsDep
 from src.api.modules.orders.dto import GetTaxAmountDTO, ReadDecimalNumberDTO
 
 get_tax_amount_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
@@ -19,7 +16,7 @@ get_tax_amount_router = APIRouter(prefix="/orders", tags=["Órdenes/Transaccione
 )
 async def get_tax_amount(
     data: GetTaxAmountDTO,
-    service: Annotated[type[FinancialCalculationsMixin], Depends(financial_calculations_service)],
+    service: FinancialCalculationsDep,
 ) -> Response[ReadDecimalNumberDTO]:
     """
     Recibe un monto base y calcula el valor correspondiente al impuesto al valor agregado

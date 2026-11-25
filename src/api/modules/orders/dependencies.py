@@ -2,9 +2,8 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.api.common.email.dependencies import EmailService, email_service
-from src.api.common.payment.dependencies import create_payment_link_service
-from src.api.common.payment.services import CreatePaymentLinkService
+from src.api.common.email.dependencies import EmailServiceDep
+from src.api.common.payment.dependencies import CreatePaymentLinkServiceDep
 from src.api.common.utils import FinancialCalculationsMixin
 from src.api.modules.auth.dependencies import UserRepositoryDep
 from src.api.modules.inventory.dependencies import (
@@ -14,7 +13,7 @@ from src.api.modules.inventory.dependencies import (
 from src.api.modules.orders.repositories import OrderRepository
 from src.api.modules.orders.services import OrderNotificationService
 from src.api.modules.orders.services.purchase import (
-    CreatePurchaseOrderWholesalerService,
+    CreateOrderWholesalerService,
     GetListPurchaseOrderService,
     GetPurchaseOrderService,
 )
@@ -27,6 +26,9 @@ def order_repository(db: DBSessionDep) -> OrderRepository:
     return OrderRepository(db=db)
 
 
+OrderRepositoryDep = Annotated[OrderRepository, Depends(order_repository)]
+
+
 def financial_calculations_service() -> type[FinancialCalculationsMixin]:
     """
     Provee una instancia del servicio que provee métodos auxiliares y cálculos matemáticos
@@ -36,9 +38,12 @@ def financial_calculations_service() -> type[FinancialCalculationsMixin]:
     return FinancialCalculationsMixin
 
 
-def get_list_purchase_order_service(
-    order_repo: Annotated[OrderRepository, Depends(order_repository)],
-) -> GetListPurchaseOrderService:
+FinancialCalculationsDep = Annotated[
+    type[FinancialCalculationsMixin], Depends(financial_calculations_service)
+]
+
+
+def get_list_purchase_order_service(order_repo: OrderRepositoryDep) -> GetListPurchaseOrderService:
     """
     Provee una instancia del servicio encargado de la consulta y serialización de órdenes
     de compra.
@@ -47,9 +52,12 @@ def get_list_purchase_order_service(
     return GetListPurchaseOrderService(order_repo=order_repo)
 
 
-def get_purchase_order_service(
-    order_repo: Annotated[OrderRepository, Depends(order_repository)],
-) -> GetPurchaseOrderService:
+GetListPurchaseOrderServiceDep = Annotated[
+    GetListPurchaseOrderService, Depends(get_list_purchase_order_service)
+]
+
+
+def get_purchase_order_service(order_repo: OrderRepositoryDep) -> GetPurchaseOrderService:
     """
     Provee una instancia del servicio encargado de la consulta y serialización de órdenes
     de compra.
@@ -58,9 +66,12 @@ def get_purchase_order_service(
     return GetPurchaseOrderService(order_repo=order_repo)
 
 
-def notification_service(
-    email_service: Annotated[EmailService, Depends(email_service)],
-) -> OrderNotificationService:
+GetPurchaseOrderServiceDep = Annotated[
+    GetPurchaseOrderService, Depends(get_purchase_order_service)
+]
+
+
+def notification_service(email_service: EmailServiceDep) -> OrderNotificationService:
     """
     Provee una instancia del servicio encargado de despachar notificaciones al cliente sobre
     órdenes de compra
@@ -69,22 +80,30 @@ def notification_service(
     return OrderNotificationService(email_service=email_service)
 
 
+OrderNotificationServiceDep = Annotated[OrderNotificationService, Depends(notification_service)]
+
+
 def create_purchase_order_wholesaler_service(
-    payment_service: Annotated[CreatePaymentLinkService, Depends(create_payment_link_service)],
-    order_repo: Annotated[OrderRepository, Depends(order_repository)],
+    create_payment_link_service: CreatePaymentLinkServiceDep,
+    order_repo: OrderRepositoryDep,
     user_repo: UserRepositoryDep,
     product_repo: ProductRepositoryDep,
     wholesaler_product_repo: WholesalerProductRepositoryDep,
-) -> CreatePurchaseOrderWholesalerService:
+) -> CreateOrderWholesalerService:
     """
     Provee una instancia del servicio encargado de la creación de órdenes de compra
     para clientes mayoristas.
     """
 
-    return CreatePurchaseOrderWholesalerService(
-        payment_service=payment_service,
+    return CreateOrderWholesalerService(
+        create_payment_link_service=create_payment_link_service,
         wholesaler_product_repo=wholesaler_product_repo,
         product_repo=product_repo,
         order_repo=order_repo,
         user_repo=user_repo,
     )
+
+
+CreateOrderWholesalerServiceDep = Annotated[
+    CreateOrderWholesalerService, Depends(create_purchase_order_wholesaler_service)
+]

@@ -1,11 +1,8 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_400
-from src.api.common.utils import FinancialCalculationsMixin
-from src.api.modules.orders.dependencies import financial_calculations_service
+from src.api.modules.orders.dependencies import FinancialCalculationsDep
 from src.api.modules.orders.dto import MultiplyDecimalDTO, ReadDecimalNumberDTO
 
 multiply_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
@@ -19,7 +16,7 @@ multiply_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
 )
 async def multiply(
     data: MultiplyDecimalDTO,
-    service: Annotated[type[FinancialCalculationsMixin], Depends(financial_calculations_service)],
+    service: FinancialCalculationsDep,
 ) -> Response[ReadDecimalNumberDTO]:
     """
     Recibe un valor monetario decimal y un factor multiplicador entero, calculando el importe

@@ -1,5 +1,8 @@
+from typing import Annotated
+
 import certifi
 import httpx
+from fastapi import Depends
 
 from src.api.settings.parameters import api_parameters
 
@@ -66,3 +69,6 @@ def http_client() -> httpx.AsyncClient:
         )
 
     return _http_client
+
+
+HTTPClientDep = Annotated[httpx.AsyncClient, Depends(http_client)]

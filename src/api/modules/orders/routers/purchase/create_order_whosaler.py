@@ -17,13 +17,11 @@ from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
 from src.api.modules.orders.dependencies import (
-    create_purchase_order_wholesaler_service,
-    notification_service,
+    CreateOrderWholesalerServiceDep,
+    OrderNotificationServiceDep,
 )
 from src.api.modules.orders.dto import CreateOrderDTO, ReadOrderDTO
 from src.api.modules.orders.models import Order
-from src.api.modules.orders.services import OrderNotificationService
-from src.api.modules.orders.services.purchase import CreatePurchaseOrderWholesalerService
 
 create_purchase_order_wholesaler_router = APIRouter(
     prefix="/orders",
@@ -74,10 +72,8 @@ async def create_purchase_order_wholesaler(
             description="El identificador único del cliente mayorista en formato UUID v4.",
         ),
     ],
-    service: Annotated[
-        CreatePurchaseOrderWholesalerService, Depends(create_purchase_order_wholesaler_service)
-    ],
-    notifier: Annotated[OrderNotificationService, Depends(notification_service)],
+    service: CreateOrderWholesalerServiceDep,
+    notifier: OrderNotificationServiceDep,
     background_tasks: BackgroundTasks,
 ) -> Response[ReadOrderDTO]:
     """

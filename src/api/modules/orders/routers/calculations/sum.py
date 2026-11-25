@@ -1,11 +1,8 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_400
-from src.api.common.utils import FinancialCalculationsMixin
-from src.api.modules.orders.dependencies import financial_calculations_service
+from src.api.modules.orders.dependencies import FinancialCalculationsDep
 from src.api.modules.orders.dto import ListDecimalNumberDTO, ReadDecimalNumberDTO
 
 sum_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
@@ -19,7 +16,7 @@ sum_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
 )
 async def sum(
     data: ListDecimalNumberDTO,
-    service: Annotated[type[FinancialCalculationsMixin], Depends(financial_calculations_service)],
+    service: FinancialCalculationsDep,
 ) -> Response[ReadDecimalNumberDTO]:
     """
     Recibe una colección de valores numéricos decimales y realiza su suma aritmética

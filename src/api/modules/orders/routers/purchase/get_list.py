@@ -12,10 +12,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.orders.dependencies import get_list_purchase_order_service
+from src.api.modules.orders.dependencies import GetListPurchaseOrderServiceDep
 from src.api.modules.orders.dto import ReadOrderSummaryDTO
 from src.api.modules.orders.models import Order
-from src.api.modules.orders.services.purchase import GetListPurchaseOrderService
 from src.api.settings.parameters import api_parameters
 
 get_list_purchase_orders_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
@@ -104,7 +103,7 @@ require_admin = UserPermissionChecker(
 )
 async def get_list_purchase_orders(
     user: Annotated[User, Depends(require_admin)],
-    service: Annotated[GetListPurchaseOrderService, Depends(get_list_purchase_order_service)],
+    service: GetListPurchaseOrderServiceDep,
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,

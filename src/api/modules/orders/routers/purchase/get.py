@@ -13,10 +13,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.orders.dependencies import get_purchase_order_service
+from src.api.modules.orders.dependencies import GetPurchaseOrderServiceDep
 from src.api.modules.orders.dto import ReadOrderDTO
 from src.api.modules.orders.models import Order
-from src.api.modules.orders.services.purchase import GetPurchaseOrderService
 
 get_purchase_order_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
 require_admin = UserPermissionChecker(
@@ -52,7 +51,7 @@ async def get_purchase_order(
             description="El identificador único de la orden de compra en formato UUID v4.",
         ),
     ],
-    service: Annotated[GetPurchaseOrderService, Depends(get_purchase_order_service)],
+    service: GetPurchaseOrderServiceDep,
 ) -> Response[ReadOrderDTO]:
     """
     Permite consultar el detalle completo de una orden de compra específica a partir de su ID

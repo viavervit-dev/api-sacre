@@ -23,7 +23,7 @@ class CreatePaymentLinkService:
     def __init__(self, http_client: httpx.AsyncClient) -> None:
         self.__http_client = http_client
 
-    async def create_payment_link(self, order_data: dict[str, Any]) -> str:
+    async def create(self, order_data: dict[str, Any]) -> str:
         """
         Envía la solicitud de creación de link al servicio de pagos.
 
