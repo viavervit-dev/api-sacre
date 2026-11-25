@@ -1,12 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import APIRouter, Path, status
 
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_404, response_scheme_503
-from src.api.modules.countries.dependencies import get_organization_country_service
+from src.api.modules.countries.dependencies import RetrieveOrganizationCountryServiceDep
 from src.api.modules.countries.dto import ReadAdministrativeStructureDTO
-from src.api.modules.countries.services import RetrieveOrganizationCountryService
 
 organization_country_router = APIRouter(prefix="/countries", tags=["Países"])
 
@@ -28,9 +27,7 @@ async def get_organization_country(
             description="Nombre oficial del país cuya organización territorial se consulta.",
         ),
     ],
-    service: Annotated[
-        RetrieveOrganizationCountryService, Depends(get_organization_country_service)
-    ],
+    service: RetrieveOrganizationCountryServiceDep,
 ) -> Response[ReadAdministrativeStructureDTO]:
     """
     Permite consultar la organización territorial jerárquica de un país registrado en el

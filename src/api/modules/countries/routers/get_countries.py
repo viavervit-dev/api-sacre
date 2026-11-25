@@ -1,12 +1,9 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_503
-from src.api.modules.countries.dependencies import get_contries_service
+from src.api.modules.countries.dependencies import RetrieveContriesServiceDep
 from src.api.modules.countries.dto import ReadCountryDTO
-from src.api.modules.countries.services import RetrieveContriesService
 
 countries_router = APIRouter(prefix="/countries", tags=["Países"])
 
@@ -19,9 +16,7 @@ countries_router = APIRouter(prefix="/countries", tags=["Países"])
         status.HTTP_503_SERVICE_UNAVAILABLE: response_scheme_503(db_unavailable=True),
     },
 )
-async def get_countries(
-    service: Annotated[RetrieveContriesService, Depends(get_contries_service)],
-) -> Response[list[ReadCountryDTO]]:
+async def get_countries(service: RetrieveContriesServiceDep) -> Response[list[ReadCountryDTO]]:
     """
     Permite consultar una lista del catálogo general de países registrados con su nombre
     oficial y código internacional (ISO). Proporciona a las aplicaciones cliente los datos
