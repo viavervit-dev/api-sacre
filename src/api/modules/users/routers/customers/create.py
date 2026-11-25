@@ -1,13 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_400, response_scheme_503
 from src.api.modules.auth.dto import ReadUserDTO
-from src.api.modules.users.dependencies import create_customer_service
+from src.api.modules.users.dependencies import CreateCustomerServiceDep
 from src.api.modules.users.dto import CreateCustomerDTO
-from src.api.modules.users.services.customers import CreateCustomerService
 
 create_customer_router = APIRouter(prefix="/users", tags=["Usuarios"])
 
@@ -23,7 +20,7 @@ create_customer_router = APIRouter(prefix="/users", tags=["Usuarios"])
 )
 async def create_customer(
     data: CreateCustomerDTO,
-    service: Annotated[CreateCustomerService, Depends(create_customer_service)],
+    service: CreateCustomerServiceDep,
 ) -> Response[ReadUserDTO]:
     """
     Permite crear una cuenta de usuario con rol de cliente. Ejecuta validaciones sintácticas y

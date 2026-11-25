@@ -13,10 +13,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.users.dependencies import get_wholesaler_service
+from src.api.modules.users.dependencies import GetWholesalerServiceDep
 from src.api.modules.users.dto import ReadWholesalerDTO
 from src.api.modules.users.models import Wholesaler
-from src.api.modules.users.services.wholesaler import GetWholesalerService
 
 get_wholesaler_router = APIRouter(prefix="/users", tags=["Usuarios"])
 require_admin = UserPermissionChecker(
@@ -52,7 +51,7 @@ async def get_wholesaler(
             description="El identificador único del cliente mayorista en formato UUID v4.",
         ),
     ],
-    service: Annotated[GetWholesalerService, Depends(get_wholesaler_service)],
+    service: GetWholesalerServiceDep,
 ) -> Response[ReadWholesalerDTO]:
     """
     Permite consultar la información detallada de un cliente mayorista por su identificador

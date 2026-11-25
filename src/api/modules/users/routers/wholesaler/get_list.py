@@ -12,10 +12,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.users.dependencies import get_list_wholesaler_service
+from src.api.modules.users.dependencies import GetListWholesalerServiceDep
 from src.api.modules.users.dto import ReadWholesalerSummaryDTO
 from src.api.modules.users.models import Wholesaler
-from src.api.modules.users.services.wholesaler import GetListWholesalerService
 from src.api.settings.parameters import api_parameters
 
 get_list_wholesaler_router = APIRouter(prefix="/users", tags=["Usuarios"])
@@ -98,7 +97,7 @@ require_admin = UserPermissionChecker(
 )
 async def get_list_wholesaler(
     user: Annotated[User, Depends(require_admin)],
-    service: Annotated[GetListWholesalerService, Depends(get_list_wholesaler_service)],
+    service: GetListWholesalerServiceDep,
     offset: int = Query(
         title="Registros a omitir",
         description=PAGINATION_OFFSET_DESCRIPTION,

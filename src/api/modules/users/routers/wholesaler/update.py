@@ -14,10 +14,9 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.users.dependencies import update_wholesaler_service
+from src.api.modules.users.dependencies import UpdateWholesalerServiceDep
 from src.api.modules.users.dto import ReadWholesalerDTO, UpdateWholesalerDTO
 from src.api.modules.users.models import Wholesaler
-from src.api.modules.users.services.wholesaler import UpdateWholesalerService
 
 update_wholesaler_router = APIRouter(prefix="/users", tags=["Usuarios"])
 require_admin = UserPermissionChecker(
@@ -55,7 +54,7 @@ async def update_wholesaler(
             description="El identificador único del cliente mayorista en formato UUID v4.",
         ),
     ],
-    service: Annotated[UpdateWholesalerService, Depends(update_wholesaler_service)],
+    service: UpdateWholesalerServiceDep,
 ) -> Response[ReadWholesalerDTO]:
     """
     Permite modificar de forma parcial los datos de un cliente mayorista. Ejecuta validaciones
