@@ -3,7 +3,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.api.common.exceptions import DTOValidationErrorMessages
-from src.api.modules.users.constants import Ecuador
+from src.api.modules.countries.constants import Ecuador
 
 
 class ReadCountryDTO(BaseModel):

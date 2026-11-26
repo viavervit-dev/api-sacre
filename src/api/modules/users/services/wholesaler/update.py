@@ -5,12 +5,12 @@ from fastapi.exceptions import RequestValidationError
 from src.api.common.exceptions import ResourceNotFound
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.users.constants import WholesalerEntity
-from src.api.modules.users.dto import ReadWholesalerDTO, UpdateWholesalerDTO
+from src.api.modules.users.constants.wholesaler import WHOLESALER_CONSTANTS
+from src.api.modules.users.dto.wholesaler import ReadWholesalerDTO, UpdateWholesalerDTO
 from src.api.modules.users.repositories.interfaces import IWholesalerRepository
 
 
-class UpdateWholesalerService:
+class UpdateService:
     """Servicio encargado de la actualización de clientes mayoristas."""
 
     def __init__(self, wholesaler_repo: IWholesalerRepository, user_repo: IUserRepository) -> None:
@@ -72,7 +72,7 @@ class UpdateWholesalerService:
                 errors.append(
                     {
                         "loc": ("body", "name_or_company_name"),
-                        "msg": WholesalerEntity.NAME_OR_COMPANY_NAME_IN_USE.value,
+                        "msg": WHOLESALER_CONSTANTS.Errors.NAME_OR_COMPANY_NAME_IN_USE,
                         "type": "domain_validation",
                     }
                 )
@@ -87,7 +87,7 @@ class UpdateWholesalerService:
                 errors.append(
                     {
                         "loc": ("body", "phone"),
-                        "msg": WholesalerEntity.PHONE_IN_USE.value,
+                        "msg": WHOLESALER_CONSTANTS.Errors.PHONE_IN_USE,
                         "type": "domain_validation",
                     }
                 )
@@ -102,7 +102,7 @@ class UpdateWholesalerService:
                 errors.append(
                     {
                         "loc": ("body", "ruc"),
-                        "msg": WholesalerEntity.RUC_IN_USE.value,
+                        "msg": WHOLESALER_CONSTANTS.Errors.RUC_IN_USE,
                         "type": "domain_validation",
                     }
                 )

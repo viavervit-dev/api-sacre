@@ -7,7 +7,7 @@ from sqlalchemy import UUID as SQLAlchemyUUID
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.api.modules.users.constants import WholesalerEntity
+from src.api.modules.users.constants.wholesaler import WHOLESALER_CONSTANTS
 from src.api.settings.database import ModelBase
 
 
@@ -31,35 +31,35 @@ class Wholesaler(ModelBase):
     )
     products: Mapped[list[UUID]] = mapped_column(
         ARRAY(item_type=SQLAlchemyUUID(as_uuid=True)),
-        doc=WholesalerEntity.PRODUCTS_DESCRIPTION.value,
+        doc=WHOLESALER_CONSTANTS.Docs.PRODUCTS_DESCRIPTION,
         nullable=False,
     )
     name_or_company_name: Mapped[str] = mapped_column(
-        String(length=WholesalerEntity.NAME_OR_COMPANY_NAME_MAX_LENGTH.value),
-        doc=WholesalerEntity.NAME_OR_COMPANY_NAME_DESCRIPTION.value,
+        String(length=WHOLESALER_CONSTANTS.Limits.NAME_OR_COMPANY_NAME_MAX_LENGTH),
+        doc=WHOLESALER_CONSTANTS.Docs.NAME_OR_COMPANY_NAME_DESCRIPTION,
         nullable=False,
         unique=True,
     )
     ruc: Mapped[str | None] = mapped_column(
-        String(length=WholesalerEntity.RUC_MAX_LENGTH.value),
-        doc=WholesalerEntity.RUC_DESCRIPTION.value,
+        String(length=WHOLESALER_CONSTANTS.Limits.RUC_MAX_LENGTH),
+        doc=WHOLESALER_CONSTANTS.Docs.RUC_DESCRIPTION,
         nullable=True,
         unique=True,
     )
     phone: Mapped[str] = mapped_column(
-        String(length=WholesalerEntity.PHONE_MAX_LENGTH.value),
-        doc=WholesalerEntity.PHONE_DESCRIPTION.value,
+        String(length=WHOLESALER_CONSTANTS.Limits.PHONE_MAX_LENGTH),
+        doc=WHOLESALER_CONSTANTS.Docs.PHONE_DESCRIPTION,
         nullable=False,
         unique=True,
     )
     location: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
-        doc=WholesalerEntity.LOCATION_DESCRIPTION.value,
+        doc=WHOLESALER_CONSTANTS.Docs.LOCATION_DESCRIPTION,
         nullable=False,
     )
     extra_contacts: Mapped[dict[str, Any] | None] = mapped_column(
         JSONB,
-        doc=WholesalerEntity.EXTRA_CONTACTS_DESCRIPTION.value,
+        doc=WHOLESALER_CONSTANTS.Docs.EXTRA_CONTACTS_DESCRIPTION,
         nullable=True,
     )
     date_joined: Mapped[datetime] = mapped_column(

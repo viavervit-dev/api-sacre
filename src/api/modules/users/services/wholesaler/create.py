@@ -4,12 +4,12 @@ from fastapi.exceptions import RequestValidationError
 
 from src.api.modules.auth.constants import UserEntity, UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.users.constants import WholesalerEntity
-from src.api.modules.users.dto import CreateWholesalerDTO, ReadWholesalerDTO
+from src.api.modules.users.constants.wholesaler import WHOLESALER_CONSTANTS
+from src.api.modules.users.dto.wholesaler import CreateWholesalerDTO, ReadWholesalerDTO
 from src.api.modules.users.repositories.interfaces import IWholesalerRepository
 
 
-class CreateWholesalerService:
+class CreateService:
     """Servicio encargado de la creación de clientes mayoristas."""
 
     def __init__(self, wholesaler_repo: IWholesalerRepository, user_repo: IUserRepository) -> None:
@@ -81,7 +81,7 @@ class CreateWholesalerService:
                 errors.append(
                     {
                         "loc": ("body", "name_or_company_name"),
-                        "msg": WholesalerEntity.NAME_OR_COMPANY_NAME_IN_USE.value,
+                        "msg": WHOLESALER_CONSTANTS.Errors.NAME_OR_COMPANY_NAME_IN_USE,
                         "type": "domain_validation",
                     }
                 )
@@ -96,7 +96,7 @@ class CreateWholesalerService:
                 errors.append(
                     {
                         "loc": ("body", "phone"),
-                        "msg": WholesalerEntity.PHONE_IN_USE.value,
+                        "msg": WHOLESALER_CONSTANTS.Errors.PHONE_IN_USE,
                         "type": "domain_validation",
                     }
                 )
@@ -111,7 +111,7 @@ class CreateWholesalerService:
                 errors.append(
                     {
                         "loc": ("body", "ruc"),
-                        "msg": WholesalerEntity.RUC_IN_USE.value,
+                        "msg": WHOLESALER_CONSTANTS.Errors.RUC_IN_USE,
                         "type": "domain_validation",
                     }
                 )

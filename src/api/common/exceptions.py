@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class DTOValidationErrorMessages(Enum):
+class DTOValidationErrorMessages(StrEnum):
     """
     Enumeración que define constantes relacionadas con los mensajes de error de validación.
 
@@ -63,7 +63,7 @@ class DTOValidationErrorMessages(Enum):
     VALUE_ERROR = "El valor ingresado no es válido."
 
 
-class ExceptionErrorMessages(Enum):
+class ExceptionErrorMessages(StrEnum):
     """
     Enumeración que define constantes relacionadas con los mensajes de error para excepciones
     generales.

@@ -12,8 +12,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.users.dependencies import CreateWholesalerServiceDep
-from src.api.modules.users.dto import CreateWholesalerDTO, ReadWholesalerDTO
+from src.api.modules.users.dependencies.wholesaler import CreateServiceDep
+from src.api.modules.users.dto.wholesaler import CreateWholesalerDTO, ReadWholesalerDTO
 from src.api.modules.users.models import Wholesaler
 
 create_wholesaler_router = APIRouter(prefix="/users", tags=["Usuarios"])
@@ -44,7 +44,7 @@ require_admin = UserPermissionChecker(
 async def create_wholesaler(
     user: Annotated[User, Depends(require_admin)],
     data: CreateWholesalerDTO,
-    service: CreateWholesalerServiceDep,
+    service: CreateServiceDep,
 ) -> Response[ReadWholesalerDTO]:
     """
     Permite crear un cliente mayorista. Ejecuta validaciones sintácticas y comprobaciones

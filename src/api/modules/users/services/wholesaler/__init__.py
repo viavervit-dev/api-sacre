@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 
-from .create import CreateWholesalerService
+from .create import CreateService
 from .get import GetWholesalerService
 from .get_list import GetListWholesalerService
-from .update import UpdateWholesalerService
+from .update import UpdateService

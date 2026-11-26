@@ -3,12 +3,12 @@ from fastapi.exceptions import RequestValidationError
 from src.api.modules.auth.constants import UserEntity, UserRoles
 from src.api.modules.auth.dto import ReadUserDTO
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.users.constants import CustomerEntity
-from src.api.modules.users.dto import CreateCustomerDTO
+from src.api.modules.users.constants.customers import CUSTOMER_CONSTANTS
+from src.api.modules.users.dto.customers import CreateCustomerDTO
 from src.api.modules.users.repositories.interfaces import ICustomerRepository
 
 
-class CreateCustomerService:
+class CreateService:
     """Servicio encargado de la validación de negocio y registro de clientes."""
 
     def __init__(self, user_repo: IUserRepository, customer_repo: ICustomerRepository) -> None:
@@ -77,7 +77,7 @@ class CreateCustomerService:
                 errors.append(
                     {
                         "loc": ("body", "phone"),
-                        "msg": CustomerEntity.PHONE_IN_USE.value,
+                        "msg": CUSTOMER_CONSTANTS.Errors.PHONE_IN_USE,
                         "type": "domain_validation",
                     }
                 )
@@ -92,7 +92,7 @@ class CreateCustomerService:
                 errors.append(
                     {
                         "loc": ("body", "document_number"),
-                        "msg": CustomerEntity.DOCUMENT_NUMBER_IN_USE.value,
+                        "msg": CUSTOMER_CONSTANTS.Errors.DOCUMENT_NUMBER_IN_USE,
                         "type": "domain_validation",
                     }
                 )

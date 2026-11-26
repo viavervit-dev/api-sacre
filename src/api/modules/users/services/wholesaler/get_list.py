@@ -1,6 +1,6 @@
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.users.dto import ReadWholesalerSummaryDTO
+from src.api.modules.users.dto.wholesaler import ReadWholesalerSummaryDTO
 
 
 class GetListWholesalerService:

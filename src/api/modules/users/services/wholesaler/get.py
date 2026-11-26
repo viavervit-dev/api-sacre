@@ -3,7 +3,7 @@ from uuid import UUID
 from src.api.common.exceptions import ResourceNotFound
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.repositories.interfaces import IUserRepository
-from src.api.modules.users.dto import ReadWholesalerDTO
+from src.api.modules.users.dto.wholesaler import ReadWholesalerDTO
 
 
 class GetWholesalerService:

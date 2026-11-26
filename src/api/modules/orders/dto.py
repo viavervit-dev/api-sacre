@@ -14,7 +14,7 @@ from src.api.modules.orders.constants import (
     OrderEntity,
     OrderStatus,
 )
-from src.api.modules.users.dto import ReadExtraContactsDTO
+from src.api.modules.users.dto.wholesaler import ReadExtraContactsDTO
 
 
 class ReadDecimalNumberDTO(BaseModel):

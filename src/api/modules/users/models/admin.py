@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.api.modules.users.constants import AdminEntity
+from src.api.modules.users.constants.admin import ADMIN_CONSTANTS
 from src.api.settings.database import ModelBase
 
 
@@ -27,13 +27,13 @@ class Admin(ModelBase):
         nullable=False,
     )
     first_names: Mapped[str] = mapped_column(
-        String(length=AdminEntity.FIRST_NAMES_MAX_LENGTH.value),
-        doc=AdminEntity.FIRST_NAMES_DESCRIPTION.value,
+        String(length=ADMIN_CONSTANTS.Limits.FIRST_NAMES_MAX_LENGTH),
+        doc=ADMIN_CONSTANTS.Docs.FIRST_NAMES_DESCRIPTION,
         nullable=False,
     )
     last_names: Mapped[str] = mapped_column(
-        String(length=AdminEntity.LAST_NAMES_MAX_LENGTH.value),
-        doc=AdminEntity.LAST_NAMES_DESCRIPTION.value,
+        String(length=ADMIN_CONSTANTS.Limits.LAST_NAMES_MAX_LENGTH),
+        doc=ADMIN_CONSTANTS.Docs.LAST_NAMES_DESCRIPTION,
         nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(

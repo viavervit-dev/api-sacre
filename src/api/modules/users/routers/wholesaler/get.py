@@ -13,8 +13,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.users.dependencies import GetWholesalerServiceDep
-from src.api.modules.users.dto import ReadWholesalerDTO
+from src.api.modules.users.dependencies.wholesaler import GetWholesalerServiceDep
+from src.api.modules.users.dto.wholesaler import ReadWholesalerDTO
 from src.api.modules.users.models import Wholesaler
 
 get_wholesaler_router = APIRouter(prefix="/users", tags=["Usuarios"])
