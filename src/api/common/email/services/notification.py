@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from src.api.common.email.service import EmailService
+from src.api.common.email.services.utils import EmailService
 from src.api.common.payment.constants import PAYMENT_LINK_EMAIL_SUBJECT
 from src.api.settings.templates import jinja_env
 

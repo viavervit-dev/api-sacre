@@ -1,3 +1,5 @@
+# ruff: noqa: E501
+
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
@@ -8,18 +10,18 @@ from sqlalchemy import CheckConstraint, DateTime, Index, Integer, Numeric, Seque
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.api.modules.orders.constants import OrderEntity
+from src.api.modules.orders.constants.purchase import ORDER_CONSTANTS
 from src.api.settings.database import ModelBase
 
 # Constantes para validaciones de campos numéricos
-SUBTOTAL_MAX_VALUE = OrderEntity.SUBTOTAL_MAX_VALUE.value
-SUBTOTAL_MIN_VALUE = OrderEntity.SUBTOTAL_MIN_VALUE.value
-TAX_AMOUNT_MAX_VALUE = OrderEntity.TAX_AMOUNT_MAX_VALUE.value
-TAX_AMOUNT_MIN_VALUE = OrderEntity.TAX_AMOUNT_MIN_VALUE.value
-TOTAL_MAX_VALUE = OrderEntity.TOTAL_MAX_VALUE.value
-TOTAL_MIN_VALUE = OrderEntity.TOTAL_MIN_VALUE.value
-UNITS_MAX_VALUE = OrderEntity.UNITS_MAX_VALUE.value
-UNITS_MIN_VALUE = OrderEntity.UNITS_MIN_VALUE.value
+SUBTOTAL_MAX_VALUE = ORDER_CONSTANTS.Limits.SUBTOTAL_MAX_VALUE
+SUBTOTAL_MIN_VALUE = ORDER_CONSTANTS.Limits.SUBTOTAL_MIN_VALUE
+TAX_AMOUNT_MAX_VALUE = ORDER_CONSTANTS.Limits.TAX_AMOUNT_MAX_VALUE
+TAX_AMOUNT_MIN_VALUE = ORDER_CONSTANTS.Limits.TAX_AMOUNT_MIN_VALUE
+TOTAL_MAX_VALUE = ORDER_CONSTANTS.Limits.TOTAL_MAX_VALUE
+TOTAL_MIN_VALUE = ORDER_CONSTANTS.Limits.TOTAL_MIN_VALUE
+UNITS_MAX_VALUE = ORDER_CONSTANTS.Limits.UNITS_MAX_VALUE
+UNITS_MIN_VALUE = ORDER_CONSTANTS.Limits.UNITS_MIN_VALUE
 
 
 # Secuencia atómica para el número de ordenes de compra
@@ -38,7 +40,7 @@ class Order(ModelBase):
     __table_args__ = (
         Index(
             "ix_orders_payment_data_date_joined",
-            text("(payment_data ->> 'description')"),
+            text(text="(payment_data ->> 'description')"),
             "date_joined",
         ),
         CheckConstraint(
@@ -50,7 +52,7 @@ class Order(ModelBase):
             name="totals_range",
         ),
         CheckConstraint(
-            sqltext=f"tax_amount > {TAX_AMOUNT_MIN_VALUE} AND tax_amount <= {TAX_AMOUNT_MAX_VALUE}",  # noqa: E501
+            sqltext=f"tax_amount > {TAX_AMOUNT_MIN_VALUE} AND tax_amount <= {TAX_AMOUNT_MAX_VALUE}",
             name="tax_amount_range",
         ),
         CheckConstraint(
@@ -68,73 +70,73 @@ class Order(ModelBase):
     )
     idempotency_key: Mapped[UUID] = mapped_column(
         SQLAlchemyUUID(as_uuid=True),
-        doc=OrderEntity.IDEMPOTENCY_KEY_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.IDEMPOTENCY_KEY_DESCRIPTION,
         unique=True,
         nullable=False,
         index=True,
     )
     order_number: Mapped[str] = mapped_column(
         String(length=15),
-        doc=OrderEntity.ORDER_NUMBER_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.ORDER_NUMBER_DESCRIPTION,
         unique=True,
         nullable=False,
     )
     customer_data: Mapped[dict[str, Any] | None] = mapped_column(
         JSONB,
-        doc=OrderEntity.CUSTOMER_DATA_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.CUSTOMER_DATA_DESCRIPTION,
         nullable=True,
     )
     product_data: Mapped[list[dict[str, Any]] | None] = mapped_column(
         JSONB,
-        doc=OrderEntity.PRODUCT_DATA_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.PRODUCT_DATA_DESCRIPTION,
         nullable=True,
     )
     payment_data: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
-        doc=OrderEntity.PAYMENT_DATA_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.PAYMENT_DATA_DESCRIPTION,
         nullable=False,
     )
     status: Mapped[str] = mapped_column(
         String(length=100),
-        doc=OrderEntity.STATUS_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.STATUS_DESCRIPTION,
         nullable=False,
         index=True,
     )
     status_history: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
-        doc=OrderEntity.STATUS_HISTORY_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.STATUS_HISTORY_DESCRIPTION,
         nullable=False,
     )
     subtotal: Mapped[Decimal] = mapped_column(
         Numeric(
-            precision=OrderEntity.SUBTOTAL_MAX_DIGITS.value,
-            scale=OrderEntity.SUBTOTAL_DECIMAL_PLACES.value,
+            precision=ORDER_CONSTANTS.Limits.SUBTOTAL_MAX_DIGITS,
+            scale=ORDER_CONSTANTS.Limits.SUBTOTAL_DECIMAL_PLACES,
             asdecimal=True,
         ),
-        doc=OrderEntity.SUBTOTAL_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.SUBTOTAL_DESCRIPTION,
         nullable=False,
     )
     total: Mapped[Decimal] = mapped_column(
         Numeric(
-            precision=OrderEntity.TOTAL_MAX_DIGITS.value,
-            scale=OrderEntity.TOTAL_DECIMAL_PLACES.value,
+            precision=ORDER_CONSTANTS.Limits.TOTAL_MAX_DIGITS,
+            scale=ORDER_CONSTANTS.Limits.TOTAL_DECIMAL_PLACES,
             asdecimal=True,
         ),
-        doc=OrderEntity.TOTAL_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.TOTAL_DESCRIPTION,
         nullable=False,
     )
     tax_amount: Mapped[Decimal] = mapped_column(
         Numeric(
-            precision=OrderEntity.TAX_AMOUNT_MAX_DIGITS.value,
-            scale=OrderEntity.TAX_AMOUNT_DECIMAL_PLACES.value,
+            precision=ORDER_CONSTANTS.Limits.TAX_AMOUNT_MAX_DIGITS,
+            scale=ORDER_CONSTANTS.Limits.TAX_AMOUNT_DECIMAL_PLACES,
             asdecimal=True,
         ),
-        doc=OrderEntity.TAX_AMOUNT_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.TAX_AMOUNT_DESCRIPTION,
         nullable=False,
     )
     units: Mapped[int] = mapped_column(
         Integer,
-        doc=OrderEntity.UNITS_DESCRIPTION.value,
+        doc=ORDER_CONSTANTS.Docs.UNITS_DESCRIPTION,
         nullable=False,
     )
     date_joined: Mapped[datetime] = mapped_column(

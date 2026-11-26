@@ -2,8 +2,8 @@ from fastapi import APIRouter, status
 
 from src.api.common.response import Response
 from src.api.common.schema import response_scheme_400
-from src.api.modules.orders.dependencies import FinancialCalculationsDep
-from src.api.modules.orders.dto import AddPercentageDTO, ReadDecimalNumberDTO
+from src.api.modules.orders.dependencies.calculations import FinancialCalculationServiceDep
+from src.api.modules.orders.dto.calculations import AddPercentageDTO, ReadDecimalNumberDTO
 
 add_percentage_router = APIRouter(prefix="/orders", tags=["Órdenes/Transacciones"])
 
@@ -16,7 +16,7 @@ add_percentage_router = APIRouter(prefix="/orders", tags=["Órdenes/Transaccione
 )
 async def add_percentage(
     data: AddPercentageDTO,
-    service: FinancialCalculationsDep,
+    service: FinancialCalculationServiceDep,
 ) -> Response[ReadDecimalNumberDTO]:
     """
     Recibe un monto base y una tasa porcentual en formato decimal y calcula el importe

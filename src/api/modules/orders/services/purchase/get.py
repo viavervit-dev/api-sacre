@@ -1,8 +1,8 @@
 from uuid import UUID
 
 from src.api.common.exceptions import ResourceNotFound
-from src.api.modules.orders.constants import OrderDescription
-from src.api.modules.orders.dto import (
+from src.api.modules.orders.constants.purchase import OrderDescription
+from src.api.modules.orders.dto.purchase import (
     ReadCustomerDataDTO,
     ReadOrderDTO,
     ReadPaymentDataDTO,
@@ -11,7 +11,7 @@ from src.api.modules.orders.dto import (
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
 
-class GetPurchaseOrderService:
+class GetOrderService:
     """Servicio encargado de la consulta y obtención del detalle de una orden de compra."""
 
     def __init__(self, order_repo: IOrderRepository) -> None:

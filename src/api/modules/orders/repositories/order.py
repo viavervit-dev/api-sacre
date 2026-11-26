@@ -1,17 +1,19 @@
 from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
+from fastapi import Depends
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import defer
 
 from src.api.common.exceptions import DomainRuleViolation
-from src.api.modules.orders.constants import OrderEntity, OrderStatus
+from src.api.modules.orders.constants.purchase import ORDER_CONSTANTS, OrderStatus
 from src.api.modules.orders.models import Order, order_number_seq
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
+from src.api.settings.database import DBSessionDep
 
 
 class OrderRepository(IOrderRepository):
@@ -78,7 +80,7 @@ class OrderRepository(IOrderRepository):
 
             if await self.exists_order(filters={"idempotency_key": idempotency_key}):
                 raise DomainRuleViolation(
-                    message=OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
+                    message=ORDER_CONSTANTS.Errors.IDEMPOTENCY_KEY_EXISTS,
                 ) from exc
 
             raise
@@ -118,3 +120,14 @@ class OrderRepository(IOrderRepository):
 
         # Formato de 15 caracteres exactos: 3 + 1 + 4 + 1 + 6 = 15
         return f"ORD-{year}-{seq_num:06d}"
+
+
+def order_repository(db: DBSessionDep) -> OrderRepository:
+    """
+    Dependencia que provee el repositorio para gestionar órdenes de compra en la base de datos.
+    """
+
+    return OrderRepository(db=db)
+
+
+OrderRepositoryDep = Annotated[OrderRepository, Depends(order_repository)]

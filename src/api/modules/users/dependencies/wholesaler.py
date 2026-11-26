@@ -3,26 +3,13 @@ from typing import Annotated
 from fastapi import Depends
 
 from src.api.modules.auth.dependencies import UserRepositoryDep
-from src.api.modules.users.repositories import WholesalerRepository
+from src.api.modules.users.repositories import WholesalerRepositoryDep
 from src.api.modules.users.services.wholesaler import (
     CreateService,
     GetListWholesalerService,
     GetWholesalerService,
     UpdateService,
 )
-from src.api.settings.database import DBSessionDep
-
-
-def wholesaler_repository(db: DBSessionDep) -> WholesalerRepository:
-    """
-    Dependencia que provee el repositorio para gestionar la información de clientes mayoristas
-    en las base de datos.
-    """
-
-    return WholesalerRepository(db=db)
-
-
-WholesalerRepositoryDep = Annotated[WholesalerRepository, Depends(wholesaler_repository)]
 
 
 def get_wholesaler_service(user_repo: UserRepositoryDep) -> GetWholesalerService:

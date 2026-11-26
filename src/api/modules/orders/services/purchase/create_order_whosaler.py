@@ -15,8 +15,12 @@ from src.api.modules.inventory.repositories.interfaces import (
     IProductRepository,
     IWholesalerProductRepository,
 )
-from src.api.modules.orders.constants import OrderDescription, OrderEntity, OrderStatus
-from src.api.modules.orders.dto import (
+from src.api.modules.orders.constants.purchase import (
+    ORDER_CONSTANTS,
+    OrderDescription,
+    OrderStatus,
+)
+from src.api.modules.orders.dto.purchase import (
     CreateOrderDTO,
     ReadCustomerDataDTO,
     ReadOrderDTO,
@@ -205,7 +209,7 @@ class CreateOrderWholesalerService(FinancialCalculationsMixin):
                     errors=[
                         {
                             "loc": ("body", "product_data", i, "id"),
-                            "msg": OrderEntity.PRODUCT_NOT_FOUND.value,
+                            "msg": ORDER_CONSTANTS.Errors.PRODUCT_NOT_FOUND,
                             "type": "domain_validation",
                         }
                     ]
@@ -218,7 +222,7 @@ class CreateOrderWholesalerService(FinancialCalculationsMixin):
                 errors.append(
                     {
                         "loc": ("body", "product_data", i, "tax_amount"),
-                        "msg": OrderEntity.TAX_AMOUNT_PRODUCT_INVALID.value,
+                        "msg": ORDER_CONSTANTS.Errors.TAX_AMOUNT_PRODUCT_INVALID,
                         "type": "domain_validation",
                     }
                 )
@@ -226,7 +230,7 @@ class CreateOrderWholesalerService(FinancialCalculationsMixin):
                 errors.append(
                     {
                         "loc": ("body", "product_data", i, "total"),
-                        "msg": OrderEntity.TOTAL_PRODUCT_INVALID.value,
+                        "msg": ORDER_CONSTANTS.Errors.TOTAL_PRODUCT_INVALID,
                         "type": "domain_validation",
                     }
                 )
@@ -244,7 +248,7 @@ class CreateOrderWholesalerService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "subtotal"),
-                    "msg": OrderEntity.SUBTOTAL_INVALID.value,
+                    "msg": ORDER_CONSTANTS.Errors.SUBTOTAL_INVALID,
                     "type": "domain_validation",
                 }
             )
@@ -252,7 +256,7 @@ class CreateOrderWholesalerService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "tax_amount"),
-                    "msg": OrderEntity.TAX_AMOUNT_INVALID.value,
+                    "msg": ORDER_CONSTANTS.Errors.TAX_AMOUNT_INVALID,
                     "type": "domain_validation",
                 }
             )
@@ -260,7 +264,7 @@ class CreateOrderWholesalerService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "units"),
-                    "msg": OrderEntity.UNITS_INVALID.value,
+                    "msg": ORDER_CONSTANTS.Errors.UNITS_INVALID,
                     "type": "domain_validation",
                 }
             )
@@ -268,7 +272,7 @@ class CreateOrderWholesalerService(FinancialCalculationsMixin):
             errors.append(
                 {
                     "loc": ("body", "total"),
-                    "msg": OrderEntity.TOTAL_INVALID.value,
+                    "msg": ORDER_CONSTANTS.Errors.TOTAL_INVALID,
                     "type": "domain_validation",
                 }
             )
@@ -284,7 +288,7 @@ class CreateOrderWholesalerService(FinancialCalculationsMixin):
             errors=[
                 {
                     "loc": ("body", "idempotency_key"),
-                    "msg": OrderEntity.IDEMPOTENCY_KEY_EXISTS.value,
+                    "msg": ORDER_CONSTANTS.Errors.IDEMPOTENCY_KEY_EXISTS,
                     "type": "domain_validation",
                 }
             ]

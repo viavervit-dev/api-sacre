@@ -1,11 +1,13 @@
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.users.models import Customer
 from src.api.modules.users.repositories.interfaces import ICustomerRepository
+from src.api.settings.database import DBSessionDep
 
 
 class CustomerRepository(ICustomerRepository):
@@ -28,3 +30,15 @@ class CustomerRepository(ICustomerRepository):
         result = await self.__db.scalar(select(stmt.exists()))
 
         return bool(result)
+
+
+def customer_repository(db: DBSessionDep) -> CustomerRepository:
+    """
+    Dependencia que provee el repositorio para gestionar la información de clientes en la
+    base de datos.
+    """
+
+    return CustomerRepository(db=db)
+
+
+CustomerRepositoryDep = Annotated[CustomerRepository, Depends(customer_repository)]

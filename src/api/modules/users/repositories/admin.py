@@ -1,11 +1,13 @@
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.users.models import Admin
 from src.api.modules.users.repositories.interfaces import IAdminRepository
+from src.api.settings.database import DBSessionDep
 
 
 class AdminRepository(IAdminRepository):
@@ -28,3 +30,15 @@ class AdminRepository(IAdminRepository):
         result = await self.__db.scalar(select(stmt.exists()))
 
         return bool(result)
+
+
+def admin_repository(db: DBSessionDep) -> AdminRepository:
+    """
+    Dependencia que provee el repositorio para gestionar la información de administradores
+    en las base de datos.
+    """
+
+    return AdminRepository(db=db)
+
+
+AdminRepositoryDep = Annotated[AdminRepository, Depends(admin_repository)]

@@ -1,3 +1,3 @@
 # ruff: noqa: F401
 
-from .order import OrderRepository
+from .order import OrderRepositoryDep

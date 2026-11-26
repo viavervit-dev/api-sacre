@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
-from src.api.modules.orders.constants import OrderDescription
-from src.api.modules.orders.dto import (
+from src.api.modules.orders.constants.purchase import OrderDescription
+from src.api.modules.orders.dto.purchase import (
     ReadCustomerDataSummaryDTO,
     ReadOrderSummaryDTO,
     ReadPaymentDataDTO,
@@ -9,7 +9,7 @@ from src.api.modules.orders.dto import (
 from src.api.modules.orders.repositories.interfaces import IOrderRepository
 
 
-class GetListPurchaseOrderService:
+class GetListOrderService:
     """Servicio encargado de la consulta y serialización de órdenes de compra."""
 
     def __init__(self, order_repo: IOrderRepository) -> None:

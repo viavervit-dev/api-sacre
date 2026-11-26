@@ -1,11 +1,13 @@
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.modules.users.models import Wholesaler
 from src.api.modules.users.repositories.interfaces import IWholesalerRepository
+from src.api.settings.database import DBSessionDep
 
 
 class WholesalerRepository(IWholesalerRepository):
@@ -39,3 +41,15 @@ class WholesalerRepository(IWholesalerRepository):
         result = await self.__db.scalar(select(stmt.exists()))
 
         return bool(result)
+
+
+def wholesaler_repository(db: DBSessionDep) -> WholesalerRepository:
+    """
+    Dependencia que provee el repositorio para gestionar la información de clientes mayoristas
+    en las base de datos.
+    """
+
+    return WholesalerRepository(db=db)
+
+
+WholesalerRepositoryDep = Annotated[WholesalerRepository, Depends(wholesaler_repository)]

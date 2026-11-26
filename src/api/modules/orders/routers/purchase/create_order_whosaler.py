@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Path, status
 
+from src.api.common.email.dependencies import OrderNotificationServiceDep
 from src.api.common.response import Response
 from src.api.common.schema import (
     response_scheme_400,
@@ -16,11 +17,8 @@ from src.api.common.schema import (
 from src.api.modules.auth.constants import UserRoles
 from src.api.modules.auth.dependencies import UserPermissionChecker
 from src.api.modules.auth.models import User
-from src.api.modules.orders.dependencies import (
-    CreateOrderWholesalerServiceDep,
-    OrderNotificationServiceDep,
-)
-from src.api.modules.orders.dto import CreateOrderDTO, ReadOrderDTO
+from src.api.modules.orders.dependencies.purchase import CreateOrderWholesalerServiceDep
+from src.api.modules.orders.dto.purchase import CreateOrderDTO, ReadOrderDTO
 from src.api.modules.orders.models import Order
 
 create_purchase_order_wholesaler_router = APIRouter(

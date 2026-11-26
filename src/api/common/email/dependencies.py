@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.api.common.email.service import EmailService
+from src.api.common.email.services import EmailService, OrderNotificationService
 from src.api.settings.parameters import api_parameters
 
 
@@ -25,3 +25,15 @@ def email_service() -> EmailService:
 
 
 EmailServiceDep = Annotated[EmailService, Depends(email_service)]
+
+
+def notification_service(email_service: EmailServiceDep) -> OrderNotificationService:
+    """
+    Provee una instancia del servicio encargado de despachar notificaciones al cliente sobre
+    órdenes de compra
+    """
+
+    return OrderNotificationService(email_service=email_service)
+
+
+OrderNotificationServiceDep = Annotated[OrderNotificationService, Depends(notification_service)]
