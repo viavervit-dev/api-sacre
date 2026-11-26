@@ -21,7 +21,7 @@ from src.api.modules.inventory.services.products import (
     GetProductService,
     UpdateProductService,
 )
-from src.api.modules.inventory.services.products.wholesaler import (
+from src.api.modules.inventory.services.wholesaler_product import (
     AddProductWholesalerService,
     DeleteProductWholesalerService,
     GetListProductWholesalerService,

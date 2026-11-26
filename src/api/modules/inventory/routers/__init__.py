@@ -13,7 +13,7 @@ from src.api.modules.inventory.routers.products import (
     get_product_router,
     update_product_router,
 )
-from src.api.modules.inventory.routers.products.wholesaler import (
+from src.api.modules.inventory.routers.wholesaler_product import (
     add_product_wholesaler_router,
     delete_product_wholesaler_router,
     get_list_products_wholesaler_router,
